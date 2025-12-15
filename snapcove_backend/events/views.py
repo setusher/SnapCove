@@ -26,16 +26,13 @@ class AlbumViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-
-        #logged in
-        if user.is_authenticated:
-            return Album.objects.all()
-        
-        #not logged in
-        return Album.objects.filter(is_public=True)
+        return Album.objects.filter(event_id=self.kwargs['event_id'])
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)    
+        event = Event.objects.get(id=self.kwargs['event_id'])
+        serializer.save(
+            created_by=self.request.user,
+            event=event
+        ) 
 
 
