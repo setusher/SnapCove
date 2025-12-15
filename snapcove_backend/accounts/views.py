@@ -3,14 +3,14 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from .serializers import UserSerializer
+from .serializers import SignupSerializer, UserSerializer
 from .models import User
 
 from rest_framework_simplejwt.serializers import RefreshToken
 from django.contrib.auth import authenticate
 
 
-class SignupView(APIView):
+class SignUpView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
