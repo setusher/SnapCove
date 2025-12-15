@@ -1,5 +1,5 @@
 from django.db import models
-from events.models import Event
+from events.models import Event, Album
 from django.conf import settings 
 
 User = settings.AUTH_USER_MODEL
@@ -7,7 +7,7 @@ User = settings.AUTH_USER_MODEL
 class Photo(models.Model):
     
     #relationships
-    album = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='photos')
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='photos')
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='photos_uploaded')
 
     #files
