@@ -6,6 +6,9 @@ class Like(models.Model):
     photo = models.ForeignKey('photos.Photo', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'photo')
+
     def __str__(self):
         return f"Like {self.id} by {self.user.email} on {self.photo.id}"
 
@@ -14,7 +17,9 @@ class Comment(models.Model):
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     photo = models.ForeignKey('photos.Photo', on_delete=models.CASCADE)
     content = models.TextField()
+    parent = models.ForeignKey('self', null=True,blank=True, on_delete=models.CASCADE, related_name='replies')
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment {self.id} by {self.user.email} on {self.photo.id}"
+        return f"Comment {self.id} by {self.user.email}"
