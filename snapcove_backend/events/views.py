@@ -35,4 +35,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
         #not logged in
         return Album.objects.filter(is_public=True)
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)    
+
 
