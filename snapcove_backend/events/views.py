@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from .models import Event, Album
 from .serializers import EventSerializer, AlbumSerializer
-from accounts.permissions import IsCoordinator, IsAdmin
-from .permissions import IsEventOwnerOrAdmin
+from accounts.permissions import IsCoordinator, IsAdmin, IsPhotographer
+from .permissions import IsEventOwnerOrAdmin, IsEventOwnerOrAdminOrPhotographer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -34,6 +34,12 @@ class EventViewSet(viewsets.ModelViewSet):
 class AlbumViewSet(viewsets.ModelViewSet):
     serializer_class = AlbumSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsCoordinator()| IsAdmin()|IsPhotographer()]
+        if self.action in ['update', 'partial_update', 'destroy']:
+            return [IsEventOwnerOrAdminOrPhotographer()]
 
     def get_queryset(self):
         return Album.objects.filter(event_id=self.kwargs['event_id'])
