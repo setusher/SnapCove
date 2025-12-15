@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 
 
 class SignUpView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -29,6 +29,7 @@ class SignUpView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')

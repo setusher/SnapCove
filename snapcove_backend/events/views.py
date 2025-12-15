@@ -2,7 +2,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from .models import Event, Album
-from serializers import EventSerializer, AlbumSerializer
+from .serializers import EventSerializer, AlbumSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
