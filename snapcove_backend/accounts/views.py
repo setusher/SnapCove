@@ -110,3 +110,21 @@ class GoogleAuthView(APIView):
                 "role": user.role
             }
         })
+
+class SelectRoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        role = request.data.get('role')
+        
+        if role not in ['admin', 'coordinator', 'photographer', 'student']:
+            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user.role is not None:
+            return Response({'error': 'User already has a role'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        request.user.role = role
+        request.user.save()
+
+        return Response({'detail': 'Role selected successfully'})
+           
