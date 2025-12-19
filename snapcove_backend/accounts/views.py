@@ -124,7 +124,10 @@ class SelectRoleView(APIView):
             return Response({'error': 'User already has a role'}, status=status.HTTP_400_BAD_REQUEST)
         
         request.user.role = role
-        request.user.save()
+        request.user.save(update_fields=["role"])
 
-        return Response({'detail': 'Role selected successfully'})
+        return Response(
+            {"detail": "Role set successfully"},
+            status=status.HTTP_200_OK
+        )
            
