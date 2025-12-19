@@ -24,4 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserMiniSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email']       
+        fields = ['id', 'email']    
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField()

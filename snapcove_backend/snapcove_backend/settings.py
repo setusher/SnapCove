@@ -81,6 +81,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'snapcove_backend.wsgi.application'
 
+GOOGLE_CLIENT_ID = "447171812608-0c66t6gioscl9kl3m5gqqkkj8r4ni29n.apps.googleusercontent.com"
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
