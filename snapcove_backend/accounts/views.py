@@ -61,10 +61,13 @@ class MeView(APIView):
 class GoogleAuthView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        serializer = GoogleAuthSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        token = request.data.get('token')
 
-        token = serializer.validated_data['id_token']
+        if not token:
+            return Response(
+                {'error': 'Token not provided'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             idinfo = id_token.verify_oauth2_token(
@@ -76,27 +79,47 @@ class GoogleAuthView(APIView):
         except ValueError:
             return Response(
                 {'error': 'Invalid token'}, 
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_401_BAD_REQUEST
             )
         sub = idinfo.get("sub")
         email = idinfo.get("email")
         name = idinfo.get("name")
         picture = idinfo.get("picture")
 
-        if not email: 
-            return Response(
-                {'error': 'Email not provided by Google'}, 
-                status=status.HTTP_400_BAD_REQUEST
+        user = User.objects.filter(google_sub=google_sub).first()
+
+        if not user:
+            user = user.objects.filter(email=email).first()
+
+            if user:
+                user.google_sub = sub
+                user.auth_provider = "google"
+                user.save()
+
+        if not user:
+            user = User.objects.create(
+                email=email,
+                name=name,
+                profile_picture=picture,
+                auth_provider="google",
+                google_sub=google_sub,
+                role=None
             )
 
-        user, created = User.objects.get_or_create(
-            email=email,
-            defaults={
-                'name': name,
-                'profile_picture': picture,
-                'role': "Student",
-            }
-        )
+        # if not email: 
+        #     return Response(
+        #         {'error': 'Email not provided by Google'}, 
+        #         status=status.HTTP_400_BAD_REQUEST
+        #     )
+
+        # user, created = User.objects.get_or_create(
+        #     email=email,
+        #     defaults={
+        #         'name': name,
+        #         'profile_picture': picture,
+        #         'role': "Student",
+        #     }
+        # )
 
         refresh = RefreshToken.for_user(user)
 
@@ -109,6 +132,7 @@ class GoogleAuthView(APIView):
                 "name": user.name,
                 "role": user.role
             }
+            "needs role selection": user.role is None
         })
 
 class SelectRoleView(APIView):
