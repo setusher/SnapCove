@@ -18,3 +18,11 @@ class HasSelf(BasePermission):
             request.user.is_authenticated and
             request.user.role is not None
         )
+
+class HasSelectedRole(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user and
+            request.user.is_authenticated and
+            request.user.role is not None
+        )        
