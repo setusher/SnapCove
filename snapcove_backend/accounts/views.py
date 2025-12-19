@@ -78,7 +78,7 @@ class GoogleAuthView(APIView):
                 {'error': 'Invalid token'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-
+        sub = idinfo.get("sub")
         email = idinfo.get("email")
         name = idinfo.get("name")
         picture = idinfo.get("picture")
