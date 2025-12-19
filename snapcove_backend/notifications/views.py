@@ -43,7 +43,7 @@ class MarkAllReadView(APIView):
             is_read=False,
         ).update(is_read=True)
 
-    return Response({"success": True})
+        return Response({"success": True})
 
 class UnreadCountView(APIView):
     permission_classes = [IsAuthenticated]
