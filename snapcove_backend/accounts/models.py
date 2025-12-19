@@ -27,6 +27,17 @@ class User(AbstractUser, PermissionsMixin):
         ('student', 'Student'),
         
     )
+    auth_provider = models.CharField(
+        max_length = 50, 
+        choices = [('google', 'google'), ('email', 'email')],
+        default = 'email'
+    )
+    google_sub = models.CharField(
+    max_length=255,
+    blank=True,
+    null=True,
+    unique=True
+    )
 
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
