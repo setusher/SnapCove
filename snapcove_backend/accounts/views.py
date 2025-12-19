@@ -2,7 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.conf import settings
 from .serializers import SignupSerializer, UserSerializer, GoogleAuthSerializer
 from .models import User
 
