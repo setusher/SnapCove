@@ -23,5 +23,5 @@ urlpatterns = [
     path('api/', include('events.urls')),
     path('api/', include('photos.urls')),
     # path('api/', include('interactions.urls')),
-    # path('api/', include('notifications.urls')),
+    path('api/notifications/', include('notifications.urls')),
 ]

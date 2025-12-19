@@ -1,7 +1,14 @@
-from rest_framework.routers import DefaultRouter
-# from .views import EventViewSet, AlbumViewSet
+from django.urls import path
+from .views import (
+    NotificationListView,
+    MarkNotificationReadView,
+    MarkAllReadView,
+    UnreadCountView
+)
 
-router = DefaultRouter()
-router.register(r'events/(?P<event_id>\d+)/albums/(?P<album_id>\d+)/photos', PhotoViewSet, basename='album-photos')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path('', NotificationListView.as_view()),
+    path('<int:pk>/read/', MarkNotificationReadView.as_view()),
+    path('read-all/', MarkAllReadView.as_view()),
+    path('unread-count/', UnreadCountView.as_view()),
+]
