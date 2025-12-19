@@ -61,7 +61,8 @@ class MeView(APIView):
 class GoogleAuthView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        token = request.data.get('token')
+        # Frontend sends 'id_token', accept both for compatibility
+        token = request.data.get('id_token') or request.data.get('token')
 
         if not token:
             return Response(
@@ -76,34 +77,51 @@ class GoogleAuthView(APIView):
                 settings.GOOGLE_CLIENT_ID
             )
 
-        except ValueError:
+        except ValueError as e:
             return Response(
-                {'error': 'Invalid token'}, 
-                status=status.HTTP_401_BAD_REQUEST
+                {'error': f'Invalid token: {str(e)}'}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            return Response(
+                {'error': f'Token verification failed: {str(e)}'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         sub = idinfo.get("sub")
         email = idinfo.get("email")
         name = idinfo.get("name")
         picture = idinfo.get("picture")
 
-        user = User.objects.filter(google_sub=google_sub).first()
+        if not email:
+            return Response(
+                {'error': 'Email not provided by Google'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # Try to find user by google_sub first
+        user = User.objects.filter(google_sub=sub).first()
+
+        # If not found, try to find by email
         if not user:
-            user = user.objects.filter(email=email).first()
-
+            user = User.objects.filter(email=email).first()
             if user:
+                # Update existing user with Google info
                 user.google_sub = sub
                 user.auth_provider = "google"
+                if name and not user.name:
+                    user.name = name
                 user.save()
 
+        # Create new user if doesn't exist
         if not user:
-            user = User.objects.create(
+            user = User.objects.create_user(
                 email=email,
-                name=name,
-                profile_picture=picture,
+                password=None,  # Google users don't need passwords
+                name=name or email.split('@')[0],
                 auth_provider="google",
-                google_sub=google_sub,
-                role=None
+                google_sub=sub,
+                role=None  # User will need to select role later
             )
 
         # if not email: 
@@ -126,13 +144,8 @@ class GoogleAuthView(APIView):
         return Response({
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "name": user.name,
-                "role": user.role
-            }
-            "needs role selection": user.role is None
+            "user": UserSerializer(user).data,
+            "needs_role_selection": user.role is None
         })
 
 class SelectRoleView(APIView):
