@@ -21,12 +21,12 @@ class ToggleLikeView(APIView):
         
         return Response({'liked': True})
 
-class LikesCountView(APIView):
-    permission_classes = [IsAuthenticated]
+# class LikesCountView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, photo_id):
-        count = Like.objects.filter(photo_id=photo_id).count()
-        return Response({'likes_count': count})
+#     def get(self, request, photo_id):
+#         count = Like.objects.filter(photo_id=photo_id).count()
+#         return Response({'likes_count': count})
 
 class CommentListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -81,11 +81,11 @@ class CommentDeleteView(APIView):
         comment.delete()
         return Response(status=204)
 
-class LikeStatusView(APIView):
-    permission_classes = [IsAuthenticated]
+# class LikeStatusView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, event_id, album_id, photo_id):
-        liked = Like.objects.filter(user=request.user, photo_id=photo_id).exists()
+#     def get(self, request, event_id, album_id, photo_id):
+#         liked = Like.objects.filter(user=request.user, photo_id=photo_id).exists()
 
-        return Response({'liked': liked})
+#         return Response({'liked': liked})
         
