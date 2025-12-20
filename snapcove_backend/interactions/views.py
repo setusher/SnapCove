@@ -81,3 +81,11 @@ class CommentDeleteView(APIView):
         comment.delete()
         return Response(status=204)
 
+class LikeStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, event_id, album_id, photo_id):
+        liked = Like.objects.filter(user=request.user, photo_id=photo_id).exists()
+
+        return Response({'liked': liked})
+        
