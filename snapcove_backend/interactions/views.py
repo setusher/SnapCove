@@ -25,7 +25,7 @@ class LikesCountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, photo_id):
-        count = Like.objects.filter(photo=photo_id).count()
+        count = Like.objects.filter(photo_id=photo_id).count()
         return Response({'likes_count': count})
 
 class CommentListCreateView(APIView):
@@ -60,11 +60,13 @@ class ReplyCommentView(APIView):
         comment = get_object_or_404(Comment, pk=comment_id)
         serializer = CommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # parent_comment = Comment.objects.get(id=parent_id)
+        
 
         serializer.save(
-            photo=parent_comment.photo,
+            photo=comment.photo,
             user = request.user,
-            parent = parent_comment
+            parent = comment
         )
 
         return Response(serializer.data, status=201)
@@ -78,3 +80,4 @@ class CommentDeleteView(APIView):
             return Response({'error': 'Not Allowed'},status=403)
         comment.delete()
         return Response(status=204)
+
