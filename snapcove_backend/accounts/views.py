@@ -16,7 +16,7 @@ class SignUpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = SignupSerializer(data=request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -24,7 +24,7 @@ class SignUpView(APIView):
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         return Response({
-            'user': serializer.data,
+            'user': UserSerializer(user).data,
             'message': 'User created successfully',
             'refresh': str(refresh),
             'access': str(refresh.access_token),
