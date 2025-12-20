@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import LikesCountView, ToggleLikeView, CommentListCreateView, ReplyCommentView, CommentDeleteView
+from .views import LikesCountView, ToggleLikeView, CommentListCreateView, ReplyCommentView, CommentDeleteView, LikeStatusView
 
 urlpatterns = [
     path('photos/<int:photo_id>/likes-count/', LikesCountView.as_view()),
