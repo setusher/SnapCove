@@ -29,4 +29,7 @@ class HasSelectedRole(BasePermission):
             'LoginView',
             'SignUpView',
             'GoogleAuthView'
-        ]      
+        ]:
+            return True
+
+        return request.user.role is not None
