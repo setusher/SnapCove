@@ -16,7 +16,7 @@ class ToggleLikeView(APIView):
         like, created = Like.objects.get_or_create(user=request.user, photo=photo)
         
         if not created:
-            Like.delete()
+            like.delete()
             return Response({'liked': False})
         
         return Response({'liked': True})
@@ -42,11 +42,12 @@ class CommentListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request, photo_id):
+        photo = get_object_or_404(Photo, pk=photo_id)
         serializer = CommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
-            photo_id = photo_id,
+            photo = photo,
             user = request.user
         )
 
@@ -61,9 +62,9 @@ class ReplyCommentView(APIView):
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
-            photo=parent.photo,
+            photo=parent_comment.photo,
             user = request.user,
-            parent = parent
+            parent = parent_comment
         )
 
         return Response(serializer.data, status=201)

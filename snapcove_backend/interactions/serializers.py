@@ -10,12 +10,12 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserMiniSerializer(read_only=True)
-    replies = CommentSerializer(many=True, read_only=True)
+    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = ['id', 'user', 'photo', 'content', 'parent', 'created_at', 'replies']
-        read_only_fields = ['user', 'replies', 'created_at']
+        read_only_fields = ['user', 'replies', 'created_at', 'photo']
 
     def get_replies(self, obj):
         replies = obj.replies.all().order_by('created_at')
