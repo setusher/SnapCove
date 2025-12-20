@@ -25,3 +25,10 @@ urlpatterns = [
     path('api/', include('interactions.urls')),
     path('api/notifications/', include('notifications.urls')),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
