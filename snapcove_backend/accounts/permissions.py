@@ -21,8 +21,12 @@ class HasSelf(BasePermission):
 
 class HasSelectedRole(BasePermission):
     def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.role is not None
-        )        
+        if not request.user.is_authenticated or not request.user:
+            return True
+
+        if view.__class__.__name__ in [
+            'SelectRoleView',
+            'LoginView',
+            'SignUpView',
+            'GoogleAuthView'
+        ]      
