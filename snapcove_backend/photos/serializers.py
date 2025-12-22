@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Photo
 from accounts.serializers import UserMiniSerializer
+from interactions.models import Like, Comment
 
 class PhotoSerializer(serializers.ModelSerializer):
     uploaded_by = UserMiniSerializer(read_only=True)

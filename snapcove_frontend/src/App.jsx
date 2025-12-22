@@ -4,6 +4,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import EventsList from './components/EventsList';
+import AlbumsList from './components/AlbumsList';
+import PhotoGallery from './components/PhotoGallery';
 import './App.css';
 
 const GOOGLE_CLIENT_ID = "447171812608-0c66t6gioscl9kl3m5gqqkkj8r4ni29n.apps.googleusercontent.com";
@@ -68,6 +71,36 @@ function App() {
               element={
                 isAuthenticated ? (
                   <Dashboard onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                isAuthenticated ? (
+                  <EventsList onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/events/:eventId/albums"
+              element={
+                isAuthenticated ? (
+                  <AlbumsList onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/events/:eventId/albums/:albumId/photos"
+              element={
+                isAuthenticated ? (
+                  <PhotoGallery onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )

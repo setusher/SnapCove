@@ -47,5 +47,95 @@ export const authAPI = {
   },
 };
 
+// Events API functions
+export const eventsAPI = {
+  getEvents: async () => {
+    const response = await api.get('/events/');
+    return response.data;
+  },
+
+  getEvent: async (eventId) => {
+    const response = await api.get(`/events/${eventId}/`);
+    return response.data;
+  },
+
+  createEvent: async (eventData) => {
+    const response = await api.post('/events/', eventData);
+    return response.data;
+  },
+};
+
+// Albums API functions
+export const albumsAPI = {
+  getAlbums: async (eventId) => {
+    const response = await api.get(`/events/${eventId}/albums/`);
+    return response.data;
+  },
+
+  getAlbum: async (eventId, albumId) => {
+    const response = await api.get(`/events/${eventId}/albums/${albumId}/`);
+    return response.data;
+  },
+
+  createAlbum: async (eventId, albumData) => {
+    const response = await api.post(`/events/${eventId}/albums/`, albumData);
+    return response.data;
+  },
+};
+
+// Photos API functions
+export const photosAPI = {
+  getPhotos: async (eventId, albumId) => {
+    const response = await api.get(`/events/${eventId}/albums/${albumId}/photos/`);
+    return response.data;
+  },
+
+  getPhoto: async (eventId, albumId, photoId) => {
+    const response = await api.get(`/events/${eventId}/albums/${albumId}/photos/${photoId}/`);
+    return response.data;
+  },
+
+  uploadPhoto: async (eventId, albumId, photoData) => {
+    const formData = new FormData();
+    Object.keys(photoData).forEach(key => {
+      formData.append(key, photoData[key]);
+    });
+    const response = await api.post(`/events/${eventId}/albums/${albumId}/photos/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
+
+// Interactions API functions
+export const interactionsAPI = {
+  toggleLike: async (photoId) => {
+    const response = await api.post(`/photos/${photoId}/like/`);
+    return response.data;
+  },
+
+  getComments: async (photoId) => {
+    const response = await api.get(`/photos/${photoId}/comments/`);
+    return response.data;
+  },
+
+  createComment: async (photoId, content) => {
+    const response = await api.post(`/photos/${photoId}/comments/`, { content });
+    return response.data;
+  },
+
+  replyToComment: async (commentId, content) => {
+    const response = await api.post(`/comments/${commentId}/reply/`, { content });
+    return response.data;
+  },
+
+  deleteComment: async (commentId) => {
+    const response = await api.delete(`/comments/${commentId}/delete/`);
+    return response.data;
+  },
+};
+
 export default api;
 

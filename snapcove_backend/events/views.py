@@ -15,6 +15,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return [IsCoordinator()| IsAdmin()]
         if self.action in ['update', 'partial_update', 'destroy']:
             return [IsEventOwnerOrAdmin()]
+        return [IsAuthenticated()]
         
         
 
@@ -40,6 +41,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
             return [IsCoordinator()| IsAdmin()|IsPhotographer()]
         if self.action in ['update', 'partial_update', 'destroy']:
             return [IsEventOwnerOrAdminOrPhotographer()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         return Album.objects.filter(event_id=self.kwargs['event_id'])
