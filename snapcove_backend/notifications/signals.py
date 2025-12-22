@@ -42,13 +42,29 @@ def notify_comment(sender, instance,created, **kwargs):
                 message=f"{actor.name} replied to your comment",
             )
         
-        else:
-            recipient = instance.photo.uploaded_by
-            if recipient != actor:
-                Notification.objects.create(
-                    recipient=recipient,
-                    actor=actor,
-                    notification_type='comment',
-                    comment = instance,
-                    message=f"{actor.name} commented on your photo",
-                )
+    else:
+        recipient = instance.photo.uploaded_by
+        if recipient != actor:
+            Notification.objects.create(
+                recipient=recipient,
+                actor=actor,
+                notification_type='comment',
+                comment = instance,
+                message=f"{actor.name} commented on your photo",
+            )
+
+@receiver(post_save, sender=Photo)
+def notify_photo(sender, instance,created, **kwargs):
+    if not created:
+        return
+
+    if instance.album and instance.album.event:
+        event = instance.album.event
+        if event.created_by != instance.uploaded_by:
+            Notification.objects.create(
+                recipient=event.created_by,
+                actor=instance.uploaded_by,
+                notification_type='upload',
+                photo=instance,
+                message=f"{instance.uploaded_by.name} uploaded a new photo to the event {event.title}",
+            )

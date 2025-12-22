@@ -10,6 +10,7 @@ class Notification(models.Model):
         ('comment', 'Comment'),
         ('tag', 'Tag'),
         ('upload', 'Upload'),
+        ('reply', 'Reply'),
     ]
 
     recipient = models.ForeignKey(
