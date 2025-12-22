@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { albumsAPI, eventsAPI } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 import './AlbumsList.css';
 
 const AlbumsList = ({ onLogout }) => {
@@ -13,6 +14,7 @@ const AlbumsList = ({ onLogout }) => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
   const fetchData = async () => {
@@ -22,7 +24,11 @@ const AlbumsList = ({ onLogout }) => {
         albumsAPI.getAlbums(eventId),
         eventsAPI.getEvent(eventId),
       ]);
-      setAlbums(albumsData);
+      // Deduplicate by ID in case of duplicates
+      const uniqueAlbums = Array.from(
+        new Map(albumsData.map(album => [album.id, album])).values()
+      );
+      setAlbums(uniqueAlbums);
       setEvent(eventData);
     } catch (err) {
       if (err.response?.status === 401) {
@@ -80,7 +86,7 @@ const AlbumsList = ({ onLogout }) => {
               {album.cover_image && (
                 <div className="album-cover">
                   <img 
-                    src={`http://localhost:8000${album.cover_image}`} 
+                    src={getImageUrl(album.cover_image)} 
                     alt={album.title}
                     onError={(e) => {
                       e.target.style.display = 'none';

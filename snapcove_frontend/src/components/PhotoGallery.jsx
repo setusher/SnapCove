@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { photosAPI, albumsAPI, eventsAPI } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 import LikeButton from './LikeButton';
 import CommentSection from './CommentSection';
 import './PhotoGallery.css';
@@ -16,6 +17,7 @@ const PhotoGallery = ({ onLogout }) => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, albumId]);
 
   const fetchData = async () => {
@@ -26,7 +28,11 @@ const PhotoGallery = ({ onLogout }) => {
         albumsAPI.getAlbum(eventId, albumId),
         eventsAPI.getEvent(eventId),
       ]);
-      setPhotos(photosData);
+      // Deduplicate by ID in case of duplicates
+      const uniquePhotos = Array.from(
+        new Map(photosData.map(photo => [photo.id, photo])).values()
+      );
+      setPhotos(uniquePhotos);
       setAlbum(albumData);
       setEvent(eventData);
     } catch (err) {
@@ -97,7 +103,7 @@ const PhotoGallery = ({ onLogout }) => {
               >
                 <div className="photo-image">
                   <img 
-                    src={`http://localhost:8000${photo.image}`} 
+                    src={getImageUrl(photo.image)} 
                     alt={photo.caption || 'Photo'}
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/300x300?text=Image+Not+Found';
@@ -119,8 +125,11 @@ const PhotoGallery = ({ onLogout }) => {
                 <button className="close-modal" onClick={() => setSelectedPhoto(null)}>×</button>
                 <div className="modal-photo">
                   <img 
-                    src={`http://localhost:8000${selectedPhoto.image}`} 
+                    src={getImageUrl(selectedPhoto.image)} 
                     alt={selectedPhoto.caption || 'Photo'}
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/600x600?text=Image+Not+Found';
+                    }}
                   />
                 </div>
                 <div className="modal-details">

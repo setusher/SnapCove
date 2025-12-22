@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { eventsAPI } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 import './EventsList.css';
 
 const EventsList = ({ onLogout }) => {
@@ -11,13 +12,18 @@ const EventsList = ({ onLogout }) => {
 
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
       const data = await eventsAPI.getEvents();
-      setEvents(data);
+      // Deduplicate by ID in case of duplicates
+      const uniqueEvents = Array.from(
+        new Map(data.map(event => [event.id, event])).values()
+      );
+      setEvents(uniqueEvents);
     } catch (err) {
       if (err.response?.status === 401) {
         onLogout();
@@ -78,7 +84,7 @@ const EventsList = ({ onLogout }) => {
               {event.cover_image && (
                 <div className="event-cover">
                   <img 
-                    src={`http://localhost:8000${event.cover_image}`} 
+                    src={getImageUrl(event.cover_image)} 
                     alt={event.title}
                     onError={(e) => {
                       e.target.style.display = 'none';

@@ -5,6 +5,8 @@ from .serializers import PhotoSerializer
 from events.models import Album
 
 class PhotoViewSet(viewsets.ModelViewSet):
+    fiterset_fields = ['album', 'is_approved']
+    search_fields = ['caption', 'tags']
     serializer_class = PhotoSerializer
     permission_classes = [IsAuthenticated]
 

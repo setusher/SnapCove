@@ -51,6 +51,7 @@ INSTALLED_APPS = [
      # Third Party
     'rest_framework',
     'corsheaders',
+    'django_filters',
 
     # Local Apps
     'accounts',
@@ -154,7 +155,16 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
         'accounts.permissions.HasSelectedRole',
     ),
+
+    'PAGE_SIZE': 20,
+
 }
+
+REST_FRAMEWORK['DEFAULT_FILTER_BACKENDS'] = [
+    'django_filters.rest_framework.DjangoFilterBackend',
+    'rest_framework.filters.SearchFilter',
+]
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
