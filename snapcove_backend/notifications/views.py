@@ -26,7 +26,7 @@ class MarkNotificationReadView(APIView):
         ).first()
 
         if not notif:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'error':'Notification not found'}, status=status.HTTP_404_NOT_FOUND)
 
         notif.is_read = True
         notif.save()

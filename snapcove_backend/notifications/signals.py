@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Notification
 from interactions.models import Comment, Like
+from photos.models import Photo
 
 @receiver(post_save, sender=Like)
 def notify_like(sender, instance,created, **kwargs):
