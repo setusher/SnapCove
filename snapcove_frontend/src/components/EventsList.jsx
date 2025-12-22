@@ -8,20 +8,22 @@ const EventsList = ({ onLogout }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(searchQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchQuery]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (searchQuery = '') => {
     try {
       setLoading(true);
-      const data = await eventsAPI.getEvents();
-      // Deduplicate by ID in case of duplicates
+      const data = await eventsAPI.getEvents(searchQuery);
+      // Ensure data is an array and deduplicate by ID
+      const eventsArray = Array.isArray(data) ? data : [];
       const uniqueEvents = Array.from(
-        new Map(data.map(event => [event.id, event])).values()
+        new Map(eventsArray.map(event => [event.id, event])).values()
       );
       setEvents(uniqueEvents);
     } catch (err) {
@@ -60,6 +62,10 @@ const EventsList = ({ onLogout }) => {
     );
   }
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <div className="events-container">
       <div className="events-header">
@@ -67,6 +73,16 @@ const EventsList = ({ onLogout }) => {
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
+      </div>
+
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search events by title or description..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="search-input"
+        />
       </div>
 
       {events.length === 0 ? (

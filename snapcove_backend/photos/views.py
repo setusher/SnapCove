@@ -1,9 +1,13 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from .models import Photo
 from .serializers import PhotoSerializer
 from events.models import Album
 from accounts.permissions import IsCoordinator, IsAdmin
+from rest_framework.generics import ListAPIView 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404 
 
 
 class PhotoViewSet(viewsets.ModelViewSet):
@@ -30,7 +34,7 @@ class PendingPhotosView(ListAPIView):
         return Photo.objects.filter(is_approved=False)
 
 class ApprovePhotoView(APIView):
-    permission_classes = = [IsCoordinator|IsAdmin]
+    permission_classes  = [IsCoordinator|IsAdmin]
 
     def post(self, request, pk):
         photo = get_object_or_404(Photo, pk=pk)
@@ -39,7 +43,7 @@ class ApprovePhotoView(APIView):
         return Response({'status': 'approved'})
 
 class RejectPhotoView(APIView):
-    permission_classes = = [IsCoordinator|IsAdmin]
+    permission_classes =  [IsCoordinator|IsAdmin]
 
     def post(self, request, pk):
         photo = get_object_or_404(Photo, pk=pk)

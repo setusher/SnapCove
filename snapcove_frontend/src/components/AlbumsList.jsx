@@ -10,23 +10,25 @@ const AlbumsList = ({ onLogout }) => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchData();
+    fetchData(searchQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]);
+  }, [eventId, searchQuery]);
 
-  const fetchData = async () => {
+  const fetchData = async (searchQuery = '') => {
     try {
       setLoading(true);
       const [albumsData, eventData] = await Promise.all([
-        albumsAPI.getAlbums(eventId),
+        albumsAPI.getAlbums(eventId, searchQuery),
         eventsAPI.getEvent(eventId),
       ]);
-      // Deduplicate by ID in case of duplicates
+      // Ensure data is an array and deduplicate by ID
+      const albumsArray = Array.isArray(albumsData) ? albumsData : [];
       const uniqueAlbums = Array.from(
-        new Map(albumsData.map(album => [album.id, album])).values()
+        new Map(albumsArray.map(album => [album.id, album])).values()
       );
       setAlbums(uniqueAlbums);
       setEvent(eventData);
@@ -57,6 +59,10 @@ const AlbumsList = ({ onLogout }) => {
     );
   }
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <div className="albums-container">
       <div className="albums-header">
@@ -69,6 +75,16 @@ const AlbumsList = ({ onLogout }) => {
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
+      </div>
+
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search albums..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="search-input"
+        />
       </div>
 
       {albums.length === 0 ? (

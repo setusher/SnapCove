@@ -49,9 +49,11 @@ export const authAPI = {
 
 // Events API functions
 export const eventsAPI = {
-  getEvents: async () => {
-    const response = await api.get('/events/');
-    return response.data;
+  getEvents: async (searchQuery = '') => {
+    const params = searchQuery ? { search: searchQuery } : {};
+    const response = await api.get('/events/', { params });
+    // Handle paginated response
+    return response.data.results || response.data;
   },
 
   getEvent: async (eventId) => {
@@ -67,9 +69,11 @@ export const eventsAPI = {
 
 // Albums API functions
 export const albumsAPI = {
-  getAlbums: async (eventId) => {
-    const response = await api.get(`/events/${eventId}/albums/`);
-    return response.data;
+  getAlbums: async (eventId, searchQuery = '') => {
+    const params = searchQuery ? { search: searchQuery } : {};
+    const response = await api.get(`/events/${eventId}/albums/`, { params });
+    // Handle paginated response
+    return response.data.results || response.data;
   },
 
   getAlbum: async (eventId, albumId) => {
@@ -85,9 +89,11 @@ export const albumsAPI = {
 
 // Photos API functions
 export const photosAPI = {
-  getPhotos: async (eventId, albumId) => {
-    const response = await api.get(`/events/${eventId}/albums/${albumId}/photos/`);
-    return response.data;
+  getPhotos: async (eventId, albumId, searchQuery = '') => {
+    const params = searchQuery ? { search: searchQuery } : {};
+    const response = await api.get(`/events/${eventId}/albums/${albumId}/photos/`, { params });
+    // Handle paginated response
+    return response.data.results || response.data;
   },
 
   getPhoto: async (eventId, albumId, photoId) => {

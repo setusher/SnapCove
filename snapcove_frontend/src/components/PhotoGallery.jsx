@@ -14,23 +14,25 @@ const PhotoGallery = ({ onLogout }) => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchData();
+    fetchData(searchQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId, albumId]);
+  }, [eventId, albumId, searchQuery]);
 
-  const fetchData = async () => {
+  const fetchData = async (searchQuery = '') => {
     try {
       setLoading(true);
       const [photosData, albumData, eventData] = await Promise.all([
-        photosAPI.getPhotos(eventId, albumId),
+        photosAPI.getPhotos(eventId, albumId, searchQuery),
         albumsAPI.getAlbum(eventId, albumId),
         eventsAPI.getEvent(eventId),
       ]);
-      // Deduplicate by ID in case of duplicates
+      // Ensure data is an array and deduplicate by ID
+      const photosArray = Array.isArray(photosData) ? photosData : [];
       const uniquePhotos = Array.from(
-        new Map(photosData.map(photo => [photo.id, photo])).values()
+        new Map(photosArray.map(photo => [photo.id, photo])).values()
       );
       setPhotos(uniquePhotos);
       setAlbum(albumData);
@@ -73,6 +75,10 @@ const PhotoGallery = ({ onLogout }) => {
     );
   }
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <div className="photo-gallery-container">
       <div className="gallery-header">
@@ -86,6 +92,16 @@ const PhotoGallery = ({ onLogout }) => {
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
+      </div>
+
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search photos by caption or tags..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="search-input"
+        />
       </div>
 
       {photos.length === 0 ? (
