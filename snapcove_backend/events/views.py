@@ -7,6 +7,8 @@ from accounts.permissions import IsCoordinator, IsAdmin, IsPhotographer
 from .permissions import IsEventOwnerOrAdmin, IsEventOwnerOrAdminOrPhotographer
 
 class EventViewSet(viewsets.ModelViewSet):
+    filterset_fields = ['is_public', 'created_by']
+    search_fields = ['title', 'description']
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
