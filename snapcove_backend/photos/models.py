@@ -22,7 +22,7 @@ class Photo(models.Model):
     height = models.PositiveIntegerField(null=True, blank=True)
     exif_data = models.JSONField(null=True, blank=True)
 
-    is_approved = models.BooleanField(default=True)
+    is_approved = models.BooleanField()
     is_public = models.BooleanField(default=True)
 
     processing_status = models.CharField(

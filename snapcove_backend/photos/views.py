@@ -3,6 +3,8 @@ from rest_framework import viewsets
 from .models import Photo
 from .serializers import PhotoSerializer
 from events.models import Album
+from accounts.permissions import IsCoordinator, IsAdmin
+
 
 class PhotoViewSet(viewsets.ModelViewSet):
     fiterset_fields = ['album', 'is_approved']
@@ -19,4 +21,29 @@ class PhotoViewSet(viewsets.ModelViewSet):
             uploaded_by=self.request.user,
             album=album
         )
+
+class PendingPhotosView(ListAPIView):
+    serializer_class = PhotoSerializer
+    permission_classes = [IsCoordinator|IsAdmin]
+
+    def get_queryset(self):
+        return Photo.objects.filter(is_approved=False)
+
+class ApprovePhotoView(APIView):
+    permission_classes = = [IsCoordinator|IsAdmin]
+
+    def post(self, request, pk):
+        photo = get_object_or_404(Photo, pk=pk)
+        photo.is_approved = True
+        photo.save()
+        return Response({'status': 'approved'})
+
+class RejectPhotoView(APIView):
+    permission_classes = = [IsCoordinator|IsAdmin]
+
+    def post(self, request, pk):
+        photo = get_object_or_404(Photo, pk=pk)
+        photo.is_approved = False
+        photo.save()
+        return Response({'status': 'rejected'})
     
