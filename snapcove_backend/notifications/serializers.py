@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Notification
 
 class NotificationSerializer(serializers.ModelSerializer):
+    actor_detail = serializers.SerializerMethodField()
+    photo_url = serializers.SerializerMethodField()
     class Meta:
         model = Notification
         fields = [
@@ -18,14 +20,13 @@ class NotificationSerializer(serializers.ModelSerializer):
         ]
 
     def get_actor_detail(self,obj):
-        if obj.actor:
-            return {
-                'id': obj.actor.id,
-                'name': obj.actor.name,
-                'email': obj.actor.email,
-                'profile_picture': obj.actor.profile_picture.url if obj.actor.profile_picture else None,
-            }
-        return None
+        if not obj.actor:
+            return None
+        return {
+            "id": obj.actor.id,
+            "name": obj.actor.name,
+            "profile_picture": obj.actor.profile_picture.url if obj.actor.profile_picture else None,
+        }
 
     def get_photo_url(self,obj):
         if obj.photo and obj.photo.image:
