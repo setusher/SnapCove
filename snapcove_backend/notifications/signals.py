@@ -32,7 +32,7 @@ def notify_comment(sender, instance,created, **kwargs):
 
     actor = instance.user
     
-    if instance.parent:
+    if instance.parent_id:
         recipient = instance.parent.user
         if recipient != actor:
             Notification.objects.create(
