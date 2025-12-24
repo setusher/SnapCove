@@ -8,10 +8,11 @@ from .serializers import NotificationSerializer
 
 
 class NotificationListView(APIView):
+    serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = Notification.objects.filter(recipient=request.user)
+        qs = Notification.objects.filter(recipient=self.request.user)
         serializer = NotificationSerializer(qs, many=True)
         return Response(serializer.data)
 
@@ -55,4 +56,11 @@ class UnreadCountView(APIView):
         ).count()
 
         return Response({"count": count})
+
+class MarkUnreadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        Notification.objects.filter(id=pk, recipient=request.user).update(is_read=False)
+        return Response({"success": True})
        

@@ -11,6 +11,8 @@ class Notification(models.Model):
         ('tag', 'Tag'),
         ('upload', 'Upload'),
         ('reply', 'Reply'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
     ]
 
     recipient = models.ForeignKey(
