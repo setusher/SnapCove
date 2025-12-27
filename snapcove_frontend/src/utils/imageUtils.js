@@ -17,3 +17,4 @@ export const getImageUrl = (imagePath) => {
   return `http://localhost:8000${normalizedPath}`;
 };
 
+

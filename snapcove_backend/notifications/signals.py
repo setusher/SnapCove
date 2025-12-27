@@ -25,6 +25,8 @@ def notify_like(sender, instance,created, **kwargs):
     )
 
 
+
+
 @receiver(post_save, sender=Comment)
 def notify_comment(sender, instance,created, **kwargs):
     if not created:
@@ -69,3 +71,6 @@ def notify_photo(sender, instance,created, **kwargs):
                 photo=instance,
                 message=f"{instance.uploaded_by.name} uploaded a new photo to the event {event.title}",
             )
+
+
+    
