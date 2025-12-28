@@ -71,3 +71,10 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+img {
+  background: linear-gradient(90deg,#111,#222,#111);
+}
+@media (max-width: 1024px) {
+  .columns-3 { column-count: 2; }
+}
