@@ -3,13 +3,11 @@ import { useEffect, useState } from "react"
 import { api } from "../api/api"
 import NavRail from "../components/NavRail"
 import TopNav from "../components/TopNav"
-import PhotoInteractions from "../components/PhotoInteractions"
 
 
 export default function AlbumGallery(){
   const { eventId, albumId } = useParams()
   const [photos, setPhotos] = useState([])
-  const [selectedPhoto, setSelectedPhoto] = useState(null)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export default function AlbumGallery(){
               {photos.map((photo, idx) => (
                 <div 
                   key={photo.id}
-                  onClick={() => setSelectedPhoto(photo)}
+                  onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
                   className="masonry-item cursor-pointer stagger-item group"
                   style={{ animationDelay: `${idx * 0.02}s` }}
                 >
@@ -110,39 +108,6 @@ export default function AlbumGallery(){
           )}
         </div>
       </div>
-
-      {/* Premium Lightbox */}
-      {selectedPhoto && (
-  <div 
-    className="fixed inset-0 z-50 flex items-center justify-center p-10 animate-fadeIn"
-    style={{ background: 'rgba(10,22,40,.96)', backdropFilter: 'blur(24px)' }}
-  >
-    <div 
-      onClick={() => setSelectedPhoto(null)}
-      className="absolute inset-0"
-    />
-
-    <div 
-      onClick={e => e.stopPropagation()}
-      className="w-full max-w-7xl h-[85vh] grid grid-cols-2 rounded-[32px] overflow-hidden shadow-floating"
-      style={{ background: 'var(--navy)', border: '1px solid rgba(58,80,107,.3)' }}
-    >
-      {/* Photo */}
-      <div className="relative bg-black">
-        <img 
-          src={selectedPhoto.image}
-          className="w-full h-full object-contain"
-        />
-      </div>
-
-      {/* Interaction Panel */}
-      <div className="flex flex-col p-8">
-        <PhotoInteractions photo={selectedPhoto} />
-      </div>
-    </div>
-  </div>
-)}
-
     </div>
   )
 }
