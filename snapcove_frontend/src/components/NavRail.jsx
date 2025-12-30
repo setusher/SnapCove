@@ -22,42 +22,128 @@ export default function NavRail() {
   }
 
   return (
-    <aside className="fixed left-6 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-4">
+    <aside 
+      className="fixed left-8 top-1/2 z-50 flex flex-col items-center gap-4"
+      style={{
+        transform: 'translateY(-50%)'
+      }}
+    >
       
       {/* Logo */}
-      <div className="w-14 h-14 rounded-[22px] flex items-center justify-center text-xl shadow-floating bg-gradient-to-br from-[#5bc0be] to-[#6fffe9] text-[#0b132b]">
+      <div 
+        className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl cursor-pointer transition-all hover:scale-110"
+        onClick={() => nav("/dashboard")}
+        style={{
+          background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
+          color: '#0b132b',
+          boxShadow: '0 8px 24px rgba(93, 217, 193, 0.4)'
+        }}
+      >
         📸
       </div>
 
-      {/* Items */}
-      {items.map(i=>(
-        <div
-          key={i.path}
-          onClick={()=>nav(i.path)}
-          title={i.label}
-          className={`w-14 h-14 flex items-center justify-center rounded-[22px] cursor-pointer transition-all
-          ${location.pathname===i.path
-            ? "bg-[#5bc0be] text-[#0b132b] shadow-glow"
-            : "bg-[#1c2541]/60 text-[#6fffe9] hover:shadow-glow hover:bg-[#1c2541]"
-          }`}
-        >
-          {i.icon}
-        </div>
-      ))}
+      {/* Divider */}
+      <div 
+        className="w-8 h-px"
+        style={{ background: 'rgba(58, 80, 107, 0.4)' }}
+      />
+
+      {/* Navigation Items */}
+      {items.map(i => {
+        const isActive = location.pathname === i.path
+        return (
+          <div
+            key={i.path}
+            onClick={() => nav(i.path)}
+            title={i.label}
+            className="w-16 h-16 flex items-center justify-center rounded-2xl cursor-pointer transition-all text-2xl"
+            style={{
+              background: isActive 
+                ? 'rgba(93, 217, 193, 0.2)' 
+                : 'rgba(26, 41, 66, 0.6)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${isActive 
+                ? 'rgba(93, 217, 193, 0.4)' 
+                : 'rgba(58, 80, 107, 0.3)'}`,
+              color: isActive ? '#6fffe9' : 'rgba(255, 255, 255, 0.6)',
+              boxShadow: isActive 
+                ? '0 0 24px rgba(93, 217, 193, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)' 
+                : '0 4px 16px rgba(0, 0, 0, 0.2)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isActive) {
+                e.currentTarget.style.background = 'rgba(93, 217, 193, 0.15)';
+                e.currentTarget.style.borderColor = 'rgba(93, 217, 193, 0.3)';
+                e.currentTarget.style.color = '#6fffe9';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) {
+                e.currentTarget.style.background = 'rgba(26, 41, 66, 0.6)';
+                e.currentTarget.style.borderColor = 'rgba(58, 80, 107, 0.3)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }
+            }}
+          >
+            {i.icon}
+          </div>
+        )
+      })}
+
+      {/* Divider */}
+      <div 
+        className="w-8 h-px"
+        style={{ background: 'rgba(58, 80, 107, 0.4)' }}
+      />
 
       {/* Notifications */}
-      <NotificationBell/>
+      <NotificationBell />
 
-      {/* User */}
-      <div className="w-14 h-14 rounded-full flex items-center justify-center text-[#0b132b] bg-gradient-to-br from-[#5bc0be] to-[#6fffe9] font-bold">
+      {/* Divider */}
+      <div 
+        className="w-8 h-px"
+        style={{ background: 'rgba(58, 80, 107, 0.4)' }}
+      />
+
+      {/* User Avatar */}
+      <div 
+        className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl cursor-pointer transition-all hover:scale-110"
+        style={{
+          background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
+          color: '#0b132b',
+          boxShadow: '0 4px 16px rgba(93, 217, 193, 0.3)'
+        }}
+        title={user?.name || "User"}
+      >
         {user?.name?.[0]?.toUpperCase() || "U"}
       </div>
 
       {/* Logout */}
       <div
         onClick={logout}
-        className="w-14 h-14 flex items-center justify-center rounded-[22px] cursor-pointer text-red-400 hover:bg-red-400/10 transition"
+        className="w-16 h-16 flex items-center justify-center rounded-2xl cursor-pointer transition-all text-2xl"
         title="Logout"
+        style={{
+          background: 'rgba(26, 41, 66, 0.6)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(58, 80, 107, 0.3)',
+          color: 'rgba(239, 68, 68, 0.8)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+          e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+          e.currentTarget.style.color = '#ef4444';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(26, 41, 66, 0.6)';
+          e.currentTarget.style.borderColor = 'rgba(58, 80, 107, 0.3)';
+          e.currentTarget.style.color = 'rgba(239, 68, 68, 0.8)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
       >
         🚪
       </div>

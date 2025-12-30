@@ -10,7 +10,6 @@ export default function PhotoDetail() {
   const [loading, setLoading] = useState(!location.state?.photo)
 
   useEffect(() => {
-    // If photo wasn't passed via state, try to get it from localStorage as fallback
     if (!photo) {
       const savedPhoto = localStorage.getItem(`photo_${photoId}`)
       if (savedPhoto) {
@@ -22,11 +21,9 @@ export default function PhotoDetail() {
           setLoading(false)
         }
       } else {
-        // If no state and no localStorage, show error
         setLoading(false)
       }
     } else {
-      // Save photo to localStorage as cache
       localStorage.setItem(`photo_${photoId}`, JSON.stringify(photo))
       setLoading(false)
     }
@@ -34,10 +31,19 @@ export default function PhotoDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center animate-pageFade" style={{ background: 'linear-gradient(135deg, var(--ink) 0%, var(--navy) 100%)' }}>
+      <div 
+        className="min-h-screen flex items-center justify-center" 
+        style={{ background: '#0b132b' }}
+      >
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-aqua border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading photo...</p>
+          <div 
+            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto mb-4"
+            style={{ 
+              borderColor: '#5bc0be', 
+              borderTopColor: 'transparent' 
+            }}
+          />
+          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading photo...</p>
         </div>
       </div>
     )
@@ -45,10 +51,24 @@ export default function PhotoDetail() {
 
   if (!photo) {
     return (
-      <div className="min-h-screen flex items-center justify-center animate-pageFade" style={{ background: 'linear-gradient(135deg, var(--ink) 0%, var(--navy) 100%)' }}>
+      <div 
+        className="min-h-screen flex items-center justify-center" 
+        style={{ background: '#0b132b' }}
+      >
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Photo not found</h2>
-          <button onClick={() => nav(-1)} className="btn btn-primary">Go Back</button>
+          <h2 className="text-3xl font-bold mb-4" style={{ color: '#ffffff' }}>
+            Photo not found
+          </h2>
+          <button 
+            onClick={() => nav(-1)} 
+            className="px-8 py-4 rounded-2xl font-semibold"
+            style={{
+              background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
+              color: '#0b132b'
+            }}
+          >
+            Go Back
+          </button>
         </div>
       </div>
     )
@@ -56,20 +76,29 @@ export default function PhotoDetail() {
 
   return (
     <div 
-      className="min-h-screen animate-pageFade overflow-hidden"
-      style={{ 
-        background: 'linear-gradient(135deg, var(--ink) 0%, var(--navy) 100%)'
-      }}
+      className="h-screen w-screen overflow-hidden animate-pageFade"
+      style={{ background: '#0b132b' }}
     >
-      {/* Close Button */}
+      {/* Close Button - Fixed Position */}
       <button
         onClick={() => nav(-1)}
-        className="fixed top-8 right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-floating"
+        className="fixed top-8 right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110"
         style={{
-          background: 'rgba(28, 37, 65, 0.6)',
+          background: 'rgba(26, 41, 66, 0.9)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(58, 80, 107, 0.3)',
-          color: 'var(--text-primary)'
+          border: '1px solid rgba(58, 80, 107, 0.4)',
+          color: 'rgba(255, 255, 255, 0.9)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(93, 217, 193, 0.2)';
+          e.currentTarget.style.borderColor = 'rgba(93, 217, 193, 0.5)';
+          e.currentTarget.style.color = '#6fffe9';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(26, 41, 66, 0.9)';
+          e.currentTarget.style.borderColor = 'rgba(58, 80, 107, 0.4)';
+          e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
         }}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,32 +106,34 @@ export default function PhotoDetail() {
         </svg>
       </button>
 
-      {/* 2-Panel Layout */}
-      <div className="h-screen flex">
+      {/* 2-Panel Layout: 65% Photo / 35% Interactions */}
+      <div className="flex h-full">
+        
         {/* Left Panel - Photo (65%) */}
         <div 
           className="relative flex items-center justify-center"
           style={{
             width: '65%',
-            background: 'rgba(0, 0, 0, 0.5)'
+            background: 'radial-gradient(circle at center, #1c2541 0%, #0b132b 100%)'
           }}
         >
-          {/* Dark Vignette */}
+          {/* Dark Vignette Effect */}
           <div 
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle at center, transparent 0%, rgba(10, 22, 40, 0.7) 100%)'
+              background: 'radial-gradient(ellipse at center, transparent 0%, rgba(11, 19, 43, 0.8) 100%)',
+              mixBlendMode: 'multiply'
             }}
           />
           
-          {/* Photo */}
-          <div className="relative z-10 w-full h-full flex items-center justify-center p-16">
+          {/* Photo Container */}
+          <div className="relative z-10 w-full h-full flex items-center justify-center p-20">
             <img 
               src={photo.image}
               alt={photo.caption || 'Photo'}
-              className="max-w-full max-h-full object-contain rounded-[32px]"
+              className="max-w-full max-h-full object-contain rounded-3xl"
               style={{
-                boxShadow: '0 32px 80px -16px rgba(0, 0, 0, 0.8)'
+                boxShadow: '0 32px 80px -16px rgba(0, 0, 0, 0.8), 0 0 48px rgba(0, 0, 0, 0.5)'
               }}
             />
           </div>
@@ -110,24 +141,25 @@ export default function PhotoDetail() {
 
         {/* Right Panel - Interactions (35%) */}
         <div 
-          className="relative overflow-hidden"
+          className="relative"
           style={{
             width: '35%',
-            background: 'var(--navy)'
+            background: '#1c2541'
           }}
         >
-          {/* Glass Interaction Rail */}
+          {/* Frosted Glass Rail */}
           <div 
-            className="h-full flex flex-col rounded-l-[32px]"
+            className="h-full flex flex-col rounded-l-3xl overflow-hidden"
             style={{
-              background: 'rgba(28, 37, 65, 0.6)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
+              background: 'rgba(26, 41, 66, 0.7)',
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
               borderLeft: '1px solid rgba(58, 80, 107, 0.3)',
-              boxShadow: 'inset 1px 0 0 rgba(255, 255, 255, 0.05)'
+              boxShadow: 'inset 1px 0 0 rgba(255, 255, 255, 0.05), -8px 0 32px rgba(0, 0, 0, 0.3)'
             }}
           >
-            <div className="flex-1 overflow-y-auto p-8">
+            {/* Interactions Content */}
+            <div className="flex-1 overflow-y-auto p-10">
               <PhotoInteractions photo={photo} />
             </div>
           </div>
@@ -136,4 +168,3 @@ export default function PhotoDetail() {
     </div>
   )
 }
-
