@@ -1,70 +1,90 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { api } from "../api/api"
+import Sidebar from "../components/Sidebar"
+import TopBar from "../components/TopBar"
 
 export default function CreateAlbum(){
   const { eventId } = useParams()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const nav = useNavigate()
 
-  const submit = async() => {
-    await api.post(`/events/${eventId}/albums/`, { title, description })
-    nav(`/events/${eventId}`)
+  const submit = async(e) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await api.post(`/events/${eventId}/albums/`, { title, description })
+      nav(`/events/${eventId}`)
+    } catch(err) {
+      alert("Failed to create album")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return(
-    <div className="min-h-screen flex justify-center items-center px-4 page-container"
-         style={{ background: 'linear-gradient(135deg, #0b132b 0%, #1c2541 100%)' }}>
-      <div className="glow-card p-10 rounded-2xl space-y-6 w-full max-w-lg"
-           style={{ backgroundColor: '#1c2541' }}>
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold gradient-text mb-2">Create Album</h2>
-          <p className="text-gray-400">Add a new photo collection</p>
-        </div>
+    <div className="app-layout">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <main className="main-content">
+        <TopBar 
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Create Album"
+          subtitle="Add a new photo collection"
+        />
 
-        <div className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: '#5bc0be' }}>
-              Album Title
-            </label>
-            <input 
-              onChange={e => setTitle(e.target.value)} 
-              placeholder="Summer Memories 2024" 
-              className="glow-input w-full p-4 rounded-xl text-white"
-              style={{ backgroundColor: '#0b132b' }}
-            />
-          </div>
+        <div className="p-6 max-w-2xl mx-auto">
+          <form onSubmit={submit} className="card p-8 space-y-6 animate-slideUp">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Album Title *
+                </label>
+                <input 
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)} 
+                  placeholder="Summer Memories 2024"
+                  required
+                  className="input-field"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: '#5bc0be' }}>
-              Description (Optional)
-            </label>
-            <textarea 
-              onChange={e => setDescription(e.target.value)} 
-              placeholder="Add a description for this album..." 
-              className="glow-input w-full p-4 rounded-xl text-white min-h-32 resize-none"
-              style={{ backgroundColor: '#0b132b' }}
-            />
-          </div>
-        </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea 
+                  value={description}
+                  onChange={e => setDescription(e.target.value)} 
+                  placeholder="Add a description for this album..."
+                  rows={4}
+                  className="input-field resize-none"
+                />
+              </div>
+            </div>
 
-        <div className="flex gap-4 pt-4">
-          <button 
-            onClick={() => nav(`/events/${eventId}`)}
-            className="flex-1 p-4 rounded-xl font-semibold border-2 hover:bg-opacity-10"
-            style={{ borderColor: '#3a506b', color: '#5bc0be', backgroundColor: 'transparent' }}>
-            Cancel
-          </button>
-          
-          <button 
-            onClick={submit} 
-            className="glow-button flex-1 p-4 rounded-xl font-semibold relative z-10"
-            style={{ background: 'linear-gradient(135deg, #5bc0be, #6fffe9)', color: '#0b132b' }}>
-            Create Album
-          </button>
+            <div className="flex gap-4 pt-4">
+              <button 
+                type="button"
+                onClick={() => nav(`/events/${eventId}`)}
+                className="btn btn-ghost flex-1">
+                Cancel
+              </button>
+              
+              <button 
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary flex-1">
+                {loading ? 'Creating...' : 'Create Album'}
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

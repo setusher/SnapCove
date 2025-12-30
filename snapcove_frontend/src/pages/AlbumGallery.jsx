@@ -1,11 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { api } from "../api/api"
+import Sidebar from "../components/Sidebar"
+import TopBar from "../components/TopBar"
 
 export default function AlbumGallery(){
   const { eventId, albumId } = useParams()
   const [photos, setPhotos] = useState([])
   const [selectedPhoto, setSelectedPhoto] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -14,67 +17,73 @@ export default function AlbumGallery(){
   }, [eventId, albumId])
 
   return (
-    <div className="min-h-screen page-container px-6 py-10"
-         style={{ background: 'linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #0b132b 100%)' }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
+    <div className="app-layout">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <main className="main-content">
+        <TopBar 
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Photo Gallery"
+          subtitle={`${photos.length} ${photos.length === 1 ? 'photo' : 'photos'}`}
+        />
+
+        <div className="p-6">
           <button 
             onClick={() => nav(`/events/${eventId}`)}
-            className="text-sm mb-4 flex items-center gap-2 hover:gap-3 transition-all"
-            style={{ color: '#5bc0be' }}>
-            ← Back to Albums
+            className="btn btn-ghost mb-6">
+            <span>←</span>
+            Back to Albums
           </button>
-          <h1 className="text-5xl font-bold gradient-text mb-2">Photo Gallery</h1>
-          <p className="text-gray-400 text-lg">
-            {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
-          </p>
-        </div>
 
-        {photos.length > 0 ? (
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-            {photos.map((p, idx) => (
-              <div 
-                key={p.id}
-                onClick={() => setSelectedPhoto(p)}
-                className="grid-item break-inside-avoid mb-4 cursor-pointer"
-                style={{ animationDelay: `${idx * 0.05}s` }}>
-                <img 
-                  src={p.image} 
-                  alt={`Photo ${p.id}`}
-                  className="image-hover w-full rounded-xl"
-                  style={{ border: '2px solid rgba(91, 192, 190, 0.2)' }}
-                />
+          {photos.length === 0 ? (
+            <div className="text-center py-20 animate-fadeIn">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-800 flex items-center justify-center text-4xl">
+                🖼️
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🖼️</div>
-            <p className="text-gray-400 text-xl">No photos in this album yet</p>
-          </div>
-        )}
-      </div>
+              <h3 className="text-xl font-semibold text-white mb-2">No photos yet</h3>
+              <p className="text-gray-400">Photos will appear here once uploaded</p>
+            </div>
+          ) : (
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+              {photos.map((photo, idx) => (
+                <div 
+                  key={photo.id}
+                  onClick={() => setSelectedPhoto(photo)}
+                  className="break-inside-avoid mb-4 cursor-pointer stagger-item group"
+                  style={{ animationDelay: `${idx * 0.05}s` }}>
+                  <img 
+                    src={photo.image} 
+                    alt={`Photo ${photo.id}`}
+                    className="w-full rounded-xl border border-gray-700 group-hover:border-cyan-500 transition-all"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
 
       {/* Lightbox Modal */}
       {selectedPhoto && (
         <div 
           onClick={() => setSelectedPhoto(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(11, 19, 43, 0.95)' }}>
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <button 
+            onClick={() => setSelectedPhoto(null)}
+            className="absolute top-6 right-6 w-12 h-12 rounded-xl bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-all z-10">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
           <div 
             onClick={e => e.stopPropagation()}
-            className="max-w-5xl max-h-[90vh] relative">
-            <button 
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute -top-12 right-0 w-10 h-10 rounded-full flex items-center justify-center glow-button"
-              style={{ background: 'linear-gradient(135deg, #5bc0be, #6fffe9)', color: '#0b132b' }}>
-              ✕
-            </button>
+            className="max-w-6xl max-h-[90vh] relative">
             <img 
               src={selectedPhoto.image} 
               alt="Full size"
-              className="max-w-full max-h-[90vh] rounded-2xl"
-              style={{ boxShadow: '0 0 60px rgba(91, 192, 190, 0.5)' }}
+              className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl"
             />
           </div>
         </div>
