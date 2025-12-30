@@ -8,6 +8,7 @@ from .permissions import IsEventOwnerOrAdmin, IsEventOwnerOrAdminOrPhotographer
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 class EventViewSet(viewsets.ModelViewSet):
+    filter_backends = [SearchFilter, OrderingFilter]
     filterset_fields = ['is_public', 'created_by']
     search_fields = ['title', 'description']
     serializer_class = EventSerializer

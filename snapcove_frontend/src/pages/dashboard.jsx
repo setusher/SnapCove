@@ -5,8 +5,8 @@ import { useAuth } from "../auth/AuthProvider"
 
 export default function Dashboard(){
   const [events,setEvents] = useState([])
+  const { user } = useAuth()
   const nav = useNavigate()
-  const { user } = useAuth()   
 
   useEffect(()=>{
     api.get("/events/")
@@ -15,8 +15,8 @@ export default function Dashboard(){
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">My Events</h1>
+      <div className="flex justify-between mb-8 items-center">
+        <h1 className="text-4xl font-bold">Events</h1>
 
         {["admin","coordinator"].includes(user?.role) && (
           <button onClick={()=>nav("/events/create")}
@@ -26,14 +26,11 @@ export default function Dashboard(){
         )}
       </div>
 
-      {events.length===0 && (
-        <p className="text-gray-400">No events yet.</p>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {events.map(e=>(
-          <div key={e.id} className="bg-gray-900 p-6 rounded-xl">
-            <h2 className="font-semibold mb-2">{e.title}</h2>
+          <div key={e.id} onClick={()=>nav(`/events/${e.id}`)}
+            className="cursor-pointer bg-gray-900 rounded-xl p-6 hover:bg-gray-800">
+            <h2 className="font-semibold mb-1">{e.title}</h2>
             <p className="text-gray-400 text-sm">{e.description}</p>
           </div>
         ))}
