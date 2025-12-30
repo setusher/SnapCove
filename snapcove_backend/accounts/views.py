@@ -9,10 +9,9 @@ from .serializers import SignupSerializer, UserSerializer, GoogleAuthSerializer
 from .models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
-
 from rest_framework_simplejwt.serializers import RefreshToken
 from django.contrib.auth import authenticate
+from .utils import send_otp
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SignUpView(APIView):
@@ -25,13 +24,42 @@ class SignUpView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
+        user.is_active = False
+        user.save()
+
+        send_email_otp(user)
+
+        return Response("detail: OTP sent successfully", status=201)
+
+class VerifyEmailOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).last()
+        if not otp or not otp.is_valid():
+            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp.is_used = True
+        otp.save()
+
+        user.is_active = True
+        user.save()
         refresh = RefreshToken.for_user(user)
+
         return Response({
-            'user': UserSerializer(user).data,
-            'message': 'User created successfully',
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserSerializer(user).data
+        })
+
+        
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
@@ -44,6 +72,8 @@ class LoginView(APIView):
             return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(request, email=email, password=password)
+        if not user.is_active:
+            return Response({"error":"Account not verified"}, 403)
 
         if user is None:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
