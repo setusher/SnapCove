@@ -26,7 +26,7 @@ export default function CreateAlbum(){
   }
 
   return(
-    <div className="app-layout">
+    <div className="app-layout animate-pageFade">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="main-content">
@@ -36,11 +36,11 @@ export default function CreateAlbum(){
           subtitle="Add a new photo collection"
         />
 
-        <div className="p-6 max-w-2xl mx-auto">
-          <form onSubmit={submit} className="card p-8 space-y-6 animate-slideUp">
-            <div className="space-y-6">
+        <div className="p-8 lg:p-12 max-w-3xl mx-auto">
+          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
+            <div className="space-y-8">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   Album Title *
                 </label>
                 <input 
@@ -54,20 +54,20 @@ export default function CreateAlbum(){
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   Description
                 </label>
                 <textarea 
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Add a description for this album..."
-                  rows={4}
+                  rows={5}
                   className="input-field resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-6">
               <button 
                 type="button"
                 onClick={() => nav(`/events/${eventId}`)}

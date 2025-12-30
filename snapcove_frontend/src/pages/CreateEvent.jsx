@@ -32,7 +32,7 @@ export default function CreateEvent(){
   }
 
   return(
-    <div className="app-layout">
+    <div className="app-layout animate-pageFade">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="main-content">
@@ -42,11 +42,11 @@ export default function CreateEvent(){
           subtitle="Add a new event to your gallery"
         />
 
-        <div className="p-6 max-w-3xl mx-auto">
-          <form onSubmit={submit} className="card p-8 space-y-6 animate-slideUp">
-            <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-8 lg:p-12 max-w-4xl mx-auto">
+          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
+            <div className="grid md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   Event Title *
                 </label>
                 <input 
@@ -60,20 +60,20 @@ export default function CreateEvent(){
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   Description
                 </label>
                 <textarea 
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Tell us about this event..."
-                  rows={4}
+                  rows={5}
                   className="input-field resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   Start Date *
                 </label>
                 <input 
@@ -86,7 +86,7 @@ export default function CreateEvent(){
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
                   End Date *
                 </label>
                 <input 
@@ -99,7 +99,7 @@ export default function CreateEvent(){
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-6">
               <button 
                 type="button"
                 onClick={() => nav("/dashboard")}

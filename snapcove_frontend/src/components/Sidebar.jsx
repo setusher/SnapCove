@@ -29,19 +29,19 @@ export default function Sidebar({ isOpen, onClose }) {
         onClick={onClose}
       />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-emerald-300 flex items-center justify-center text-xl">
+        <div className="p-8 border-b border-slate/20">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-[20px] bg-gradient-to-br from-aqua to-mint flex items-center justify-center text-2xl shadow-glow-aqua">
               📸
             </div>
             <div>
-              <h1 className="font-bold text-lg text-white">Gallery</h1>
-              <p className="text-xs text-gray-400">Event Manager</p>
+              <h1 className="text-card-title text-[#e8eaed] tracking-tight">SnapCove</h1>
+              <p className="text-meta text-[#e8eaed]/50">Event Manager</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-6 space-y-2">
           {menuItems.map((item) => (
             <button
               key={item.path}
@@ -49,30 +49,30 @@ export default function Sidebar({ isOpen, onClose }) {
                 nav(item.path)
                 onClose()
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-[16px] transition-all ${
                 isActive(item.path)
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-emerald-300/20 text-cyan-300 border border-cyan-500/30'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-aqua/15 text-aqua border border-aqua/30 shadow-glow-aqua'
+                  : 'text-[#e8eaed]/60 hover:bg-navy/50 hover:text-[#e8eaed] border border-transparent'
               }`}>
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
+              <span className="text-2xl">{item.icon}</span>
+              <span className="font-medium text-base">{item.label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-700">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 mb-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-300 flex items-center justify-center font-bold text-gray-900">
+        <div className="p-6 border-t border-slate/20">
+          <div className="flex items-center gap-4 p-4 rounded-[16px] bg-navy/50 border border-slate/20 mb-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-aqua to-mint flex items-center justify-center font-bold text-ink text-lg shadow-glow-aqua">
               {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-white truncate">{user?.name || 'User'}</p>
-              <p className="text-xs text-gray-400 capitalize">{user?.role || 'member'}</p>
+              <p className="font-semibold text-[#e8eaed] truncate text-base">{user?.name || 'User'}</p>
+              <p className="text-meta text-[#e8eaed]/50 capitalize">{user?.role || 'member'}</p>
             </div>
           </div>
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20">
+            className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-[16px] bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20 hover:border-red-500/40">
             <span>🚪</span>
             <span className="font-medium">Logout</span>
           </button>

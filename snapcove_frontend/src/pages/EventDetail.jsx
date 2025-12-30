@@ -18,7 +18,7 @@ export default function EventDetail(){
   }, [eventId])
 
   return (
-    <div className="app-layout">
+    <div className="app-layout animate-pageFade">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="main-content">
@@ -38,21 +38,21 @@ export default function EventDetail(){
           }
         />
 
-        <div className="p-6">
+        <div className="p-8 lg:p-12">
           <button 
             onClick={() => nav("/dashboard")}
-            className="btn btn-ghost mb-6">
+            className="btn btn-ghost mb-8">
             <span>←</span>
             Back to Events
           </button>
 
           {albums.length === 0 ? (
-            <div className="text-center py-20 animate-fadeIn">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-800 flex items-center justify-center text-4xl">
+            <div className="text-center py-32 animate-fadeIn">
+              <div className="w-24 h-24 mx-auto mb-8 rounded-[28px] bg-navy border border-slate/30 flex items-center justify-center text-5xl shadow-floating">
                 📸
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No albums yet</h3>
-              <p className="text-gray-400 mb-6">Create your first album to organize photos</p>
+              <h3 className="text-section text-[#e8eaed] mb-3 tracking-tight">No albums yet</h3>
+              <p className="text-meta text-[#e8eaed]/60 mb-8">Create your first album to organize photos</p>
               {["admin", "coordinator", "photographer"].includes(user?.role) && (
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
@@ -63,23 +63,25 @@ export default function EventDetail(){
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {albums.map((album) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {albums.map((album, idx) => (
                 <div 
                   key={album.id}
                   onClick={() => nav(`/events/${eventId}/albums/${album.id}`)}
-                  className="card p-6 cursor-pointer stagger-item group">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-400/20 flex items-center justify-center text-2xl">
+                  className="card p-8 cursor-pointer stagger-item group"
+                  style={{ animationDelay: `${idx * 0.05}s` }}
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-16 h-16 rounded-[20px] bg-aqua/10 border border-aqua/20 flex items-center justify-center text-3xl group-hover:bg-aqua/20 group-hover:border-aqua/40 transition-all">
                       📷
                     </div>
-                    <span className="text-xs text-gray-500 group-hover:text-cyan-400">View →</span>
+                    <span className="text-meta text-[#e8eaed]/50 group-hover:text-aqua transition-colors">View →</span>
                   </div>
                   
-                  <h3 className="font-semibold text-lg text-white mb-2">
+                  <h3 className="text-card-title text-[#e8eaed] mb-3 tracking-tight">
                     {album.title}
                   </h3>
-                  <p className="text-gray-400 text-sm line-clamp-2">
+                  <p className="text-meta text-[#e8eaed]/60 line-clamp-2 leading-relaxed">
                     {album.description || "No description"}
                   </p>
                 </div>

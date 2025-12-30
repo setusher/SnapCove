@@ -26,27 +26,28 @@ export default function Signup(){
   }
 
   return(
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-emerald-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+    <div className="min-h-screen bg-ink flex items-center justify-center px-4 relative overflow-hidden animate-pageFade">
+      {/* Soft ambient background gradients */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-aqua rounded-full blur-[100px] opacity-8"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-mint rounded-full blur-[120px] opacity-6"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10 animate-slideUp">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-300 flex items-center justify-center text-2xl">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-aqua to-mint flex items-center justify-center text-3xl shadow-glow-aqua">
               📸
             </div>
-            <span className="font-bold text-2xl text-white">Gallery</span>
+            <span className="text-section text-[#e8eaed] tracking-tight">SnapCove</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
-          <p className="text-gray-400">Get started with your free account</p>
+          <h2 className="text-section text-[#e8eaed] mb-3 tracking-tight">Create Account</h2>
+          <p className="text-meta text-[#e8eaed]/60">Get started with your free account</p>
         </div>
 
-        <form onSubmit={submit} className="bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-gray-700 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+        <form onSubmit={submit} className="glass-card p-10 space-y-8">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
               Full Name
             </label>
             <input 
@@ -59,8 +60,8 @@ export default function Signup(){
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
               Email Address
             </label>
             <input 
@@ -73,8 +74,8 @@ export default function Signup(){
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
               Password
             </label>
             <input 
@@ -86,22 +87,22 @@ export default function Signup(){
               minLength={6}
               className="input-field"
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
+            <p className="text-xs text-meta text-[#e8eaed]/50 mt-2">Must be at least 6 characters</p>
           </div>
 
           <button 
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full justify-center">
+            className="btn btn-primary w-full justify-center py-4 text-base">
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
 
           <div className="text-center text-sm">
-            <span className="text-gray-400">Already have an account? </span>
+            <span className="text-meta text-[#e8eaed]/60">Already have an account? </span>
             <button 
               type="button"
               onClick={() => nav("/login")}
-              className="text-cyan-400 hover:text-cyan-300 font-medium">
+              className="text-aqua hover:text-mint font-medium transition-colors">
               Sign in
             </button>
           </div>
