@@ -1,12 +1,64 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
+
+const GOOGLE_CLIENT_ID = "447171812608-0c66t6gioscl9kl3m5gqqkkj8r4ni29n.apps.googleusercontent.com"
 
 export default function Login(){
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const nav = useNavigate()
+  const googleButtonRef = useRef(null)
+
+  useEffect(() => {
+    // Initialize Google Sign-In
+    const initGoogleSignIn = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleSignIn
+        })
+        
+        // Render Google Sign-In button
+        if (googleButtonRef.current && window.google.accounts.id.renderButton) {
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: googleButtonRef.current.offsetWidth || 350,
+            text: 'signin_with',
+            type: 'standard'
+          })
+        }
+      } else {
+        // Retry after a short delay if script hasn't loaded
+        setTimeout(initGoogleSignIn, 100)
+      }
+    }
+    initGoogleSignIn()
+  }, [])
+
+  const handleGoogleSignIn = async (response) => {
+    setGoogleLoading(true)
+    try {
+      const res = await api.post("/auth/google/", { id_token: response.credential })
+      localStorage.setItem("access_token", res.data.access)
+      localStorage.setItem("refresh_token", res.data.refresh)
+      localStorage.setItem("user", JSON.stringify(res.data.user))
+      
+      if (res.data.needs_role_selection) {
+        nav("/dashboard")
+      } else {
+        nav("/dashboard")
+      }
+    } catch(e) {
+      alert("Google sign-in failed")
+      console.error(e)
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -128,6 +180,21 @@ export default function Login(){
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full" style={{ borderTop: '1px solid rgba(58, 80, 107, 0.3)' }}></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span style={{ color: 'var(--text-secondary)', background: 'rgba(28, 37, 65, 0.6)', padding: '0 12px' }}>
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Sign-In Button */}
+          <div ref={googleButtonRef} className="w-full flex justify-center"></div>
 
           <div className="text-center text-sm pt-4" style={{ borderTop: '1px solid rgba(58, 80, 107, 0.3)' }}>
             <span style={{ color: 'var(--text-secondary)' }}>Don't have an account? </span>

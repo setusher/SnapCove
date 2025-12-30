@@ -7,12 +7,23 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password', 'name', 'role', 'batch', 'department']
+        extra_kwargs = {
+            'role': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'batch': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'department': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'name': {'required': True},
+            'email': {'required': True},
+        }
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create_user(password=password, **validated_data)
-        # user.set_password(password)
-        user.save()
+        # Filter out None/empty values for optional fields
+        cleaned_data = {}
+        for k, v in validated_data.items():
+            if v is not None and v != '':
+                cleaned_data[k] = v
+        
+        user = User.objects.create_user(password=password, **cleaned_data)
         return user
 
 
