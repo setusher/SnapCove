@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
-import Sidebar from "../components/Sidebar"
-import TopBar from "../components/TopBar"
+import NavRail from "../components/NavRail"
+import TopNav from "../components/TopNav"
 
 export default function CreateEvent(){
   const [title, setTitle] = useState("")
@@ -10,7 +10,6 @@ export default function CreateEvent(){
   const [start, setStart] = useState("")
   const [end, setEnd] = useState("")
   const [loading, setLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const nav = useNavigate()
 
   const submit = async (e) => {
@@ -32,21 +31,23 @@ export default function CreateEvent(){
   }
 
   return(
-    <div className="app-layout animate-pageFade">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="min-h-screen animate-pageFade" style={{ background: 'var(--ink)' }}>
+      <NavRail />
       
-      <main className="main-content">
-        <TopBar 
-          onMenuClick={() => setSidebarOpen(true)}
+      <div className="dashboard-container" style={{ paddingTop: '120px' }}>
+        <TopNav 
           title="Create Event"
           subtitle="Add a new event to your gallery"
         />
 
-        <div className="p-8 lg:p-12 max-w-4xl mx-auto">
-          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
-            <div className="grid md:grid-cols-2 gap-8">
+        <div className="px-16 py-12 max-w-4xl">
+          <form onSubmit={submit} className="card p-14 space-y-12 animate-slideUp">
+            <div className="grid md:grid-cols-2 gap-10">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Event Title *
                 </label>
                 <input 
@@ -60,20 +61,26 @@ export default function CreateEvent(){
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Description
                 </label>
                 <textarea 
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Tell us about this event..."
-                  rows={5}
+                  rows={6}
                   className="input-field resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Start Date *
                 </label>
                 <input 
@@ -86,7 +93,10 @@ export default function CreateEvent(){
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   End Date *
                 </label>
                 <input 
@@ -99,24 +109,26 @@ export default function CreateEvent(){
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-6 pt-8">
               <button 
                 type="button"
                 onClick={() => nav("/dashboard")}
-                className="btn btn-ghost flex-1">
+                className="btn btn-ghost flex-1"
+              >
                 Cancel
               </button>
               
               <button 
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary flex-1">
+                className="btn btn-primary flex-1"
+              >
                 {loading ? 'Creating...' : 'Create Event'}
               </button>
             </div>
           </form>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -1,15 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { api } from "../api/api"
-import Sidebar from "../components/Sidebar"
-import TopBar from "../components/TopBar"
+import NavRail from "../components/NavRail"
+import TopNav from "../components/TopNav"
 
 export default function CreateAlbum(){
   const { eventId } = useParams()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [loading, setLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const nav = useNavigate()
 
   const submit = async(e) => {
@@ -26,21 +25,23 @@ export default function CreateAlbum(){
   }
 
   return(
-    <div className="app-layout animate-pageFade">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="min-h-screen animate-pageFade" style={{ background: 'var(--ink)' }}>
+      <NavRail />
       
-      <main className="main-content">
-        <TopBar 
-          onMenuClick={() => setSidebarOpen(true)}
+      <div className="dashboard-container" style={{ paddingTop: '120px' }}>
+        <TopNav 
           title="Create Album"
           subtitle="Add a new photo collection"
         />
 
-        <div className="p-8 lg:p-12 max-w-3xl mx-auto">
-          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
-            <div className="space-y-8">
+        <div className="px-16 py-12 max-w-3xl">
+          <form onSubmit={submit} className="card p-14 space-y-12 animate-slideUp">
+            <div className="space-y-10">
               <div>
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Album Title *
                 </label>
                 <input 
@@ -54,37 +55,42 @@ export default function CreateAlbum(){
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+                <label 
+                  className="block text-sm font-medium mb-5"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Description
                 </label>
                 <textarea 
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Add a description for this album..."
-                  rows={5}
+                  rows={6}
                   className="input-field resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-6 pt-8">
               <button 
                 type="button"
                 onClick={() => nav(`/events/${eventId}`)}
-                className="btn btn-ghost flex-1">
+                className="btn btn-ghost flex-1"
+              >
                 Cancel
               </button>
               
               <button 
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary flex-1">
+                className="btn btn-primary flex-1"
+              >
                 {loading ? 'Creating...' : 'Create Album'}
               </button>
             </div>
           </form>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

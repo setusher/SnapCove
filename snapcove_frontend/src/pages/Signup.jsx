@@ -26,28 +26,58 @@ export default function Signup(){
   }
 
   return(
-    <div className="min-h-screen bg-ink flex items-center justify-center px-4 relative overflow-hidden animate-pageFade">
-      {/* Soft ambient background gradients */}
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden animate-pageFade" style={{ background: 'var(--ink)' }}>
+      {/* Dark ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-aqua rounded-full blur-[100px] opacity-8"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-mint rounded-full blur-[120px] opacity-6"></div>
+        <div 
+          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px] opacity-8"
+          style={{ background: 'var(--aqua)' }}
+        />
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] rounded-full blur-[140px] opacity-6"
+          style={{ background: 'var(--mint)' }}
+        />
       </div>
 
       <div className="w-full max-w-md relative z-10 animate-slideUp">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-aqua to-mint flex items-center justify-center text-3xl shadow-glow-aqua">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-4 mb-8">
+            <div 
+              className="w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl shadow-glow"
+              style={{
+                background: 'linear-gradient(135deg, var(--aqua), var(--mint))',
+                color: 'var(--ink)'
+              }}
+            >
               📸
             </div>
-            <span className="text-section text-[#e8eaed] tracking-tight">SnapCove</span>
+            <span 
+              className="text-section"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              SnapCove
+            </span>
           </div>
-          <h2 className="text-section text-[#e8eaed] mb-3 tracking-tight">Create Account</h2>
-          <p className="text-meta text-[#e8eaed]/60">Get started with your free account</p>
+          <h2 
+            className="text-section mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Create Account
+          </h2>
+          <p 
+            className="text-meta"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Get started with your free account
+          </p>
         </div>
 
-        <form onSubmit={submit} className="glass-card p-10 space-y-8">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+        <form onSubmit={submit} className="glass-card p-12 space-y-10">
+          <div className="space-y-3">
+            <label 
+              className="block text-sm font-medium mb-4"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Full Name
             </label>
             <input 
@@ -60,8 +90,11 @@ export default function Signup(){
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+          <div className="space-y-3">
+            <label 
+              className="block text-sm font-medium mb-4"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Email Address
             </label>
             <input 
@@ -74,8 +107,11 @@ export default function Signup(){
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#e8eaed]/80 mb-3">
+          <div className="space-y-3">
+            <label 
+              className="block text-sm font-medium mb-4"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Password
             </label>
             <input 
@@ -87,22 +123,30 @@ export default function Signup(){
               minLength={6}
               className="input-field"
             />
-            <p className="text-xs text-meta text-[#e8eaed]/50 mt-2">Must be at least 6 characters</p>
+            <p 
+              className="text-xs mt-2"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Must be at least 6 characters
+            </p>
           </div>
 
           <button 
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full justify-center py-4 text-base">
+            className="btn btn-primary w-full justify-center py-5 text-base"
+          >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
 
           <div className="text-center text-sm">
-            <span className="text-meta text-[#e8eaed]/60">Already have an account? </span>
+            <span style={{ color: 'var(--text-secondary)' }}>Already have an account? </span>
             <button 
               type="button"
               onClick={() => nav("/login")}
-              className="text-aqua hover:text-mint font-medium transition-colors">
+              className="font-medium transition-colors"
+              style={{ color: 'var(--aqua)' }}
+            >
               Sign in
             </button>
           </div>
