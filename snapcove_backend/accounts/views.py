@@ -23,8 +23,14 @@ class SignUpView(APIView):
     def post(self, request):
         email = request.data.get("email")
 
-        if PendingSignup.objects.filter(email=email).exists():
-            return Response({"error": "OTP already sent"}, status=400)
+        existing = PendingSignup.objects.filter(email=email).first()
+
+        if existing:
+            if timezone.now() < existing.expires_at:
+                return Response({"error":"OTP already sent"}, 400)
+            else:
+                existing.delete()
+
 
         otp = str(random.randint(100000, 999999))
 
@@ -87,8 +93,8 @@ class LoginView(APIView):
             return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(request, email=email, password=password)
-        if not user.is_active:
-            return Response({"error":"Account not verified"}, 403)
+        # if not user.is_active:
+        #     return Response({"error":"Account not verified"}, 403)
 
         if user is None:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -216,4 +222,24 @@ class SelectRoleView(APIView):
             {"detail": "Role set successfully"},
             status=status.HTTP_200_OK
         )
-           
+
+class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        pending = PendingSignup.objects.filter(email=email).first()
+
+        if not pending:
+            return Response({"error":"No pending signup"}, 404)
+
+        # Generate new OTP
+        otp = str(random.randint(100000,999999))
+        pending.otp = otp
+        pending.expires_at = timezone.now() + timedelta(minutes=10)
+        pending.save()
+
+        send_email_otp_raw(email, otp)
+
+        return Response({"success": True})
+

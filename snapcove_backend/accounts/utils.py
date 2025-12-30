@@ -12,3 +12,6 @@ def send_email_otp_raw(email, otp):
         recipient_list=[email],
         fail_silently=False
     )
+
+def cleanup_expired_signups():
+    PendingSignup.objects.filter(expires_at__lt=timezone.now()).delete()

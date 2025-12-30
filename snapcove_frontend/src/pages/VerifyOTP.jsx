@@ -54,6 +54,16 @@ export default function VerifyOTP() {
             className="input-field text-center tracking-widest text-xl"
             required
           />
+          <button
+  type="button"
+  onClick={async () => {
+    await api.post("/auth/resend-otp/", { email })
+    alert("New OTP sent")
+  }}
+  className="text-[#6fffe9] mt-3 text-sm hover:underline"
+>
+  Resend OTP
+</button>
 
           <button
             disabled={loading}
