@@ -6,9 +6,12 @@ export default function Signup(){
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
   const nav = useNavigate()
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
     try {
       const res = await api.post("/auth/signup/", { name, email, password })
       localStorage.setItem("access_token", res.data.access)
@@ -17,77 +20,92 @@ export default function Signup(){
       nav("/dashboard")
     } catch(e){
       alert("Signup failed")
+    } finally {
+      setLoading(false)
     }
   }
 
   return(
-    <div className="min-h-screen flex items-center justify-center px-4 page-container"
-         style={{ background: 'linear-gradient(135deg, #0b132b 0%, #1c2541 100%)' }}>
-      <div className="glow-card p-10 rounded-2xl w-full max-w-md space-y-6"
-           style={{ backgroundColor: '#1c2541' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-emerald-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10 animate-slideUp">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold gradient-text mb-2">Join Us</h2>
-          <p className="text-gray-400">Create your account to get started</p>
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-300 flex items-center justify-center text-2xl">
+              📸
+            </div>
+            <span className="font-bold text-2xl text-white">Gallery</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
+          <p className="text-gray-400">Get started with your free account</p>
         </div>
 
-        <div className="space-y-5">
+        <form onSubmit={submit} className="bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-gray-700 space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: '#5bc0be' }}>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Full Name
             </label>
             <input 
+              type="text"
+              value={name}
               onChange={e => setName(e.target.value)} 
               placeholder="John Doe"
-              className="glow-input w-full p-4 rounded-xl text-white"
-              style={{ backgroundColor: '#0b132b' }}
+              required
+              className="input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: '#5bc0be' }}>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Email Address
             </label>
             <input 
               type="email"
+              value={email}
               onChange={e => setEmail(e.target.value)} 
               placeholder="you@example.com"
-              className="glow-input w-full p-4 rounded-xl text-white"
-              style={{ backgroundColor: '#0b132b' }}
+              required
+              className="input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: '#5bc0be' }}>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Password
             </label>
             <input 
-              type="password" 
+              type="password"
+              value={password}
               onChange={e => setPassword(e.target.value)} 
               placeholder="••••••••"
-              className="glow-input w-full p-4 rounded-xl text-white"
-              style={{ backgroundColor: '#0b132b' }}
+              required
+              minLength={6}
+              className="input-field"
             />
+            <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
           </div>
-        </div>
 
-        <button 
-          onClick={submit}
-          className="glow-button w-full p-4 rounded-xl font-semibold text-lg relative z-10"
-          style={{ background: 'linear-gradient(135deg, #5bc0be, #6fffe9)', color: '#0b132b' }}>
-          Create Account
-        </button>
+          <button 
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full justify-center">
+            {loading ? 'Creating account...' : 'Create Account'}
+          </button>
 
-        <div className="text-center">
-          <p className="text-gray-400">
-            Already have an account?{' '}
+          <div className="text-center text-sm">
+            <span className="text-gray-400">Already have an account? </span>
             <button 
+              type="button"
               onClick={() => nav("/login")}
-              className="font-semibold hover:underline"
-              style={{ color: '#5bc0be' }}>
+              className="text-cyan-400 hover:text-cyan-300 font-medium">
               Sign in
             </button>
-          </p>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   )
