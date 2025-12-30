@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -191,10 +192,12 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+EMAIL_HOST_USER = os.getenv("SNAPCOVE_EMAIL")
+EMAIL_HOST_PASSWORD = os.getenv("SNAPCOVE_EMAIL_PASS")
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'shradhath08@gmail.com'
-EMAIL_HOST_PASSWORD = 'cced oqzq zzar sump'
-DEFAULT_FROM_EMAIL = 'SnapCove <shradhath08@gmail.com>'
+
+DEFAULT_FROM_EMAIL = f"SnapCove <{EMAIL_HOST_USER}>"

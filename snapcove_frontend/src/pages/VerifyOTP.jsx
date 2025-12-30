@@ -14,14 +14,23 @@ export default function VerifyOTP() {
     e.preventDefault()
     setLoading(true)
     try {
-      await api.post("/auth/verify-otp/", { email, otp })
-      nav("/select-role")
+      const res = await api.post("/auth/verify-otp/", { email, otp })
+  
+      // 🔐 LOGIN USER NOW
+      localStorage.setItem("access_token", res.data.access)
+      localStorage.setItem("refresh_token", res.data.refresh)
+      localStorage.setItem("user", JSON.stringify(res.data.user))
+  
+      // now route to role or dashboard
+      if (!res.data.user.role) nav("/select-role")
+      else nav("/dashboard")
     } catch (err) {
       alert("Invalid OTP")
     } finally {
       setLoading(false)
     }
   }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-ink overflow-hidden">
