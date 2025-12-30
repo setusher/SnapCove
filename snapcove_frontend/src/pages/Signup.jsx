@@ -42,37 +42,48 @@ export default function Signup(){
   const handleGoogleSignIn = async (response) => {
     try {
       const res = await api.post("/auth/google/", { id_token: response.credential })
+  
+      // Google users skip OTP but MUST choose role
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
-      
+  
       if (res.data.needs_role_selection) {
-        nav("/dashboard")
+        nav("/select-role")
       } else {
         nav("/dashboard")
       }
-    } catch(e) {
+    } catch (e) {
       alert("Google sign-in failed")
       console.error(e)
     }
   }
+  
 
   const submit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await api.post("/auth/signup/", { name, email, password })
-      localStorage.setItem("access_token", res.data.access)
-      localStorage.setItem("refresh_token", res.data.refresh)
-      localStorage.setItem("user", JSON.stringify(res.data.user))
-      nav("/dashboard")
-    } catch(e){
+      await api.post("/auth/signup/", {
+        name,
+        email,
+        password,
+        role: "",
+        batch: "",
+        department: ""
+      })
+      
+  
+      // DO NOT login yet — user must verify OTP
+      nav("/verify-otp", { state: { email } })
+    } catch (e) {
       console.error("Signup error:", e.response?.data)
-      alert("Signup failed: " + (e.response?.data?.error || JSON.stringify(e.response?.data) || "Please try again"))
+      alert("Signup failed: " + (e.response?.data?.error || "Please try again"))
     } finally {
       setLoading(false)
     }
   }
+  
 
   return(
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden animate-pageFade" style={{ background: 'var(--ink)' }}>

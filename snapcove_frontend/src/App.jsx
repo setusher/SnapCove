@@ -10,6 +10,8 @@ import EventDetail from "./pages/EventDetail"
 import CreateAlbum from "./pages/CreateAlbum"
 import AlbumGallery from "./pages/AlbumGallery"
 import PhotoDetail from "./pages/PhotoDetail"
+import VerifyOTP from "./pages/VerifyOTP"
+import SelectRole from "./pages/SelectRole"
 
 export default function App() {
   return (
@@ -36,6 +38,9 @@ export default function App() {
       <Route path="/events/:eventId/albums/create" element={<ProtectedRoute><CreateAlbum/></ProtectedRoute>} />
       <Route path="/events/:eventId/albums/:albumId" element={<ProtectedRoute><AlbumGallery/></ProtectedRoute>} />
       <Route path="/photos/:photoId" element={<ProtectedRoute><PhotoDetail/></ProtectedRoute>} />
+      <Route path="/verify-otp" element={<VerifyOTP/>}/>
+      <Route path="/select-role" element={<ProtectedRoute><SelectRole/></ProtectedRoute>}/>
+
     </Routes>
   )
 }

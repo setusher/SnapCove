@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SignUpView, LoginView, MeView, GoogleAuthView, SelectRoleView, VerifyEmailOTPView
+from .views import SignUpView, LoginView, MeView, GoogleAuthView, SelectRoleView, VerifyOTPView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny
@@ -12,6 +12,6 @@ urlpatterns = [
     path('me/', MeView.as_view()),
     path('google/', GoogleAuthView.as_view()),
     path('select-role/', SelectRoleView.as_view()),
-    path("verify-otp/", VerifyEmailOTPView.as_view()),
+    path("verify-otp/", VerifyOTPView.as_view()),
 
 ]

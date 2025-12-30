@@ -6,51 +6,66 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
 from .serializers import SignupSerializer, UserSerializer, GoogleAuthSerializer
-from .models import User
+from .models import User, PendingSignup
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework_simplejwt.serializers import RefreshToken
 from django.contrib.auth import authenticate
-from .utils import send_otp
+from .utils import send_email_otp_raw
+import random
+from datetime import timedelta
+from django.utils import timezone
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = SignupSerializer(data=request.data)
+        email = request.data.get("email")
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if PendingSignup.objects.filter(email=email).exists():
+            return Response({"error": "OTP already sent"}, status=400)
 
-        user = serializer.save()
-        user.is_active = False
-        user.save()
+        otp = str(random.randint(100000, 999999))
 
-        send_email_otp(user)
+        PendingSignup.objects.create(
+            email=email,
+            name=request.data.get("name"),
+            password=request.data.get("password"),
+            role=request.data.get("role"),
+            batch=request.data.get("batch"),
+            department=request.data.get("department"),
+            otp=otp,
+            expires_at=timezone.now() + timedelta(minutes=10)
+        )
 
-        return Response("detail: OTP sent successfully", status=201)
+        send_email_otp_raw(email, otp)
 
-class VerifyEmailOTPView(APIView):
+        return Response({"needs_verification": True}, status=201)
+
+class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
-        code = request.data.get('code')
+        email = request.data.get("email")
+        otp = request.data.get("otp")
 
-        user = User.objects.filter(email=email).first()
-        if not user:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).last()
-        if not otp or not otp.is_valid():
-            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        pending = PendingSignup.objects.filter(email=email, otp=otp).first()
 
-        otp.is_used = True
-        otp.save()
+        if not pending or timezone.now() > pending.expires_at:
+            return Response({"error":"Invalid OTP"},400)
 
-        user.is_active = True
-        user.save()
+        user = User.objects.create_user(
+            email=pending.email,
+            password=pending.password,
+            name=pending.name,
+            role=pending.role,
+            batch=pending.batch,
+            department=pending.department,
+        )
+
+        pending.delete()
+
         refresh = RefreshToken.for_user(user)
 
         return Response({

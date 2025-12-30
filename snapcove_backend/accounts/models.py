@@ -62,12 +62,22 @@ class User(AbstractUser, PermissionsMixin):
     def __str__(self):
         return f"{self.email}-{self.role}"
 
-
-class EmailOTP(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=6)
+class PendingSignup(models.Model):
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    role = models.CharField(max_length=20, null=True, blank=True)
+    batch = models.CharField(max_length=20, null=True, blank=True)
+    department = models.CharField(max_length=50, null=True, blank=True)
+    otp = models.CharField(max_length=6)
     expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
 
-    def is_valid(self):
-        return not self.is_used and timezone.now() < self.expires_at
+
+# class EmailOTP(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     code = models.CharField(max_length=6)
+#     expires_at = models.DateTimeField()
+#     is_used = models.BooleanField(default=False)
+
+#     def is_valid(self):
+#         return not self.is_used and timezone.now() < self.expires_at

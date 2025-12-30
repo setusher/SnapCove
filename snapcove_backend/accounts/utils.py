@@ -2,21 +2,13 @@ import random
 from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
-from .models import EmailOTP, User
+from .models import User
 
-def send_otp(user):
-    otp = str(random.randint(100000, 999999))
-
-    EmailOTP.objects.create(
-        user=user,
-        code=otp,
-        expires_at=timezone.now() + timedelta(minutes=10)
-    )
-
+def send_email_otp_raw(email, otp):
     send_mail(
-        "SnapCove Verification Code",
-        f"Your SnapCove verification code is: {otp}",
-        "noreply@snapcove.com",
-        [user.email],
+        subject="SnapCove Email Verification",
+        message=f"Your SnapCove verification code is: {otp}",
+        from_email="SnapCove <snapcove.noreply@gmail.com>",
+        recipient_list=[email],
         fail_silently=False
     )
