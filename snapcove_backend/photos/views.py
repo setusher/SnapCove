@@ -8,6 +8,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404 
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class PhotoViewSet(viewsets.ModelViewSet):
@@ -15,6 +16,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     search_fields = ['caption', 'tags']
     serializer_class = PhotoSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
 
     def get_queryset(self):
         return Photo.objects.filter(album_id=self.kwargs['album_id'])

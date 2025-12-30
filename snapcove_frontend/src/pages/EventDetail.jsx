@@ -4,15 +4,15 @@ import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 
 export default function EventDetail(){
-  const { id } = useParams()
+  const { id:eventId } = useParams()
   const { user } = useAuth()
   const [albums,setAlbums] = useState([])
   const nav = useNavigate()
 
   useEffect(()=>{
-    api.get(`/events/${id}/albums/`)
+    api.get(`/events/${eventId}/albums/`)
       .then(r=>setAlbums(r.data))
-  },[])
+  },[eventId])
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
@@ -20,7 +20,7 @@ export default function EventDetail(){
         <h1 className="text-3xl font-bold">Albums</h1>
 
         {["admin","coordinator","photographer"].includes(user?.role) && (
-          <button onClick={()=>nav(`/events/${id}/albums/create`)}
+          <button onClick={()=>nav(`/events/${eventId}/albums/create`)}
             className="bg-indigo-600 px-4 py-2 rounded">
             + Create Album
           </button>
@@ -29,7 +29,8 @@ export default function EventDetail(){
 
       <div className="grid md:grid-cols-3 gap-6">
         {albums.map(a=>(
-          <div key={a.id} onClick={()=>nav(`/albums/${a.id}`)}
+          <div key={a.id}
+            onClick={()=>nav(`/events/${eventId}/albums/${a.id}`)}
             className="bg-gray-900 p-5 rounded-xl cursor-pointer hover:bg-gray-800">
             <h2 className="font-semibold">{a.title}</h2>
             <p className="text-gray-400 text-sm">{a.description}</p>

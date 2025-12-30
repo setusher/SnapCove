@@ -7,6 +7,9 @@ import ProtectedRoute from "./auth/ProtectedRoute"
 import CreateEvent from "./pages/CreateEvent"
 import RoleGate from "./auth/RoleGate"
 // import CreateEvent from "./pages/CreateEvent"
+import EventDetail from "./pages/EventDetail"
+import CreateAlbum from "./pages/CreateAlbum"
+import AlbumGallery from "./pages/AlbumGallery"
 
 export default function App() {
   return (
@@ -26,6 +29,10 @@ export default function App() {
           </RoleGate>
         </ProtectedRoute>
       }/>
+      <Route path="/events/:id" element={<ProtectedRoute><EventDetail/></ProtectedRoute>} />
+<Route path="/events/:id/albums/create" element={<ProtectedRoute><CreateAlbum/></ProtectedRoute>} />
+<Route path="/events/:eventId/albums/:albumId" element={<ProtectedRoute><AlbumGallery/></ProtectedRoute>} />
+
     </Routes>
   )
 }
