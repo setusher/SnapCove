@@ -7,11 +7,14 @@ from google.auth.transport import requests
 from django.conf import settings
 from .serializers import SignupSerializer, UserSerializer, GoogleAuthSerializer
 from .models import User
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 
 from rest_framework_simplejwt.serializers import RefreshToken
 from django.contrib.auth import authenticate
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
@@ -30,6 +33,7 @@ class SignUpView(APIView):
             'access': str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
