@@ -13,7 +13,6 @@ export default function Signup(){
   const googleButtonRef = useRef(null)
 
   useEffect(() => {
-    // Initialize Google Sign-In
     const initGoogleSignIn = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
@@ -21,7 +20,6 @@ export default function Signup(){
           callback: handleGoogleSignIn
         })
         
-        // Render Google Sign-In button
         if (googleButtonRef.current && window.google.accounts.id.renderButton) {
           window.google.accounts.id.renderButton(googleButtonRef.current, {
             theme: 'outline',
@@ -32,7 +30,6 @@ export default function Signup(){
           })
         }
       } else {
-        // Retry after a short delay if script hasn't loaded
         setTimeout(initGoogleSignIn, 100)
       }
     }
@@ -42,196 +39,125 @@ export default function Signup(){
   const handleGoogleSignIn = async (response) => {
     try {
       const res = await api.post("/auth/google/", { id_token: response.credential })
-  
-      // Google users skip OTP but MUST choose role
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
-  
-      if (res.data.needs_role_selection) {
-        nav("/select-role")
-      } else {
-        nav("/dashboard")
-      }
-    } catch (e) {
+      nav("/dashboard")
+    } catch(e) {
       alert("Google sign-in failed")
       console.error(e)
     }
   }
-  
 
   const submit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await api.post("/auth/signup/", {
-        name,
-        email,
-        password,
-        role: "",
-        batch: "",
-        department: ""
-      })
-      
-  
-      // DO NOT login yet — user must verify OTP
-      nav("/verify-otp", { state: { email } })
-    } catch (e) {
-      console.error("Signup error:", e.response?.data)
-      alert("Signup failed: " + (e.response?.data?.error || "Please try again"))
+      const res = await api.post("/auth/signup/", { name, email, password })
+      localStorage.setItem("access_token", res.data.access)
+      localStorage.setItem("refresh_token", res.data.refresh)
+      localStorage.setItem("user", JSON.stringify(res.data.user))
+      nav("/dashboard")
+    } catch(e){
+      alert("Signup failed: " + (e.response?.data?.error || JSON.stringify(e.response?.data) || "Please try again"))
     } finally {
       setLoading(false)
     }
   }
-  
 
   return(
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden animate-pageFade" style={{ background: 'var(--ink)' }}>
-      {/* Dark ambient background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px] opacity-8"
-          style={{ background: 'var(--aqua)' }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] rounded-full blur-[140px] opacity-6"
-          style={{ background: 'var(--mint)' }}
-        />
-      </div>
-
-      <div className="w-full max-w-[420px] relative z-10 animate-slideUp">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--bg)' }}>
+      <div className="w-full max-w-[400px]">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-4 mb-8">
-            <div 
-              className="w-16 h-16 rounded-[20px] flex items-center justify-center text-3xl shadow-glow"
-              style={{
-                background: 'linear-gradient(135deg, var(--aqua), var(--mint))',
-                color: 'var(--ink)'
-              }}
-            >
-              📸
-            </div>
-            <span 
-              className="text-section"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              SnapCove
-            </span>
-          </div>
-          <h2 
-            className="text-3xl font-bold mb-3"
-            style={{ 
-              color: 'var(--text-primary)',
-              fontFamily: "'Inter', sans-serif"
-            }}
-          >
-            Create Account
-          </h2>
-          <p 
-            className="text-base"
-            style={{ 
-              color: 'var(--text-secondary)',
-              opacity: 0.7
-            }}
-          >
+          <h1 className="text-page-title mb-2">SnapCove</h1>
+          <h2 className="text-section-title mb-3">Create Account</h2>
+          <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
             Get started with your free account
           </p>
         </div>
 
-        <form onSubmit={submit} className="glass-card p-10 space-y-6">
-          {/* Google Sign-In Button */}
-          <div ref={googleButtonRef} className="w-full flex justify-center"></div>
+        <div className="card p-8">
+          <form onSubmit={submit} className="space-y-6">
+            <div ref={googleButtonRef} className="w-full flex justify-center mb-6"></div>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full" style={{ borderTop: '1px solid rgba(58, 80, 107, 0.3)' }}></div>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full divider"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-3 text-meta" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>
+                  Or create with email
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span style={{ color: 'var(--text-secondary)', background: 'rgba(28, 37, 65, 0.6)', padding: '0 12px' }}>
-                Or create with email
-              </span>
+
+            <div>
+              <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Full Name
+              </label>
+              <input 
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)} 
+                placeholder="John Doe"
+                required
+                className="input-field"
+              />
             </div>
-          </div>
 
-          <div>
-            <label 
-              className="block text-sm font-medium mb-3"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Full Name
-            </label>
-            <input 
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)} 
-              placeholder="John Doe"
-              required
-              className="input-field"
-            />
-          </div>
+            <div>
+              <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Email Address
+              </label>
+              <input 
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)} 
+                placeholder="you@example.com"
+                required
+                className="input-field"
+              />
+            </div>
 
-          <div>
-            <label 
-              className="block text-sm font-medium mb-3"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Email Address
-            </label>
-            <input 
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)} 
-              placeholder="you@example.com"
-              required
-              className="input-field"
-            />
-          </div>
+            <div>
+              <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Password
+              </label>
+              <input 
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)} 
+                placeholder="••••••••"
+                required
+                minLength={6}
+                className="input-field"
+              />
+              <p className="text-meta mt-2" style={{ color: 'var(--text-secondary)' }}>
+                Must be at least 6 characters
+              </p>
+            </div>
 
-          <div>
-            <label 
-              className="block text-sm font-medium mb-3"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Password
-            </label>
-            <input 
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)} 
-              placeholder="••••••••"
-              required
-              minLength={6}
-              className="input-field"
-            />
-            <p 
-              className="text-xs mt-2"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              Must be at least 6 characters
-            </p>
-          </div>
-
-          <button 
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary w-full justify-center py-4 text-base mt-6"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-
-          <div className="text-center text-sm pt-4" style={{ borderTop: '1px solid rgba(58, 80, 107, 0.3)' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Already have an account? </span>
             <button 
-              type="button"
-              onClick={() => nav("/login")}
-              className="font-medium transition-colors hover:underline"
-              style={{ color: 'var(--aqua)' }}
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full"
             >
-              Sign in
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
-          </div>
-        </form>
+
+            <div className="text-center text-body pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Already have an account? </span>
+              <button 
+                type="button"
+                onClick={() => nav("/login")}
+                className="font-medium transition-colors"
+                style={{ color: 'var(--accent)' }}
+              >
+                Sign in
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
-import NavRail from "../components/NavRail"
+import TopNav from "../components/TopNav"
+import { Calendar } from "lucide-react"
 
 export default function Dashboard(){
   const [events, setEvents] = useState([])
@@ -15,242 +16,150 @@ export default function Dashboard(){
   }, [])
 
   return (
-    <div 
-      className="min-h-screen animate-pageFade" 
-      style={{ 
-        background: 'linear-gradient(135deg, #0b132b 0%, #1c2541 100%)'
-      }}
-    >
-      <NavRail />
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <TopNav />
       
-      {/* Main Content - Properly Centered */}
-      <div className="pl-32 pr-16 py-16 min-h-screen">
+      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 48px', minHeight: '100vh' }}>
         <div className="max-w-[1600px] mx-auto">
-          
-          {/* Header Section - Fixed Spacing */}
-          <div className="mb-16">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <h1 
-                  className="text-6xl font-bold mb-4"
-                  style={{ 
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em',
-                    fontFamily: "'Inter', sans-serif"
-                  }}
-                >
-                  Events
-                </h1>
-                <p 
-                  className="text-xl"
-                  style={{ 
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontWeight: 500
-                  }}
-                >
-                  {events.length} {events.length === 1 ? 'event' : 'events'} in your gallery
-                </p>
-              </div>
-              
+          {/* Page Header */}
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)', lineHeight: '1.2' }}>
+                Events
+              </h1>
+              <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                Manage and monitor all campus events
+              </p>
+            </div>
+            
+            {["admin", "coordinator"].includes(user?.role) && (
+              <button 
+                onClick={() => nav("/events/create")}
+                className="btn btn-primary"
+              >
+                + Create Event
+              </button>
+            )}
+          </div>
+
+          {/* Events Grid */}
+          {events.length === 0 ? (
+            <div className="card p-12 text-center">
+              <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
+                No events yet. Create your first event to get started.
+              </p>
               {["admin", "coordinator"].includes(user?.role) && (
                 <button 
                   onClick={() => nav("/events/create")}
-                  className="px-8 py-4 rounded-2xl font-semibold text-base transition-all hover:scale-105 hover:shadow-lg flex items-center gap-3"
-                  style={{
-                    background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
-                    color: '#0b132b',
-                    boxShadow: '0 4px 24px rgba(93, 217, 193, 0.3)'
-                  }}
+                  className="btn btn-primary mt-6"
                 >
-                  <span className="text-xl">+</span>
                   Create Event
                 </button>
               )}
             </div>
-            
-            {/* Divider */}
-            <div 
-              className="h-px w-full"
-              style={{ 
-                background: 'linear-gradient(90deg, transparent, rgba(93, 217, 193, 0.3), transparent)'
-              }}
-            />
-          </div>
-
-          {/* Events Grid or Empty State */}
-          {events.length === 0 ? (
-            <div className="flex items-center justify-center py-32 animate-fadeIn">
-              <div className="text-center max-w-md">
-                <div 
-                  className="w-32 h-32 mx-auto mb-8 rounded-3xl flex items-center justify-center text-6xl"
-                  style={{
-                    background: 'rgba(26, 41, 66, 0.6)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(58, 80, 107, 0.3)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  📅
-                </div>
-                <h3 
-                  className="text-3xl font-bold mb-4"
-                  style={{ color: '#ffffff' }}
-                >
-                  No events yet
-                </h3>
-                <p 
-                  className="text-lg mb-8"
-                  style={{ 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    lineHeight: '1.6'
-                  }}
-                >
-                  Create your first event to start building your gallery
-                </p>
-                {["admin", "coordinator"].includes(user?.role) && (
-                  <button 
-                    onClick={() => nav("/events/create")}
-                    className="px-8 py-4 rounded-2xl font-semibold text-base transition-all hover:scale-105 inline-flex items-center gap-3"
-                    style={{
-                      background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
-                      color: '#0b132b',
-                      boxShadow: '0 4px 24px rgba(93, 217, 193, 0.3)'
-                    }}
-                  >
-                    <span className="text-xl">+</span>
-                    Create Your First Event
-                  </button>
-                )}
-              </div>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {events.map((event, idx) => (
-                <div 
-                  key={event.id} 
-                  onClick={() => nav(`/events/${event.id}`)}
-                  className="group cursor-pointer opacity-0"
-                  style={{
-                    animation: `slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.05}s forwards`
-                  }}
-                >
-                  {/* Card Container */}
-                  <div 
-                    className="rounded-3xl overflow-hidden transition-all duration-300"
+            <div 
+              className="grid gap-6"
+              style={{
+                gridTemplateColumns: 'repeat(auto-fill, 320px)',
+                justifyContent: 'start'
+              }}
+            >
+              {events.map(event => {
+                // Get cover image (last uploaded photo) - for now using placeholder
+                const coverImage = event.cover_image || null
+                const albumCount = event.albums?.length || 0
+                const photoCount = event.albums?.reduce((sum, album) => sum + (album.photos?.length || 0), 0) || 0
+                
+                return (
+                  <div
+                    key={event.id}
+                    onClick={() => nav(`/events/${event.id}`)}
+                    className="cursor-pointer transition-all"
                     style={{
-                      background: 'rgba(26, 41, 66, 0.6)',
-                      backdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(58, 80, 107, 0.3)',
-                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
+                      width: '320px',
+                      background: 'var(--bg-primary)',
+                      border: '1px solid var(--border-primary)',
+                      borderRadius: '8px',
+                      overflow: 'hidden'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-8px)';
-                      e.currentTarget.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.4), 0 0 32px rgba(93, 217, 193, 0.2)';
-                      e.currentTarget.style.borderColor = 'rgba(93, 217, 193, 0.4)';
+                      e.currentTarget.style.transform = 'translateY(-4px)'
+                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.08)'
+                      e.currentTarget.style.borderColor = 'var(--accent-primary)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.3)';
-                      e.currentTarget.style.borderColor = 'rgba(58, 80, 107, 0.3)';
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                      e.currentTarget.style.borderColor = 'var(--border-primary)'
                     }}
                   >
-                    {/* Header Image Area */}
+                    {/* Cover Image */}
                     <div 
-                      className="h-56 relative overflow-hidden"
+                      className="w-full flex items-center justify-center"
                       style={{
-                        background: 'linear-gradient(135deg, #1c2541 0%, #3a506b 100%)'
+                        height: '200px',
+                        background: coverImage 
+                          ? `url(${coverImage}) center/cover no-repeat`
+                          : 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface-elevated) 100%)',
+                        color: 'var(--text-muted)'
                       }}
                     >
-                      {/* Gradient Overlay */}
-                      <div 
-                        className="absolute inset-0"
-                        style={{
-                          background: 'linear-gradient(to bottom, transparent 0%, rgba(11, 19, 43, 0.8) 100%)'
-                        }}
-                      />
-                      
-                      {/* Centered Icon */}
-                      <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-90 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100">
-                        🎉
-                      </div>
-                      
-                      {/* Floating Badge */}
-                      <div className="absolute top-4 right-4">
-                        <div 
-                          className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                          style={{
-                            background: 'rgba(93, 217, 193, 0.2)',
-                            color: '#6fffe9',
-                            border: '1px solid rgba(93, 217, 193, 0.3)',
-                            backdropFilter: 'blur(10px)'
-                          }}
-                        >
-                          Active
+                      {!coverImage && (
+                        <div className="text-center">
+                          <Calendar size={48} style={{ opacity: 0.3 }} />
+                          <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>No photos yet</p>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    
-                    {/* Card Body */}
-                    <div className="p-6">
+
+                    {/* Content Section */}
+                    <div style={{ padding: '20px' }}>
+                      {/* Event Title */}
                       <h3 
-                        className="text-xl font-bold mb-3 line-clamp-1"
+                        className="font-semibold mb-3"
                         style={{ 
-                          color: '#ffffff',
-                          letterSpacing: '-0.01em'
+                          fontSize: '16px',
+                          color: 'var(--text-primary)',
+                          lineHeight: '1.4',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
                         }}
                       >
                         {event.title}
                       </h3>
-                      
-                      <p 
-                        className="text-sm line-clamp-2 mb-6"
-                        style={{ 
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          lineHeight: '1.6',
-                          minHeight: '2.8em'
-                        }}
-                      >
-                        {event.description || "No description provided"}
-                      </p>
-                      
-                      {/* Divider */}
-                      <div 
-                        className="h-px w-full mb-4"
-                        style={{ background: 'rgba(58, 80, 107, 0.3)' }}
-                      />
-                      
-                      {/* Footer */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                          <span>📅</span>
-                          <span className="text-xs">
-                            {new Date(event.start_date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric'
-                            })}
-                            {' - '}
-                            {new Date(event.end_date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                        
-                        <div 
-                          className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                          style={{
-                            color: '#5bc0be',
-                            background: 'rgba(93, 217, 193, 0.1)'
-                          }}
-                        >
-                          View →
-                        </div>
+
+                      {/* Date */}
+                      <div className="flex items-center gap-2 mb-2" style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                        <Calendar size={16} />
+                        <span>
+                          {new Date(event.start_date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-1 mb-4" style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                        <span>{albumCount} {albumCount === 1 ? 'Album' : 'Albums'}</span>
+                        <span>·</span>
+                        <span>{photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}</span>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="mt-4">
+                        <span className="badge badge-active">
+                          Active
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

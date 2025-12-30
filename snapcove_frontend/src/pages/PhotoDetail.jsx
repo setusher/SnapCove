@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import PhotoInteractions from "../components/PhotoInteractions"
+import { X } from "lucide-react"
 
 export default function PhotoDetail() {
   const { photoId } = useParams()
@@ -31,19 +32,16 @@ export default function PhotoDetail() {
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center" 
-        style={{ background: '#0b132b' }}
-      >
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center">
           <div 
-            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto mb-4"
+            className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-4"
             style={{ 
-              borderColor: '#5bc0be', 
+              borderColor: 'var(--accent-primary)', 
               borderTopColor: 'transparent' 
             }}
           />
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading photo...</p>
+          <p className="text-body" style={{ color: 'var(--text-secondary)' }}>Loading photo...</p>
         </div>
       </div>
     )
@@ -51,22 +49,10 @@ export default function PhotoDetail() {
 
   if (!photo) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center" 
-        style={{ background: '#0b132b' }}
-      >
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4" style={{ color: '#ffffff' }}>
-            Photo not found
-          </h2>
-          <button 
-            onClick={() => nav(-1)} 
-            className="px-8 py-4 rounded-2xl font-semibold"
-            style={{
-              background: 'linear-gradient(135deg, #5bc0be, #6fffe9)',
-              color: '#0b132b'
-            }}
-          >
+          <h2 className="text-section-title mb-4">Photo not found</h2>
+          <button onClick={() => nav(-1)} className="btn btn-primary">
             Go Back
           </button>
         </div>
@@ -75,94 +61,55 @@ export default function PhotoDetail() {
   }
 
   return (
-    <div 
-      className="h-screen w-screen overflow-hidden animate-pageFade"
-      style={{ background: '#0b132b' }}
-    >
-      {/* Close Button - Fixed Position */}
+    <div className="h-screen w-screen overflow-hidden flex" style={{ background: 'var(--bg-primary)' }}>
+      {/* Close Button */}
       <button
         onClick={() => nav(-1)}
-        className="fixed top-8 right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110"
+        className="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center cursor-pointer transition-colors"
         style={{
-          background: 'rgba(26, 41, 66, 0.9)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(58, 80, 107, 0.4)',
-          color: 'rgba(255, 255, 255, 0.9)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
+          background: 'var(--bg-primary)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: '6px',
+          color: 'var(--text-primary)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(93, 217, 193, 0.2)';
-          e.currentTarget.style.borderColor = 'rgba(93, 217, 193, 0.5)';
-          e.currentTarget.style.color = '#6fffe9';
+          e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(26, 41, 66, 0.9)';
-          e.currentTarget.style.borderColor = 'rgba(58, 80, 107, 0.4)';
-          e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+          e.currentTarget.style.backgroundColor = 'var(--bg-primary)'
         }}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X size={20} strokeWidth={1.5} />
       </button>
 
-      {/* 2-Panel Layout: 65% Photo / 35% Interactions */}
-      <div className="flex h-full">
-        
-        {/* Left Panel - Photo (65%) */}
-        <div 
-          className="relative flex items-center justify-center"
-          style={{
-            width: '65%',
-            background: 'radial-gradient(circle at center, #1c2541 0%, #0b132b 100%)'
-          }}
-        >
-          {/* Dark Vignette Effect */}
-          <div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'radial-gradient(ellipse at center, transparent 0%, rgba(11, 19, 43, 0.8) 100%)',
-              mixBlendMode: 'multiply'
-            }}
-          />
-          
-          {/* Photo Container */}
-          <div className="relative z-10 w-full h-full flex items-center justify-center p-20">
-            <img 
-              src={photo.image}
-              alt={photo.caption || 'Photo'}
-              className="max-w-full max-h-full object-contain rounded-3xl"
-              style={{
-                boxShadow: '0 32px 80px -16px rgba(0, 0, 0, 0.8), 0 0 48px rgba(0, 0, 0, 0.5)'
-              }}
-            />
-          </div>
-        </div>
+      {/* Photo Panel - 70% (LEFT) */}
+      <div 
+        className="flex items-center justify-center relative"
+        style={{ 
+          width: '70%', 
+          background: 'var(--bg-primary)',
+          padding: '40px'
+        }}
+      >
+        <img 
+          src={photo.image}
+          alt={photo.caption || 'Photo'}
+          className="max-w-full max-h-full object-contain"
+          style={{ maxHeight: '100vh' }}
+        />
+      </div>
 
-        {/* Right Panel - Interactions (35%) */}
-        <div 
-          className="relative"
-          style={{
-            width: '35%',
-            background: '#1c2541'
-          }}
-        >
-          {/* Frosted Glass Rail */}
-          <div 
-            className="h-full flex flex-col rounded-l-3xl overflow-hidden"
-            style={{
-              background: 'rgba(26, 41, 66, 0.7)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              borderLeft: '1px solid rgba(58, 80, 107, 0.3)',
-              boxShadow: 'inset 1px 0 0 rgba(255, 255, 255, 0.05), -8px 0 32px rgba(0, 0, 0, 0.3)'
-            }}
-          >
-            {/* Interactions Content */}
-            <div className="flex-1 overflow-y-auto p-10">
-              <PhotoInteractions photo={photo} />
-            </div>
-          </div>
+      {/* Interactions Panel - 30% (RIGHT) */}
+      <div 
+        className="border-l flex flex-col"
+        style={{ 
+          width: '30%',
+          background: 'var(--bg-primary)',
+          borderColor: 'var(--border-primary)'
+        }}
+      >
+        <div className="flex-1 overflow-y-auto">
+          <PhotoInteractions photo={photo} />
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
-import NavRail from "../components/NavRail"
 import TopNav from "../components/TopNav"
+import { ChevronLeft } from "lucide-react"
 
 export default function CreateEvent(){
   const [title, setTitle] = useState("")
@@ -31,23 +31,36 @@ export default function CreateEvent(){
   }
 
   return(
-    <div className="min-h-screen animate-pageFade" style={{ background: 'var(--ink)' }}>
-      <NavRail />
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <TopNav />
       
-      <div className="dashboard-container" style={{ paddingTop: '120px' }}>
-        <TopNav 
-          title="Create Event"
-          subtitle="Add a new event to your gallery"
-        />
+      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 48px', minHeight: '100vh' }}>
+        <div className="max-w-[800px] mx-auto">
+          {/* Back Button */}
+          <button 
+            onClick={() => nav("/dashboard")}
+            className="btn btn-ghost mb-6 flex items-center gap-2"
+            style={{ marginBottom: '24px' }}
+          >
+            <ChevronLeft size={18} />
+            Back to Events
+          </button>
 
-        <div className="px-8 lg:px-16 py-12 max-w-4xl mx-auto">
-          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label 
-                  className="block text-sm font-medium mb-3"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)', lineHeight: '1.2' }}>
+              Create Event
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+              Add a new event to your gallery
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="card">
+            <form onSubmit={submit} className="space-y-6">
+              <div>
+                <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Event Title *
                 </label>
                 <input 
@@ -60,11 +73,8 @@ export default function CreateEvent(){
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label 
-                  className="block text-sm font-medium mb-3"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+              <div>
+                <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Description
                 </label>
                 <textarea 
@@ -72,61 +82,57 @@ export default function CreateEvent(){
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Tell us about this event..."
                   rows={5}
-                  className="input-field resize-none"
-                />
-              </div>
-
-              <div>
-                <label 
-                  className="block text-sm font-medium mb-3"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  Start Date *
-                </label>
-                <input 
-                  type="date"
-                  value={start}
-                  onChange={e => setStart(e.target.value)} 
-                  required
                   className="input-field"
                 />
               </div>
 
-              <div>
-                <label 
-                  className="block text-sm font-medium mb-3"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  End Date *
-                </label>
-                <input 
-                  type="date"
-                  value={end}
-                  onChange={e => setEnd(e.target.value)} 
-                  required
-                  className="input-field"
-                />
-              </div>
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Start Date *
+                  </label>
+                  <input 
+                    type="date"
+                    value={start}
+                    onChange={e => setStart(e.target.value)} 
+                    required
+                    className="input-field"
+                  />
+                </div>
 
-            <div className="flex gap-4 pt-6">
-              <button 
-                type="button"
-                onClick={() => nav("/dashboard")}
-                className="btn btn-ghost flex-1"
-              >
-                Cancel
-              </button>
-              
-              <button 
-                type="submit"
-                disabled={loading}
-                className="btn btn-primary flex-1"
-              >
-                {loading ? 'Creating...' : 'Create Event'}
-              </button>
-            </div>
-          </form>
+                <div>
+                  <label className="block text-meta mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    End Date *
+                  </label>
+                  <input 
+                    type="date"
+                    value={end}
+                    onChange={e => setEnd(e.target.value)} 
+                    required
+                    className="input-field"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => nav("/dashboard")}
+                  className="btn btn-ghost flex-1"
+                >
+                  Cancel
+                </button>
+                
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary flex-1"
+                >
+                  {loading ? 'Creating...' : 'Create Event'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
