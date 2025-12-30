@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Like, Comment 
-from accounts.serializers import UserMiniSerializer
+from accounts.serializers import UserSerializer
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +9,7 @@ class LikeSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_by']
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = UserMiniSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     replies = serializers.SerializerMethodField()
 
     class Meta:

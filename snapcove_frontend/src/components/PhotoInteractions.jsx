@@ -101,13 +101,13 @@ export default function PhotoInteractions({ photo }) {
                       color: 'var(--ink)'
                     }}
                   >
-                    {c.user?.name?.[0]?.toUpperCase() || 'U'}
+                    {(c.user?.name?.[0] || c.user?.email?.[0] || 'U').toUpperCase()}
                   </div>
                   <span 
                     className="font-semibold text-sm"
                     style={{ color: 'var(--text-primary)' }}
                   >
-                    {c.user?.name || 'Unknown'}
+                    {c.user?.name || (c.user?.email ? c.user.email.split('@')[0] : 'Unknown')}
                   </span>
                   <span 
                     className="text-xs"
@@ -136,7 +136,7 @@ export default function PhotoInteractions({ photo }) {
                           color: 'var(--aqua)'
                         }}
                       >
-                        {r.user?.name?.[0]?.toUpperCase() || 'U'}
+                        {r.user?.name?.[0]?.toUpperCase() || r.user?.email?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -144,7 +144,7 @@ export default function PhotoInteractions({ photo }) {
                             className="font-semibold text-xs"
                             style={{ color: 'var(--text-primary)' }}
                           >
-                            {r.user?.name || 'Unknown'}
+                            {r.user?.name || r.user?.email?.split('@')[0] || 'Unknown'}
                           </span>
                           <span 
                             className="text-xs"
