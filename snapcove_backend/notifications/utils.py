@@ -2,7 +2,7 @@ from .models import Notification
 
 def notify_photo_status(photo, status, reason=None):
     if not photo.uploaded_by:
-        return None:
+        return None
     
     if status == 'approved':
         return Notification.objects.create(
