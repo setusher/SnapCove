@@ -34,12 +34,12 @@ export default function CreateAlbum(){
           subtitle="Add a new photo collection"
         />
 
-        <div className="px-16 py-12 max-w-3xl">
-          <form onSubmit={submit} className="card p-14 space-y-12 animate-slideUp">
-            <div className="space-y-10">
+        <div className="px-8 lg:px-16 py-12 max-w-3xl mx-auto">
+          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
+            <div className="space-y-6">
               <div>
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   Album Title *
@@ -56,7 +56,7 @@ export default function CreateAlbum(){
 
               <div>
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   Description
@@ -65,13 +65,13 @@ export default function CreateAlbum(){
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Add a description for this album..."
-                  rows={6}
+                  rows={5}
                   className="input-field resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-6 pt-8">
+            <div className="flex gap-4 pt-6">
               <button 
                 type="button"
                 onClick={() => nav(`/events/${eventId}`)}

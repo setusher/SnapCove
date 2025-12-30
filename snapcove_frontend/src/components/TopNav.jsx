@@ -3,15 +3,21 @@ export default function TopNav({ title, subtitle, action }) {
     <div className="top-nav">
       <div>
         <h2 
-          className="text-section mb-2"
-          style={{ color: 'var(--text-primary)' }}
+          className="text-2xl font-bold mb-2"
+          style={{ 
+            color: 'var(--text-primary)',
+            fontFamily: "'Inter', sans-serif"
+          }}
         >
           {title}
         </h2>
         {subtitle && (
           <p 
-            className="text-meta"
-            style={{ color: 'var(--text-secondary)' }}
+            className="text-sm"
+            style={{ 
+              color: 'var(--text-secondary)',
+              opacity: 0.7
+            }}
           >
             {subtitle}
           </p>
@@ -22,4 +28,3 @@ export default function TopNav({ title, subtitle, action }) {
     </div>
   )
 }
-

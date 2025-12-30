@@ -26,7 +26,7 @@ export default function Signup(){
   }
 
   return(
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden animate-pageFade" style={{ background: 'var(--ink)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden animate-pageFade" style={{ background: 'var(--ink)' }}>
       {/* Dark ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -39,11 +39,11 @@ export default function Signup(){
         />
       </div>
 
-      <div className="w-full max-w-md relative z-10 animate-slideUp">
-        <div className="text-center mb-12">
+      <div className="w-full max-w-[420px] relative z-10 animate-slideUp">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-4 mb-8">
             <div 
-              className="w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl shadow-glow"
+              className="w-16 h-16 rounded-[20px] flex items-center justify-center text-3xl shadow-glow"
               style={{
                 background: 'linear-gradient(135deg, var(--aqua), var(--mint))',
                 color: 'var(--ink)'
@@ -59,23 +59,29 @@ export default function Signup(){
             </span>
           </div>
           <h2 
-            className="text-section mb-4"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-3xl font-bold mb-3"
+            style={{ 
+              color: 'var(--text-primary)',
+              fontFamily: "'Inter', sans-serif"
+            }}
           >
             Create Account
           </h2>
           <p 
-            className="text-meta"
-            style={{ color: 'var(--text-secondary)' }}
+            className="text-base"
+            style={{ 
+              color: 'var(--text-secondary)',
+              opacity: 0.7
+            }}
           >
             Get started with your free account
           </p>
         </div>
 
-        <form onSubmit={submit} className="glass-card p-12 space-y-10">
-          <div className="space-y-3">
+        <form onSubmit={submit} className="glass-card p-10 space-y-6">
+          <div>
             <label 
-              className="block text-sm font-medium mb-4"
+              className="block text-sm font-medium mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Full Name
@@ -90,9 +96,9 @@ export default function Signup(){
             />
           </div>
 
-          <div className="space-y-3">
+          <div>
             <label 
-              className="block text-sm font-medium mb-4"
+              className="block text-sm font-medium mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Email Address
@@ -107,9 +113,9 @@ export default function Signup(){
             />
           </div>
 
-          <div className="space-y-3">
+          <div>
             <label 
-              className="block text-sm font-medium mb-4"
+              className="block text-sm font-medium mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Password
@@ -134,17 +140,17 @@ export default function Signup(){
           <button 
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full justify-center py-5 text-base"
+            className="btn btn-primary w-full justify-center py-4 text-base mt-6"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
 
-          <div className="text-center text-sm">
+          <div className="text-center text-sm pt-4" style={{ borderTop: '1px solid rgba(58, 80, 107, 0.3)' }}>
             <span style={{ color: 'var(--text-secondary)' }}>Already have an account? </span>
             <button 
               type="button"
               onClick={() => nav("/login")}
-              className="font-medium transition-colors"
+              className="font-medium transition-colors hover:underline"
               style={{ color: 'var(--aqua)' }}
             >
               Sign in

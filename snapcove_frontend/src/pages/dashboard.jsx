@@ -30,21 +30,21 @@ export default function Dashboard(){
                 className="btn btn-primary"
               >
                 <span>➕</span>
-                New Event
+                + Create Event
               </button>
             )
           }
         />
 
-        <div className="px-16 py-12">
+        <div className="px-8 lg:px-16 py-12">
           {events.length === 0 ? (
             <div className="text-center py-48 animate-fadeIn">
               <div 
-                className="w-32 h-32 mx-auto mb-12 rounded-[36px] flex items-center justify-center text-7xl shadow-floating"
+                className="w-32 h-32 mx-auto mb-12 rounded-[24px] flex items-center justify-center text-7xl shadow-floating"
                 style={{
-                  background: 'rgba(28, 37, 65, 0.5)',
+                  background: 'rgba(26, 41, 66, 0.5)',
                   backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(58, 80, 107, 0.2)'
+                  border: '1px solid rgba(58, 80, 107, 0.3)'
                 }}
               >
                 📅
@@ -72,7 +72,7 @@ export default function Dashboard(){
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {events.map((event, idx) => (
                 <div 
                   key={event.id} 
@@ -80,10 +80,10 @@ export default function Dashboard(){
                   className="event-card stagger-item"
                   style={{ animationDelay: `${idx * 0.05}s` }}
                 >
-                  {/* Cinematic Header */}
+                  {/* Cinematic Header with Thumbnail */}
                   <div className="event-card-header">
                     <div 
-                      className="absolute inset-0 flex items-center justify-center text-6xl"
+                      className="absolute inset-0 flex items-center justify-center text-5xl"
                       style={{ zIndex: 1 }}
                     >
                       🎉
@@ -92,40 +92,53 @@ export default function Dashboard(){
                   
                   {/* Card Body */}
                   <div className="event-card-body">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="flex-1">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 min-w-0">
                         <h3 
-                          className="text-card-title mb-3"
+                          className="text-lg font-bold mb-2 truncate"
                           style={{ color: 'var(--text-primary)' }}
                         >
                           {event.title}
                         </h3>
                         <p 
-                          className="text-meta line-clamp-2 mb-6 leading-relaxed"
-                          style={{ color: 'var(--text-secondary)' }}
+                          className="text-sm line-clamp-2 mb-4 leading-relaxed"
+                          style={{ 
+                            color: 'var(--text-secondary)',
+                            opacity: 0.7
+                          }}
                         >
                           {event.description || "No description"}
                         </p>
                       </div>
-                      <span className="badge">Active</span>
+                      <span className="badge ml-2 flex-shrink-0">Active</span>
                     </div>
                     
                     <div 
-                      className="flex items-center justify-between pt-6"
-                      style={{ borderTop: '1px solid rgba(58, 80, 107, 0.15)' }}
+                      className="flex items-center justify-between pt-4"
+                      style={{ borderTop: '1px solid rgba(58, 80, 107, 0.2)' }}
                     >
-                      <span 
-                        className="text-xs"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        {new Date(event.start_date).toLocaleDateString()} - {new Date(event.end_date).toLocaleDateString()}
-                      </span>
-                      <span 
-                        className="text-sm font-medium transition-colors"
-                        style={{ color: 'var(--aqua)' }}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>📅</span>
+                        <span 
+                          className="text-xs"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          {new Date(event.start_date).toLocaleDateString()} - {new Date(event.end_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <button
+                        className="btn btn-ghost text-xs py-2 px-4"
+                        style={{ 
+                          fontSize: '0.75rem',
+                          padding: '6px 12px'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          nav(`/events/${event.id}`)
+                        }}
                       >
                         View →
-                      </span>
+                      </button>
                     </div>
                   </div>
                 </div>

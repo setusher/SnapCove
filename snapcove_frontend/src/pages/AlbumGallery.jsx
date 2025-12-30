@@ -25,10 +25,11 @@ export default function AlbumGallery(){
           subtitle={`${photos.length} ${photos.length === 1 ? 'photo' : 'photos'}`}
         />
 
-        <div className="px-16 py-12">
+        <div className="px-8 lg:px-16 py-12">
           <button 
             onClick={() => nav(`/events/${eventId}`)}
-            className="btn btn-ghost mb-12"
+            className="btn btn-ghost mb-8 flex items-center gap-2"
+            style={{ marginBottom: '24px' }}
           >
             <span>←</span>
             Back to Albums
@@ -37,11 +38,11 @@ export default function AlbumGallery(){
           {photos.length === 0 ? (
             <div className="text-center py-48 animate-fadeIn">
               <div 
-                className="w-32 h-32 mx-auto mb-12 rounded-[36px] flex items-center justify-center text-7xl shadow-floating"
+                className="w-32 h-32 mx-auto mb-12 rounded-[24px] flex items-center justify-center text-7xl shadow-floating"
                 style={{
-                  background: 'rgba(28, 37, 65, 0.5)',
+                  background: 'rgba(26, 41, 66, 0.5)',
                   backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(58, 80, 107, 0.2)'
+                  border: '1px solid rgba(58, 80, 107, 0.3)'
                 }}
               >
                 🖼️
@@ -65,31 +66,39 @@ export default function AlbumGallery(){
                 <div 
                   key={photo.id}
                   onClick={() => setSelectedPhoto(photo)}
-                  className="masonry-item cursor-pointer stagger-item"
+                  className="masonry-item cursor-pointer stagger-item group"
                   style={{ animationDelay: `${idx * 0.02}s` }}
                 >
-                  <div className="relative overflow-hidden rounded-[28px]">
+                  <div className="relative overflow-hidden rounded-[12px]">
                     <img 
                       src={photo.image} 
                       alt={`Photo ${photo.id}`}
                       className="w-full h-auto"
                       style={{
-                        border: '1px solid rgba(58, 80, 107, 0.15)',
-                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                        border: '1px solid rgba(58, 80, 107, 0.2)',
+                        transition: 'all 0.3s ease-in-out'
                       }}
                       loading="lazy"
                     />
                     
-                    <div className="gradient-overlay rounded-[28px]" />
+                    <div className="gradient-overlay rounded-[12px]" />
                     
                     <div className="floating-caption">
-                      <div className="caption-chip">
-                        <p 
-                          className="text-sm font-medium"
-                          style={{ color: 'var(--aqua)' }}
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{ zIndex: 2 }}
+                      >
+                        <div 
+                          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+                          style={{
+                            background: 'rgba(26, 41, 66, 0.9)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(93, 217, 193, 0.3)',
+                            color: 'var(--aqua)'
+                          }}
                         >
-                          View Full Size
-                        </p>
+                          🔍
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -106,21 +115,21 @@ export default function AlbumGallery(){
           onClick={() => setSelectedPhoto(null)}
           className="fixed inset-0 z-50 flex items-center justify-center p-8 animate-fadeIn"
           style={{
-            background: 'rgba(11, 19, 43, 0.98)',
-            backdropFilter: 'blur(32px)'
+            background: 'rgba(10, 22, 40, 0.95)',
+            backdropFilter: 'blur(20px)'
           }}
         >
           <button 
             onClick={() => setSelectedPhoto(null)}
-            className="absolute top-8 right-8 w-16 h-16 rounded-[24px] flex items-center justify-center text-2xl transition-all z-10 shadow-floating"
+            className="absolute top-8 right-8 w-14 h-14 rounded-[16px] flex items-center justify-center text-2xl transition-all z-10 shadow-floating hover:scale-110"
             style={{
-              background: 'rgba(28, 37, 65, 0.8)',
+              background: 'rgba(26, 41, 66, 0.8)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(58, 80, 107, 0.3)',
               color: 'var(--text-primary)'
             }}
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -132,9 +141,9 @@ export default function AlbumGallery(){
             <img 
               src={selectedPhoto.image} 
               alt="Full size"
-              className="max-w-full max-h-[90vh] rounded-[36px] shadow-floating"
+              className="max-w-full max-h-[90vh] rounded-[24px] shadow-floating"
               style={{
-                border: '1px solid rgba(58, 80, 107, 0.2)'
+                border: '1px solid rgba(58, 80, 107, 0.3)'
               }}
             />
           </div>

@@ -40,12 +40,12 @@ export default function CreateEvent(){
           subtitle="Add a new event to your gallery"
         />
 
-        <div className="px-16 py-12 max-w-4xl">
-          <form onSubmit={submit} className="card p-14 space-y-12 animate-slideUp">
-            <div className="grid md:grid-cols-2 gap-10">
+        <div className="px-8 lg:px-16 py-12 max-w-4xl mx-auto">
+          <form onSubmit={submit} className="card p-10 space-y-8 animate-slideUp">
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   Event Title *
@@ -62,7 +62,7 @@ export default function CreateEvent(){
 
               <div className="md:col-span-2">
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   Description
@@ -71,14 +71,14 @@ export default function CreateEvent(){
                   value={description}
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Tell us about this event..."
-                  rows={6}
+                  rows={5}
                   className="input-field resize-none"
                 />
               </div>
 
               <div>
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   Start Date *
@@ -94,7 +94,7 @@ export default function CreateEvent(){
 
               <div>
                 <label 
-                  className="block text-sm font-medium mb-5"
+                  className="block text-sm font-medium mb-3"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   End Date *
@@ -109,7 +109,7 @@ export default function CreateEvent(){
               </div>
             </div>
 
-            <div className="flex gap-6 pt-8">
+            <div className="flex gap-4 pt-6">
               <button 
                 type="button"
                 onClick={() => nav("/dashboard")}
