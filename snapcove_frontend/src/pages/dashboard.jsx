@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
-import { Calendar } from "lucide-react"
+import { Calendar, Camera, Plus } from "lucide-react"
 
 export default function Dashboard(){
   const [events, setEvents] = useState([])
@@ -19,15 +19,15 @@ export default function Dashboard(){
     <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       <TopNav />
       
-      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 48px', minHeight: '100vh' }}>
+      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
         <div className="max-w-[1600px] mx-auto">
           {/* Page Header */}
-          <div className="mb-8 flex items-end justify-between">
+          <div className="mb-10 flex items-end justify-between" style={{ marginBottom: '40px' }}>
             <div>
-              <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)', lineHeight: '1.2' }}>
+              <h1 className="text-3xl font-semibold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.2', fontSize: '32px' }}>
                 Events
               </h1>
-              <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="text-base" style={{ color: 'var(--text-tertiary)', fontSize: '16px' }}>
                 Manage and monitor all campus events
               </p>
             </div>
@@ -35,9 +35,26 @@ export default function Dashboard(){
             {["admin", "coordinator"].includes(user?.role) && (
               <button 
                 onClick={() => nav("/events/create")}
-                className="btn btn-primary"
+                className="btn btn-primary flex items-center gap-2"
+                style={{
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(91, 192, 190, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
               >
-                + Create Event
+                <Plus size={16} strokeWidth={2} />
+                Create Event
               </button>
             )}
           </div>
@@ -59,14 +76,13 @@ export default function Dashboard(){
             </div>
           ) : (
             <div 
-              className="grid gap-6"
+              className="grid gap-7"
               style={{
-                gridTemplateColumns: 'repeat(auto-fill, 320px)',
-                justifyContent: 'start'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '28px'
               }}
             >
               {events.map(event => {
-                // Get cover image (last uploaded photo) - for now using placeholder
                 const coverImage = event.cover_image || null
                 const albumCount = event.albums?.length || 0
                 const photoCount = event.albums?.reduce((sum, album) => sum + (album.photos?.length || 0), 0) || 0
@@ -75,40 +91,57 @@ export default function Dashboard(){
                   <div
                     key={event.id}
                     onClick={() => nav(`/events/${event.id}`)}
-                    className="cursor-pointer transition-all"
+                    className="cursor-pointer"
                     style={{
-                      width: '320px',
+                      width: '100%',
+                      minWidth: '280px',
+                      maxWidth: '380px',
                       background: 'var(--bg-primary)',
                       border: '1px solid var(--border-primary)',
-                      borderRadius: '8px',
-                      overflow: 'hidden'
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)'
-                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.08)'
+                      e.currentTarget.style.transform = 'translateY(-6px)'
+                      e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.12)'
                       e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                      const img = e.currentTarget.querySelector('.cover-image')
+                      if (img) img.style.transform = 'scale(1.05)'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)'
                       e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
                       e.currentTarget.style.borderColor = 'var(--border-primary)'
+                      const img = e.currentTarget.querySelector('.cover-image')
+                      if (img) img.style.transform = 'scale(1)'
                     }}
                   >
                     {/* Cover Image */}
                     <div 
-                      className="w-full flex items-center justify-center"
+                      className="w-full relative overflow-hidden"
                       style={{
-                        height: '200px',
+                        height: '240px',
                         background: coverImage 
-                          ? `url(${coverImage}) center/cover no-repeat`
+                          ? 'none'
                           : 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface-elevated) 100%)',
-                        color: 'var(--text-muted)'
+                        borderBottom: '1px solid var(--border-subtle)'
                       }}
                     >
-                      {!coverImage && (
-                        <div className="text-center">
-                          <Calendar size={48} style={{ opacity: 0.3 }} />
-                          <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>No photos yet</p>
+                      {coverImage ? (
+                        <img 
+                          src={coverImage} 
+                          alt={event.title}
+                          className="cover-image w-full h-full object-cover"
+                          style={{
+                            height: '240px',
+                            transition: 'transform 400ms ease'
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <Camera size={32} style={{ color: 'var(--text-muted)', opacity: 0.5 }} />
+                          <p className="text-sm mt-3" style={{ color: 'var(--text-muted)' }}>No photos yet</p>
                         </div>
                       )}
                     </div>
@@ -119,13 +152,15 @@ export default function Dashboard(){
                       <h3 
                         className="font-semibold mb-3"
                         style={{ 
-                          fontSize: '16px',
+                          fontSize: '18px',
                           color: 'var(--text-primary)',
-                          lineHeight: '1.4',
+                          lineHeight: '1.3',
+                          letterSpacing: '-0.01em',
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
+                          overflow: 'hidden',
+                          marginBottom: '12px'
                         }}
                       >
                         {event.title}
@@ -133,7 +168,7 @@ export default function Dashboard(){
 
                       {/* Date */}
                       <div className="flex items-center gap-2 mb-2" style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>
-                        <Calendar size={16} />
+                        <Calendar size={14} strokeWidth={1.5} />
                         <span>
                           {new Date(event.start_date).toLocaleDateString('en-US', { 
                             month: 'short', 
@@ -144,7 +179,8 @@ export default function Dashboard(){
                       </div>
 
                       {/* Stats */}
-                      <div className="flex items-center gap-1 mb-4" style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                      <div className="flex items-center gap-1.5 mb-4" style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '6px' }}>
+                        <Camera size={14} strokeWidth={1.5} />
                         <span>{albumCount} {albumCount === 1 ? 'Album' : 'Albums'}</span>
                         <span>·</span>
                         <span>{photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}</span>
@@ -152,7 +188,26 @@ export default function Dashboard(){
 
                       {/* Status Badge */}
                       <div className="mt-4">
-                        <span className="badge badge-active">
+                        <span 
+                          className="inline-flex items-center gap-1.5"
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            background: 'rgba(91, 192, 190, 0.12)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid rgba(91, 192, 190, 0.25)'
+                          }}
+                        >
+                          <span 
+                            style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              background: 'var(--accent-primary)'
+                            }}
+                          />
                           Active
                         </span>
                       </div>

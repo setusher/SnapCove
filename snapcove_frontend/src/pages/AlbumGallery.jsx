@@ -18,24 +18,38 @@ export default function AlbumGallery(){
     <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       <TopNav />
       
-      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 48px', minHeight: '100vh' }}>
+      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
         <div className="max-w-[1600px] mx-auto">
           {/* Back Button */}
           <button 
             onClick={() => nav(`/events/${eventId}`)}
-            className="btn btn-ghost mb-6 flex items-center gap-2"
-            style={{ marginBottom: '24px' }}
+            className="flex items-center gap-1.5 mb-6 transition-colors"
+            style={{ 
+              marginBottom: '24px',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'var(--text-tertiary)',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--accent-primary)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-tertiary)'
+            }}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} strokeWidth={1.5} />
             Back to Albums
           </button>
 
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)', lineHeight: '1.2' }}>
+          <div className="mb-10" style={{ marginBottom: '40px' }}>
+            <h1 className="text-3xl font-semibold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.2', fontSize: '32px' }}>
               Gallery
             </h1>
-            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            <p className="text-base" style={{ color: 'var(--text-tertiary)', fontSize: '16px' }}>
               {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
             </p>
           </div>
@@ -51,7 +65,8 @@ export default function AlbumGallery(){
             <div 
               className="grid gap-4"
               style={{
-                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '28px'
               }}
             >
               {photos.map(photo => (
@@ -60,18 +75,23 @@ export default function AlbumGallery(){
                   onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
                   className="cursor-pointer relative transition-all group"
                   style={{
+                    width: '100%',
                     background: 'var(--bg-primary)',
                     border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     overflow: 'hidden',
                     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     aspectRatio: '1'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.08)'
+                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
                   }}
                   onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
                     e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                    e.currentTarget.style.borderColor = 'var(--border-primary)'
                   }}
                 >
                   <img 
@@ -85,13 +105,12 @@ export default function AlbumGallery(){
                   {/* Metadata on hover */}
                   {photo.caption && (
                     <div 
-                      className="p-3 transition-opacity absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100"
+                      className="absolute bottom-0 left-0 right-0 p-4 transition-opacity opacity-0 group-hover:opacity-100"
                       style={{
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        borderTop: '1px solid var(--border-primary)'
+                        background: 'linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent)'
                       }}
                     >
-                      <div className="text-body text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <div className="text-sm text-white">
                         {photo.caption}
                       </div>
                     </div>

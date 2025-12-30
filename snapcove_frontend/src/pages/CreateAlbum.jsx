@@ -28,24 +28,38 @@ export default function CreateAlbum(){
     <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       <TopNav />
       
-      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 48px', minHeight: '100vh' }}>
+      <div className="pt-16" style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
         <div className="max-w-[800px] mx-auto">
           {/* Back Button */}
           <button 
             onClick={() => nav(`/events/${eventId}`)}
-            className="btn btn-ghost mb-6 flex items-center gap-2"
-            style={{ marginBottom: '24px' }}
+            className="flex items-center gap-1.5 mb-6 transition-colors"
+            style={{ 
+              marginBottom: '24px',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'var(--text-tertiary)',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--accent-primary)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-tertiary)'
+            }}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} strokeWidth={1.5} />
             Back to Albums
           </button>
 
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)', lineHeight: '1.2' }}>
+          <div className="mb-10" style={{ marginBottom: '40px' }}>
+            <h1 className="text-3xl font-semibold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.2', fontSize: '32px' }}>
               Create Album
             </h1>
-            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            <p className="text-base" style={{ color: 'var(--text-tertiary)', fontSize: '16px' }}>
               Add a new photo collection
             </p>
           </div>

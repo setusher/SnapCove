@@ -58,18 +58,21 @@ export default function NotificationBell(){
       <div className="relative">
         <button
           onClick={handleClick}
-          className="w-8 h-8 flex items-center justify-center cursor-pointer transition-colors relative"
+          className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all relative"
           style={{
-            color: open ? 'var(--accent-primary)' : 'var(--text-muted)'
+            color: open ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+            background: open ? 'rgba(91, 192, 190, 0.1)' : 'transparent'
           }}
           onMouseEnter={(e) => {
             if (!open) {
+              e.currentTarget.style.background = 'rgba(91, 192, 190, 0.1)'
               e.currentTarget.style.color = 'var(--accent-primary)'
             }
           }}
           onMouseLeave={(e) => {
             if (!open) {
-              e.currentTarget.style.color = 'var(--text-muted)'
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = 'var(--text-tertiary)'
             }
           }}
           title="Notifications"
@@ -86,14 +89,12 @@ export default function NotificationBell(){
 
         {count > 0 && !loading && (
           <span 
-            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center text-xs font-semibold"
+            className="absolute top-0 right-0 w-2 h-2 rounded-full"
             style={{
               background: 'var(--error)',
-              color: 'var(--bg-primary)',
+              border: '2px solid var(--bg-primary)',
             }}
-          >
-            {count > 99 ? '99+' : count}
-          </span>
+          />
         )}
       </div>
 
