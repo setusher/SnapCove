@@ -5,6 +5,7 @@ from .models import Event, Album
 from .serializers import EventSerializer, AlbumSerializer
 from accounts.permissions import IsCoordinator, IsAdmin, IsPhotographer
 from .permissions import IsEventOwnerOrAdmin, IsEventOwnerOrAdminOrPhotographer
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 class EventViewSet(viewsets.ModelViewSet):
     filterset_fields = ['is_public', 'created_by']

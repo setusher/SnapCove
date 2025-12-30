@@ -10,10 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(()=>{
     const token = localStorage.getItem("access_token")
-    if(!token){
-      setLoading(false)
-      return
-    }
+    if(!token){ setLoading(false); return }
 
     api.get("/auth/me/")
       .then(r=>setUser(r.data))
@@ -22,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   },[])
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, role: user?.role, setUser }}>
       {!loading && children}
     </AuthContext.Provider>
   )
