@@ -32,16 +32,20 @@ export default function PhotoDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-center">
+      <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+        <div style={{ textAlign: 'center' }}>
           <div 
-            className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-4"
             style={{ 
-              borderColor: 'var(--accent)', 
-              borderTopColor: 'transparent' 
+              width: '32px',
+              height: '32px',
+              border: '2px solid var(--accent)',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              margin: '0 auto var(--space-4)',
+              animation: 'spin 1s linear infinite'
             }}
           />
-          <p className="text-body text-secondary">Loading photo...</p>
+          <p className="text-body" style={{ color: 'var(--secondary-text)' }}>Loading photo...</p>
         </div>
       </div>
     )
@@ -49,9 +53,9 @@ export default function PhotoDetail() {
 
   if (!photo) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-section-title mb-4">Photo not found</h2>
+      <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 className="heading-md" style={{ marginBottom: 'var(--space-4)' }}>Photo not found</h2>
           <button onClick={() => nav(-1)} className="btn btn-primary">
             Go Back
           </button>
@@ -61,56 +65,45 @@ export default function PhotoDetail() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex bg-bg">
-      {/* Close Button */}
+    <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', background: 'var(--primary-bg)' }}>
       <button
         onClick={() => nav(-1)}
-        className="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center cursor-pointer transition-colors"
+        className="flex-center"
         style={{
-          background: 'var(--surface)',
+          position: 'absolute',
+          top: 'var(--space-4)',
+          left: 'var(--space-4)',
+          zIndex: 50,
+          width: '40px',
+          height: '40px',
+          background: 'var(--secondary-bg)',
           border: '1px solid var(--border)',
           borderRadius: '6px',
-          color: 'var(--text-primary)'
+          color: 'var(--primary-text)',
+          cursor: 'pointer'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = 'var(--accent)'
-          e.currentTarget.style.color = 'var(--bg)'
+          e.currentTarget.style.color = 'white'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--surface)'
-          e.currentTarget.style.color = 'var(--text-primary)'
+          e.currentTarget.style.backgroundColor = 'var(--secondary-bg)'
+          e.currentTarget.style.color = 'var(--primary-text)'
         }}
       >
         <X size={20} strokeWidth={1.5} />
       </button>
 
-      {/* Photo Panel - 70% (LEFT) */}
-      <div 
-        className="flex items-center justify-center relative"
-        style={{ 
-          width: '70%', 
-          background: 'var(--bg)',
-          padding: 'var(--space-10)'
-        }}
-      >
+      <div className="flex-center" style={{ width: '70%', background: 'var(--primary-bg)', padding: 'var(--space-10)', position: 'relative' }}>
         <img 
           src={photo.image}
           alt={photo.caption || 'Photo'}
-          className="max-w-full max-h-full object-contain"
-          style={{ maxHeight: '100vh', borderRadius: '6px' }}
+          style={{ maxWidth: '100%', maxHeight: '100vh', objectFit: 'contain', borderRadius: '6px' }}
         />
       </div>
 
-      {/* Interactions Panel - 30% (RIGHT) */}
-      <div 
-        className="border-l flex flex-col"
-        style={{ 
-          width: '30%',
-          background: 'var(--bg)',
-          borderColor: 'var(--border)'
-        }}
-      >
-        <div className="flex-1 overflow-y-auto">
+      <div className="flex-col" style={{ width: '30%', background: 'var(--secondary-bg)', borderLeft: '1px solid var(--border)', display: 'flex' }}>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
           <PhotoInteractions photo={photo} />
         </div>
       </div>

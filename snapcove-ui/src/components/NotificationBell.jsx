@@ -55,32 +55,45 @@ export default function NotificationBell(){
 
   return (
     <>
-      <div className="relative">
+      <div style={{ position: 'relative' }}>
         <button
           onClick={handleClick}
-          className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all relative"
+          className="flex-center"
           style={{
-            color: open ? 'var(--accent)' : 'var(--text-secondary)',
-            background: open ? 'var(--surface)' : 'transparent'
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            color: open ? 'var(--accent)' : 'var(--secondary-text)',
+            background: open ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 200ms ease',
+            position: 'relative'
           }}
           onMouseEnter={(e) => {
             if (!open) {
-              e.currentTarget.style.background = 'var(--surface)'
+              e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'
               e.currentTarget.style.color = 'var(--accent)'
             }
           }}
           onMouseLeave={(e) => {
             if (!open) {
               e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = 'var(--text-secondary)'
+              e.currentTarget.style.color = 'var(--secondary-text)'
             }
           }}
           title="Notifications"
         >
           {loading ? (
             <div 
-              className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
+              style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid var(--accent)',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}
             />
           ) : (
             <Bell size={20} strokeWidth={1.5} />
@@ -89,10 +102,15 @@ export default function NotificationBell(){
 
         {count > 0 && !loading && (
           <span 
-            className="absolute top-0 right-0 w-2 h-2 rounded-full"
             style={{
-              background: 'var(--danger)',
-              border: '2px solid var(--bg)',
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'var(--error)',
+              border: '2px solid var(--secondary-bg)',
             }}
           />
         )}
@@ -107,3 +125,4 @@ export default function NotificationBell(){
     </>
   )
 }
+

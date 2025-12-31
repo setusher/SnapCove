@@ -15,38 +15,35 @@ export default function EventDetail(){
   useEffect(() => {
     api.get(`/events/${eventId}/`)
       .then(r => setEvent(r.data))
+      .catch(err => console.error(err))
     api.get(`/events/${eventId}/albums/`)
       .then(r => setAlbums(r.data))
+      .catch(err => console.error(err))
   }, [eventId])
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
       <TopNav />
       
-      <div className="pt-16" style={{ paddingTop: '64px', padding: `var(--space-12)`, minHeight: '100vh' }}>
+      <div className="container" style={{ paddingTop: '64px', padding: `var(--space-12) var(--space-6)`, minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-          {/* Back Button */}
           <button 
             onClick={() => nav("/dashboard")}
-            className="btn btn-ghost mb-6 flex items-center gap-2"
-            style={{ marginBottom: 'var(--space-6)' }}
+            className="btn btn-ghost"
+            style={{ marginBottom: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
           >
             <ChevronLeft size={16} strokeWidth={1.5} />
             Back to Events
           </button>
 
-          {/* Page Header */}
           {event && (
-            <div className="mb-10 flex items-end justify-between">
+            <div className="flex-between" style={{ marginBottom: 'var(--space-10)' }}>
               <div>
-                <h1 className="text-page-title mb-2">
-                  {event.title}
-                </h1>
-                <p className="text-body text-secondary">
+                <h1 className="heading-xl" style={{ marginBottom: 'var(--space-2)' }}>{event.title}</h1>
+                <p className="text-body" style={{ color: 'var(--secondary-text)' }}>
                   {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)} Photos
                 </p>
               </div>
-              
               {["admin", "coordinator", "photographer"].includes(user?.role) && (
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
@@ -59,71 +56,42 @@ export default function EventDetail(){
             </div>
           )}
 
-          {/* Albums Grid */}
           {albums.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: 'var(--space-12)' }}>
-              <p className="text-body text-secondary">
-                No albums yet. Create your first album to organize photos.
-              </p>
+              <p className="text-body" style={{ color: 'var(--secondary-text)' }}>No albums yet. Create your first album to organize photos.</p>
               {["admin", "coordinator", "photographer"].includes(user?.role) && (
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
-                  className="btn btn-primary mt-6"
+                  className="btn btn-primary"
+                  style={{ marginTop: 'var(--space-6)' }}
                 >
                   Create Album
                 </button>
               )}
             </div>
           ) : (
-            <div 
-              className="grid gap-6"
-              style={{
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))'
-              }}
-            >
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
               {albums.map(album => {
                 const photoCount = album.photos?.length || 0
                 return (
                   <div 
                     key={album.id}
                     onClick={() => nav(`/events/${eventId}/albums/${album.id}`)}
-                    className="card cursor-pointer"
-                    style={{
-                      overflow: 'hidden',
-                      padding: 0
-                    }}
+                    className="card card-interactive"
+                    style={{ overflow: 'hidden', padding: 0 }}
                   >
-                    {/* Album Cover */}
-                    <div 
-                      style={{
-                        height: '200px',
-                        background: album.cover_image ? 'none' : 'var(--surface)',
-                        borderBottom: '1px solid var(--border)',
-                        overflow: 'hidden'
-                      }}
-                    >
+                    <div style={{ height: '200px', background: album.cover_image ? 'none' : 'var(--surface)', borderBottom: '1px solid var(--border)', overflow: 'hidden' }}>
                       {album.cover_image ? (
-                        <img 
-                          src={album.cover_image} 
-                          alt={album.title}
-                          className="w-full h-full object-cover"
-                          style={{ height: '200px' }}
-                        />
+                        <img src={album.cover_image} alt={album.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                       ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <span className="text-body text-secondary">{album.title}</span>
+                        <div className="flex-center" style={{ height: '100%' }}>
+                          <span className="text-body" style={{ color: 'var(--secondary-text)' }}>{album.title}</span>
                         </div>
                       )}
                     </div>
-
-                    {/* Content */}
                     <div style={{ padding: 'var(--space-5)' }}>
-                      <h3 className="text-section-title mb-2">
-                        {album.title}
-                      </h3>
-                      <p className="text-meta">
-                        {photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}
-                      </p>
+                      <h3 className="heading-sm" style={{ marginBottom: 'var(--space-2)' }}>{album.title}</h3>
+                      <p className="text-caption">{photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}</p>
                     </div>
                   </div>
                 )

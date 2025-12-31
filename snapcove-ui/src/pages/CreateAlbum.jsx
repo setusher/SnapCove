@@ -25,36 +25,29 @@ export default function CreateAlbum(){
   }
 
   return(
-    <div className="min-h-screen bg-bg">
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
       <TopNav />
       
-      <div className="pt-16" style={{ paddingTop: '64px', padding: `var(--space-12)`, minHeight: '100vh' }}>
+      <div className="container" style={{ paddingTop: '64px', padding: `var(--space-12) var(--space-6)`, minHeight: '100vh' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          {/* Back Button */}
           <button 
             onClick={() => nav(`/events/${eventId}`)}
-            className="btn btn-ghost mb-6 flex items-center gap-2"
-            style={{ marginBottom: 'var(--space-6)' }}
+            className="btn btn-ghost"
+            style={{ marginBottom: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
           >
             <ChevronLeft size={16} strokeWidth={1.5} />
             Back to Albums
           </button>
 
-          {/* Page Header */}
-          <div className="mb-10">
-            <h1 className="text-page-title mb-2">
-              Create Album
-            </h1>
-            <p className="text-body text-secondary">
-              Add a new photo collection
-            </p>
+          <div style={{ marginBottom: 'var(--space-10)' }}>
+            <h1 className="heading-xl" style={{ marginBottom: 'var(--space-2)' }}>Create Album</h1>
+            <p className="text-body" style={{ color: 'var(--secondary-text)' }}>Add a new photo collection</p>
           </div>
 
-          {/* Form */}
           <div className="card">
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
               <div>
-                <label className="block text-meta mb-2">
+                <label className="text-caption" style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--secondary-text)' }}>
                   Album Title *
                 </label>
                 <input 
@@ -63,12 +56,12 @@ export default function CreateAlbum(){
                   onChange={e => setTitle(e.target.value)} 
                   placeholder="Summer Memories 2024"
                   required
-                  className="input-field"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-meta mb-2">
+                <label className="text-caption" style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--secondary-text)' }}>
                   Description
                 </label>
                 <textarea 
@@ -76,15 +69,16 @@ export default function CreateAlbum(){
                   onChange={e => setDescription(e.target.value)} 
                   placeholder="Add a description for this album..."
                   rows={5}
-                  className="input-field"
+                  className="input"
                 />
               </div>
 
-              <div className="flex gap-4" style={{ paddingTop: 'var(--space-4)' }}>
+              <div className="flex" style={{ gap: 'var(--space-4)', paddingTop: 'var(--space-4)' }}>
                 <button 
                   type="button"
                   onClick={() => nav(`/events/${eventId}`)}
-                  className="btn btn-ghost flex-1"
+                  className="btn btn-ghost"
+                  style={{ flex: 1 }}
                 >
                   Cancel
                 </button>
@@ -92,7 +86,8 @@ export default function CreateAlbum(){
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="btn btn-primary flex-1"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
                 >
                   {loading ? 'Creating...' : 'Create Album'}
                 </button>
@@ -104,3 +99,4 @@ export default function CreateAlbum(){
     </div>
   )
 }
+

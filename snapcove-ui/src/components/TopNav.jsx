@@ -27,21 +27,26 @@ export default function TopNav() {
 
   return (
     <nav 
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+      className="flex-between"
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
         height: '64px',
-        background: 'var(--bg)',
+        background: 'var(--secondary-bg)',
         borderBottom: '1px solid var(--border)',
         padding: `0 var(--space-12)`,
-        backdropFilter: 'blur(20px)'
       }}
     >
       {/* Logo Section */}
       <div 
-        className="flex items-center cursor-pointer"
+        className="flex items-center"
+        style={{ cursor: 'pointer' }}
         onClick={() => nav("/dashboard")}
       >
-        <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+        <span className="heading-md" style={{ color: 'var(--primary-text)' }}>
           SnapCove
         </span>
       </div>
@@ -50,18 +55,24 @@ export default function TopNav() {
       <div className="flex items-center" style={{ gap: 'var(--space-3)' }}>
         {/* Search */}
         <button
-          className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all"
+          className="flex-center"
           style={{
-            color: 'var(--text-secondary)',
-            background: 'transparent'
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            color: 'var(--secondary-text)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 200ms ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--surface)'
+            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'
             e.currentTarget.style.color = 'var(--accent)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent'
-            e.currentTarget.style.color = 'var(--text-secondary)'
+            e.currentTarget.style.color = 'var(--secondary-text)'
           }}
           title="Search"
         >
@@ -72,13 +83,20 @@ export default function TopNav() {
         <NotificationBell />
 
         {/* Profile Avatar */}
-        <div className="relative" ref={profileRef}>
+        <div style={{ position: 'relative' }} ref={profileRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all font-semibold text-sm"
+            className="flex-center"
             style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
               background: 'var(--accent)',
-              color: 'var(--bg)'
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '14px',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             {user?.name?.[0]?.toUpperCase() || 'U'}
@@ -87,8 +105,9 @@ export default function TopNav() {
           {/* Profile Dropdown */}
           {profileOpen && (
             <div 
-              className="card absolute"
+              className="card"
               style={{
+                position: 'absolute',
                 top: '60px',
                 right: '0',
                 width: '220px',
@@ -97,19 +116,28 @@ export default function TopNav() {
               }}
             >
               {/* User Info */}
-              <div className="px-3 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-                <div className="text-body font-medium">
+              <div style={{ padding: 'var(--space-3)', borderBottom: '1px solid var(--border)' }}>
+                <div className="text-body" style={{ fontWeight: 500 }}>
                   {user?.name || 'User'}
                 </div>
-                <div className="text-meta mt-1">
+                <div className="text-caption" style={{ marginTop: 'var(--space-1)' }}>
                   {user?.email || 'user@example.com'}
                 </div>
               </div>
 
               {/* Menu Items */}
-              <div className="py-1">
+              <div style={{ padding: 'var(--space-1) 0' }}>
                 <button
-                  className="w-full text-left px-3 py-2 text-sm text-primary transition-colors"
+                  className="text-body"
+                  style={{ 
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: 'var(--space-2) var(--space-3)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--primary-text)'
+                  }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
@@ -117,14 +145,32 @@ export default function TopNav() {
                 </button>
                 <button
                   onClick={() => nav("/settings")}
-                  className="w-full text-left px-3 py-2 text-sm text-primary transition-colors"
+                  className="text-body"
+                  style={{ 
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: 'var(--space-2) var(--space-3)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--primary-text)'
+                  }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
                   Settings
                 </button>
                 <button
-                  className="w-full text-left px-3 py-2 text-sm text-primary transition-colors"
+                  className="text-body"
+                  style={{ 
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: 'var(--space-2) var(--space-3)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--primary-text)'
+                  }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
@@ -136,7 +182,8 @@ export default function TopNav() {
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-1)' }}>
                 <button
                   onClick={logout}
-                  className="btn btn-danger w-full text-left"
+                  className="btn btn-danger"
+                  style={{ width: '100%', justifyContent: 'flex-start' }}
                 >
                   Logout
                 </button>
@@ -147,19 +194,25 @@ export default function TopNav() {
 
         {/* Settings */}
         <button
-          className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all"
+          className="flex-center"
           style={{
-            color: 'var(--text-secondary)',
-            background: 'transparent'
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            color: 'var(--secondary-text)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 200ms ease'
           }}
           onClick={() => nav("/settings")}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--surface)'
+            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'
             e.currentTarget.style.color = 'var(--accent)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent'
-            e.currentTarget.style.color = 'var(--text-secondary)'
+            e.currentTarget.style.color = 'var(--secondary-text)'
           }}
           title="Settings"
         >
@@ -169,3 +222,4 @@ export default function TopNav() {
     </nav>
   )
 }
+

@@ -56,14 +56,14 @@ export default function NotificationPanel({ onClose, refresh }){
 
   const getNotificationIcon = (type) => {
     switch(type) {
-      case 'comment': return <MessageCircle size={18} strokeWidth={1.5} />
-      case 'reply': return <Reply size={18} strokeWidth={1.5} />
-      case 'like': return <Heart size={18} strokeWidth={1.5} />
-      case 'upload': return <Upload size={18} strokeWidth={1.5} />
-      case 'approved': return <CheckCircle size={18} strokeWidth={1.5} />
-      case 'rejected': return <XCircle size={18} strokeWidth={1.5} />
-      case 'tag': return <Tag size={18} strokeWidth={1.5} />
-      default: return <Bell size={18} strokeWidth={1.5} />
+      case 'comment': return <MessageCircle size={20} strokeWidth={1.5} />
+      case 'reply': return <Reply size={20} strokeWidth={1.5} />
+      case 'like': return <Heart size={20} strokeWidth={1.5} />
+      case 'upload': return <Upload size={20} strokeWidth={1.5} />
+      case 'approved': return <CheckCircle size={20} strokeWidth={1.5} />
+      case 'rejected': return <XCircle size={20} strokeWidth={1.5} />
+      case 'tag': return <Tag size={20} strokeWidth={1.5} />
+      default: return <Bell size={20} strokeWidth={1.5} />
     }
   }
 
@@ -74,13 +74,12 @@ export default function NotificationPanel({ onClose, refresh }){
       case 'like': return '#ec4899'
       case 'upload': return 'var(--accent)'
       case 'approved': return '#22c55e'
-      case 'rejected': return 'var(--danger)'
+      case 'rejected': return 'var(--error)'
       case 'tag': return '#3b82f6'
-      default: return 'var(--text-secondary)'
+      default: return 'var(--secondary-text)'
     }
   }
 
-  // Group notifications by date
   const groupByDate = (notifications) => {
     const groups = { today: [], yesterday: [], thisWeek: [], older: [] }
     const now = new Date()
@@ -110,123 +109,107 @@ export default function NotificationPanel({ onClose, refresh }){
 
   return (
     <>
-      {/* Backdrop */}
       <div 
-        className="fixed inset-0 z-40"
+        style={{ 
+          position: 'fixed',
+          inset: 0,
+          zIndex: 40,
+          background: 'rgba(0, 0, 0, 0.5)'
+        }}
         onClick={onClose}
-        style={{ background: 'rgba(0, 0, 0, 0.5)' }}
       />
-
-      {/* Panel */}
       <div 
         ref={panelRef}
-        className="fixed right-0 top-16 h-[calc(100vh-64px)] w-[480px] z-50 flex flex-col"
+        className="flex-col"
         style={{
-          background: 'var(--bg)',
-          borderLeft: '1px solid var(--border)'
+          position: 'fixed',
+          right: 0,
+          top: '64px',
+          height: 'calc(100vh - 64px)',
+          width: '480px',
+          zIndex: 50,
+          background: 'var(--secondary-bg)',
+          borderLeft: '1px solid var(--border)',
+          display: 'flex'
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between" style={{ padding: 'var(--space-6)', borderBottom: '1px solid var(--border)' }}>
+        <div className="flex-between" style={{ padding: 'var(--space-6)', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 className="text-section-title mb-1">
-              Notifications
-            </h2>
-            <p className="text-meta">
-              Stay updated with system alerts and activity
-            </p>
+            <h2 className="heading-md" style={{ marginBottom: 'var(--space-1)' }}>Notifications</h2>
+            <p className="text-caption">Stay updated with system alerts and activity</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center transition-colors"
-            style={{ color: 'var(--text-secondary)' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            className="flex-center"
+            style={{ width: '32px', height: '32px', color: 'var(--secondary-text)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-text)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--secondary-text)'}
           >
             <X size={20} strokeWidth={1.5} />
           </button>
         </div>
-
-        {/* Mark all read button */}
-        <div className="flex justify-end" style={{ padding: 'var(--space-3) var(--space-6)', borderBottom: '1px solid var(--border)' }}>
+        <div className="flex" style={{ justifyContent: 'flex-end', padding: 'var(--space-3) var(--space-6)', borderBottom: '1px solid var(--border)' }}>
           <button 
             onClick={markAll}
-            className="text-meta transition-colors"
-            style={{ color: 'var(--accent)' }}
+            className="text-caption"
+            style={{ color: 'var(--accent)', background: 'transparent', border: 'none', cursor: 'pointer' }}
             onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
             onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
           >
             Mark all as read
           </button>
         </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto" style={{ padding: 'var(--space-6)' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-6)' }}>
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-body text-secondary">Loading...</p>
+            <div style={{ textAlign: 'center', padding: 'var(--space-12)' }}>
+              <p className="text-body" style={{ color: 'var(--secondary-text)' }}>Loading...</p>
             </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-20 px-8 card">
-              <Bell size={64} style={{ color: 'var(--text-secondary)', margin: '0 auto var(--space-4)', opacity: 0.5 }} />
-              <p className="text-section-title mb-2">
-                No new notifications
-              </p>
-              <p className="text-meta">
-                You're all caught up!
-              </p>
+            <div className="card" style={{ textAlign: 'center', padding: 'var(--space-12)' }}>
+              <Bell size={64} style={{ color: 'var(--secondary-text)', margin: '0 auto var(--space-4)', opacity: 0.5 }} />
+              <p className="heading-sm" style={{ marginBottom: 'var(--space-2)' }}>No new notifications</p>
+              <p className="text-caption">You're all caught up!</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
               {grouped.today.length > 0 && (
                 <>
-                  <div className="flex items-center gap-3" style={{ margin: 'var(--space-8) 0 var(--space-4)' }}>
-                    <span className="text-meta">
-                      Today
-                    </span>
-                    <div className="flex-1" style={{ height: '1px', background: 'var(--border)' }}></div>
+                  <div className="flex items-center" style={{ gap: 'var(--space-3)', margin: 'var(--space-8) 0 var(--space-4)' }}>
+                    <span className="text-caption">Today</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
                   </div>
                   {grouped.today.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
                   ))}
                 </>
               )}
-              
               {grouped.yesterday.length > 0 && (
                 <>
-                  <div className="flex items-center gap-3" style={{ margin: 'var(--space-8) 0 var(--space-4)' }}>
-                    <span className="text-meta">
-                      Yesterday
-                    </span>
-                    <div className="flex-1" style={{ height: '1px', background: 'var(--border)' }}></div>
+                  <div className="flex items-center" style={{ gap: 'var(--space-3)', margin: 'var(--space-8) 0 var(--space-4)' }}>
+                    <span className="text-caption">Yesterday</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
                   </div>
                   {grouped.yesterday.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
                   ))}
                 </>
               )}
-              
               {grouped.thisWeek.length > 0 && (
                 <>
-                  <div className="flex items-center gap-3" style={{ margin: 'var(--space-8) 0 var(--space-4)' }}>
-                    <span className="text-meta">
-                      This Week
-                    </span>
-                    <div className="flex-1" style={{ height: '1px', background: 'var(--border)' }}></div>
+                  <div className="flex items-center" style={{ gap: 'var(--space-3)', margin: 'var(--space-8) 0 var(--space-4)' }}>
+                    <span className="text-caption">This Week</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
                   </div>
                   {grouped.thisWeek.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
                   ))}
                 </>
               )}
-              
               {grouped.older.length > 0 && (
                 <>
-                  <div className="flex items-center gap-3" style={{ margin: 'var(--space-8) 0 var(--space-4)' }}>
-                    <span className="text-meta">
-                      Older
-                    </span>
-                    <div className="flex-1" style={{ height: '1px', background: 'var(--border)' }}></div>
+                  <div className="flex items-center" style={{ gap: 'var(--space-3)', margin: 'var(--space-8) 0 var(--space-4)' }}>
+                    <span className="text-caption">Older</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
                   </div>
                   {grouped.older.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
@@ -248,66 +231,64 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
   return (
     <div
       onClick={() => onClick(notification)}
-      className="card cursor-pointer"
+      className="card"
       style={{
-        background: isUnread ? 'var(--surface)' : 'var(--bg)',
+        cursor: 'pointer',
+        background: isUnread ? 'rgba(99, 102, 241, 0.04)' : 'var(--secondary-bg)',
         borderLeft: isUnread ? '3px solid var(--accent)' : '1px solid var(--border)',
         padding: 'var(--space-5)',
         position: 'relative'
       }}
     >
-      {/* Unread dot indicator */}
       {isUnread && (
         <div 
-          className="absolute"
           style={{
+            position: 'absolute',
             left: '-7px',
             top: '24px',
             width: '10px',
             height: '10px',
             background: 'var(--accent)',
             borderRadius: '50%',
-            border: '2px solid var(--bg)'
+            border: '2px solid var(--secondary-bg)'
           }}
         />
       )}
-
-      <div className="flex gap-4">
-        {/* Avatar/Icon */}
+      <div className="flex" style={{ gap: 'var(--space-4)' }}>
         <div 
-          className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
+          className="flex-center flex-shrink-0"
           style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
             background: iconBg,
-            color: 'var(--bg)'
+            color: 'white'
           }}
         >
           {notification.actor_detail?.profile_picture ? (
             <img 
               src={notification.actor_detail.profile_picture} 
               alt={notification.actor_detail.name}
-              className="w-full h-full rounded-full object-cover"
+              style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
             />
           ) : (
             getIcon(notification.notification_type)
           )}
         </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="text-body font-medium mb-1">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="text-body" style={{ fontWeight: 500, marginBottom: 'var(--space-1)' }}>
             {notification.message}
           </div>
           {notification.photo_url && (
-            <div className="mb-2">
+            <div style={{ marginBottom: 'var(--space-2)' }}>
               <img 
                 src={notification.photo_url} 
                 alt="Photo"
-                className="w-full h-20 object-cover"
-                style={{ borderRadius: '6px', border: '1px solid var(--border)' }}
+                style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }}
               />
             </div>
           )}
-          <div className="text-meta mt-2">
+          <div className="text-caption" style={{ marginTop: 'var(--space-2)' }}>
             {new Date(notification.created_at).toLocaleString('en-US', { 
               month: 'short', 
               day: 'numeric',
@@ -317,8 +298,8 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
           </div>
           {notification.photo && (
             <button
-              className="btn btn-ghost mt-3"
-              style={{ padding: 'var(--space-2) var(--space-4)' }}
+              className="btn btn-ghost"
+              style={{ marginTop: 'var(--space-3)', padding: 'var(--space-2) var(--space-4)' }}
             >
               View Photos
             </button>
@@ -328,3 +309,4 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
     </div>
   )
 }
+
