@@ -41,18 +41,21 @@ export default function PhotoInteractions({ photo }) {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 'var(--space-6)' }}>
-      <div style={{ marginBottom: 'var(--space-8)', paddingBottom: 'var(--space-6)', borderBottom: '1px solid var(--border)' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '24px' }}>
+      {/* Like Button */}
+      <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
         <button
           onClick={toggleLike}
-          className="flex items-center"
-          style={{ 
-            gap: 'var(--space-3)',
-            color: liked ? 'var(--accent)' : 'var(--primary-text)',
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            padding: 0
+            padding: 0,
+            color: liked ? 'var(--accent)' : 'var(--text-primary)',
+            transition: 'color 200ms ease'
           }}
           onMouseEnter={(e) => {
             if (!liked) {
@@ -61,7 +64,7 @@ export default function PhotoInteractions({ photo }) {
           }}
           onMouseLeave={(e) => {
             if (!liked) {
-              e.currentTarget.style.color = 'var(--primary-text)'
+              e.currentTarget.style.color = 'var(--text-primary)'
             }
           }}
         >
@@ -71,85 +74,94 @@ export default function PhotoInteractions({ photo }) {
             fill={liked ? 'var(--accent)' : 'none'}
             style={{ color: liked ? 'var(--accent)' : 'currentColor' }}
           />
-          <span className="text-body" style={{ fontWeight: 500 }}>
+          <span style={{ fontSize: '14px', fontWeight: 500 }}>
             {liked ? 'Liked' : 'Like'}
           </span>
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', marginBottom: 'var(--space-6)' }}>
+      {/* Comments Feed - Scrollable */}
+      <div style={{ flex: 1, overflowY: 'auto', marginBottom: '24px' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
-            <p className="text-body" style={{ color: 'var(--secondary-text)' }}>Loading comments...</p>
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Loading comments...</p>
           </div>
         ) : comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-12)' }}>
-            <p className="text-body" style={{ color: 'var(--secondary-text)' }}>No comments yet. Be the first to comment!</p>
+          <div style={{ textAlign: 'center', padding: '48px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>No comments yet. Be the first to comment!</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {comments.map(c => (
               <div
                 key={c.id}
-                style={{ paddingBottom: 'var(--space-4)', borderBottom: '1px solid var(--border)' }}
+                style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}
               >
-                <div style={{ marginBottom: 'var(--space-3)' }}>
-                  <div className="flex items-center" style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
+                {/* Main Comment */}
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                     <div
-                      className="flex-center"
                       style={{
                         width: '32px',
                         height: '32px',
                         borderRadius: '50%',
-                        background: 'var(--surface)',
+                        background: 'var(--bg)',
                         border: '1px solid var(--border)',
-                        color: 'var(--primary-text)',
+                        color: 'var(--text-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         fontWeight: 600,
                         fontSize: '12px'
                       }}
                     >
                       {c.user?.name?.[0]?.toUpperCase() || c.user?.email?.[0]?.toUpperCase() || 'U'}
                     </div>
-                    <span className="text-body" style={{ fontWeight: 500 }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                       {c.user?.name || c.user?.email?.split('@')[0] || 'Unknown'}
                     </span>
-                    <span className="text-caption">
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                       {new Date(c.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-body" style={{ marginLeft: '44px' }}>
+                  <p style={{ fontSize: '14px', color: 'var(--text-primary)', marginLeft: '44px', lineHeight: 1.5 }}>
                     {c.content}
                   </p>
                 </div>
+
+                {/* Replies */}
                 {c.replies && c.replies.length > 0 && (
-                  <div style={{ marginLeft: '44px', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                  <div style={{ marginLeft: '44px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {c.replies.map(r => (
-                      <div key={r.id} className="flex items-start" style={{ gap: 'var(--space-3)' }}>
+                      <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                         <div
-                          className="flex-center flex-shrink-0"
                           style={{
                             width: '24px',
                             height: '24px',
                             borderRadius: '50%',
-                            background: 'var(--surface)',
+                            background: 'var(--bg)',
                             border: '1px solid var(--border)',
-                            color: 'var(--secondary-text)',
+                            color: 'var(--text-secondary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             fontWeight: 600,
-                            fontSize: '10px'
+                            fontSize: '10px',
+                            flexShrink: 0
                           }}
                         >
                           {r.user?.name?.[0]?.toUpperCase() || r.user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="flex items-center" style={{ gap: 'var(--space-2)', marginBottom: 'var(--space-1)' }}>
-                            <span className="text-body" style={{ fontSize: '13px', fontWeight: 500 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>
                               {r.user?.name || r.user?.email?.split('@')[0] || 'Unknown'}
                             </span>
-                            <span className="text-caption">
+                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                               {new Date(r.created_at).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-body" style={{ fontSize: '13px' }}>
+                          <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                             {r.content}
                           </p>
                         </div>
@@ -163,20 +175,46 @@ export default function PhotoInteractions({ photo }) {
         )}
       </div>
 
-      <div style={{ paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border)' }}>
-        <div className="flex" style={{ gap: 'var(--space-3)' }}>
+      {/* Comment Input - Fixed at Bottom */}
+      <div style={{ paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
           <input
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyPress={e => e.key === 'Enter' && send()}
             placeholder="Write a comment..."
-            className="input"
-            style={{ flex: 1, background: 'var(--surface)' }}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              color: 'var(--text-primary)',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              transition: 'border-color 200ms ease'
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
           />
           <button
             onClick={send}
-            className="btn btn-primary"
-            style={{ padding: '0 var(--space-4)' }}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 200ms ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#4da8a6'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
           >
             <Send size={18} strokeWidth={1.5} />
           </button>
@@ -185,4 +223,3 @@ export default function PhotoInteractions({ photo }) {
     </div>
   )
 }
-

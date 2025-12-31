@@ -32,7 +32,15 @@ export default function PhotoDetail() {
 
   if (loading) {
     return (
-      <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+      <div style={{ 
+        position: 'fixed',
+        inset: 0,
+        top: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg)'
+      }}>
         <div style={{ textAlign: 'center' }}>
           <div 
             style={{ 
@@ -41,11 +49,11 @@ export default function PhotoDetail() {
               border: '2px solid var(--accent)',
               borderTopColor: 'transparent',
               borderRadius: '50%',
-              margin: '0 auto var(--space-4)',
+              margin: '0 auto 16px',
               animation: 'spin 1s linear infinite'
             }}
           />
-          <p className="text-body" style={{ color: 'var(--secondary-text)' }}>Loading photo...</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Loading photo...</p>
         </div>
       </div>
     )
@@ -53,10 +61,30 @@ export default function PhotoDetail() {
 
   if (!photo) {
     return (
-      <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+      <div style={{ 
+        position: 'fixed',
+        inset: 0,
+        top: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg)'
+      }}>
         <div style={{ textAlign: 'center' }}>
-          <h2 className="heading-md" style={{ marginBottom: 'var(--space-4)' }}>Photo not found</h2>
-          <button onClick={() => nav(-1)} className="btn btn-primary">
+          <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Photo not found</h2>
+          <button 
+            onClick={() => nav(-1)} 
+            style={{
+              padding: '10px 20px',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer'
+            }}
+          >
             Go Back
           </button>
         </div>
@@ -65,44 +93,76 @@ export default function PhotoDetail() {
   }
 
   return (
-    <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', background: 'var(--primary-bg)' }}>
+    <div style={{ 
+      position: 'fixed',
+      inset: 0,
+      top: '64px',
+      display: 'flex',
+      background: 'var(--bg)',
+      overflow: 'hidden'
+    }}>
+      {/* Close Button - Top Left */}
       <button
         onClick={() => nav(-1)}
-        className="flex-center"
         style={{
           position: 'absolute',
-          top: 'var(--space-4)',
-          left: 'var(--space-4)',
+          top: '16px',
+          left: '16px',
           zIndex: 50,
           width: '40px',
           height: '40px',
-          background: 'var(--secondary-bg)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg)',
           border: '1px solid var(--border)',
           borderRadius: '6px',
-          color: 'var(--primary-text)',
-          cursor: 'pointer'
+          color: 'var(--text-primary)',
+          cursor: 'pointer',
+          transition: 'all 200ms ease'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--accent)'
-          e.currentTarget.style.color = 'white'
+          e.currentTarget.style.background = 'var(--surface)'
+          e.currentTarget.style.borderColor = 'var(--accent)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--secondary-bg)'
-          e.currentTarget.style.color = 'var(--primary-text)'
+          e.currentTarget.style.background = 'var(--bg)'
+          e.currentTarget.style.borderColor = 'var(--border)'
         }}
       >
         <X size={20} strokeWidth={1.5} />
       </button>
 
-      <div className="flex-center" style={{ width: '70%', background: 'var(--primary-bg)', padding: 'var(--space-10)', position: 'relative' }}>
+      {/* Photo Panel - 70% (LEFT SIDE) */}
+      <div style={{ 
+        width: '70%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px',
+        background: 'var(--bg)'
+      }}>
         <img 
           src={photo.image}
           alt={photo.caption || 'Photo'}
-          style={{ maxWidth: '100%', maxHeight: '100vh', objectFit: 'contain', borderRadius: '6px' }}
+          style={{ 
+            maxWidth: '100%',
+            maxHeight: 'calc(100vh - 64px)',
+            objectFit: 'contain',
+            borderRadius: '8px'
+          }}
         />
       </div>
 
-      <div className="flex-col" style={{ width: '30%', background: 'var(--secondary-bg)', borderLeft: '1px solid var(--border)', display: 'flex' }}>
+      {/* Interactions Panel - 30% (RIGHT SIDE) */}
+      <div style={{ 
+        width: '30%',
+        background: 'var(--surface)',
+        borderLeft: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <PhotoInteractions photo={photo} />
         </div>

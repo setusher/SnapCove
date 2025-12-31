@@ -25,7 +25,7 @@ export default function CreateAlbum(){
   }
 
   return(
-    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <TopNav />
       
       <div className="container" style={{ paddingTop: '64px', padding: `var(--space-12) var(--space-6)`, minHeight: '100vh' }}>

@@ -58,28 +58,30 @@ export default function NotificationBell(){
       <div style={{ position: 'relative' }}>
         <button
           onClick={handleClick}
-          className="flex-center"
           style={{
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            color: open ? 'var(--accent)' : 'var(--secondary-text)',
-            background: open ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: open ? 'var(--surface)' : 'transparent',
             border: 'none',
+            color: open ? 'var(--accent)' : 'var(--text-secondary)',
             cursor: 'pointer',
             transition: 'all 200ms ease',
             position: 'relative'
           }}
           onMouseEnter={(e) => {
             if (!open) {
-              e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'
+              e.currentTarget.style.background = 'var(--surface)'
               e.currentTarget.style.color = 'var(--accent)'
             }
           }}
           onMouseLeave={(e) => {
             if (!open) {
               e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = 'var(--secondary-text)'
+              e.currentTarget.style.color = 'var(--text-secondary)'
             }
           }}
           title="Notifications"
@@ -109,8 +111,8 @@ export default function NotificationBell(){
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              background: 'var(--error)',
-              border: '2px solid var(--secondary-bg)',
+              background: '#E5533D',
+              border: '2px solid var(--bg)',
             }}
           />
         )}
@@ -125,4 +127,3 @@ export default function NotificationBell(){
     </>
   )
 }
-
