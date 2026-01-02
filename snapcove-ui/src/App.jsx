@@ -12,6 +12,7 @@ import AlbumGallery from './pages/AlbumGallery'
 import PhotoDetail from './pages/PhotoDetail'
 import VerifyOTP from './pages/VerifyOTP'
 import SelectRole from './pages/SelectRole'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -24,6 +25,12 @@ function App() {
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
+        </ProtectedRoute>
+      }/>
+
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <Profile />
         </ProtectedRoute>
       }/>
 

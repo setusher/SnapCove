@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/AuthProvider"
-import { Bell, Settings, Search } from "lucide-react"
+import { Bell, Search, LogOut } from "lucide-react"
 import NotificationBell from "./NotificationBell"
 import { useState, useRef, useEffect } from "react"
 
@@ -138,31 +138,44 @@ export default function TopNav() {
 
               {/* Menu Items */}
               <div style={{ padding: '4px 0' }}>
-                {[
-                  { label: 'My Profile', action: () => {} },
-                  { label: 'Settings', action: () => nav("/settings") },
-                  { label: 'Help & Support', action: () => {} }
-                ].map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={item.action}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '8px 12px',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      color: 'var(--text-primary)',
-                      transition: 'background 200ms ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => {
+                    nav("/profile")
+                    setProfileOpen(false)
+                  }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    color: 'var(--text-primary)',
+                    transition: 'background 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  My Profile
+                </button>
+                <button
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    color: 'var(--text-primary)',
+                    transition: 'background 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  Help & Support
+                </button>
               </div>
 
               {/* Logout */}
@@ -190,7 +203,7 @@ export default function TopNav() {
           )}
         </div>
 
-        {/* Settings */}
+        {/* Logout Button */}
         <button
           style={{
             width: '36px',
@@ -205,18 +218,18 @@ export default function TopNav() {
             cursor: 'pointer',
             transition: 'all 200ms ease'
           }}
-          onClick={() => nav("/settings")}
+          onClick={logout}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--surface)'
-            e.currentTarget.style.color = 'var(--accent)'
+            e.currentTarget.style.background = 'rgba(229, 83, 61, 0.1)'
+            e.currentTarget.style.color = 'var(--danger)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent'
             e.currentTarget.style.color = 'var(--text-secondary)'
           }}
-          title="Settings"
+          title="Logout"
         >
-          <Settings size={20} strokeWidth={1.5} />
+          <LogOut size={20} strokeWidth={1.5} />
         </button>
       </div>
     </nav>

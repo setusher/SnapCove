@@ -52,4 +52,16 @@ class RejectPhotoView(APIView):
         photo.is_approved = False
         photo.save()
         return Response({'status': 'rejected'})
+
+class UserPhotosView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_id = request.query_params.get('user_id', None)
+        if user_id and (request.user.id == int(user_id) or request.user.role in ['admin', 'coordinator']):
+            photos = Photo.objects.filter(uploaded_by_id=user_id, is_approved=True).order_by('-uploaded_at')
+        else:
+            photos = Photo.objects.filter(uploaded_by=request.user, is_approved=True).order_by('-uploaded_at')
+        serializer = PhotoSerializer(photos, many=True, context={'request': request})
+        return Response(serializer.data)
     
