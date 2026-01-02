@@ -27,6 +27,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
             uploaded_by=self.request.user,
             album=album
         )
+        process_photo_task.delay(photo.id)
 
 class PendingPhotosView(ListAPIView):
     serializer_class = PhotoSerializer
