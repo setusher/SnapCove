@@ -66,4 +66,13 @@ class UserPhotosView(APIView):
             photos = Photo.objects.filter(uploaded_by=request.user, is_approved=True).order_by('-uploaded_at')
         serializer = PhotoSerializer(photos, many=True, context={'request': request})
         return Response(serializer.data)
+
+class PhotoDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        photo = get_object_or_404(Photo, pk=pk)
+        serializer = PhotoSerializer(photo, context={'request': request})
+        return Response(serializer.data)
+
     

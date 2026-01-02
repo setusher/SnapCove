@@ -28,9 +28,9 @@ export default function PhotoInteractions({ photo }) {
     if (processingStatus && processingStatus !== 'done' && processingStatus !== 'failed') {
       const interval = setInterval(async () => {
         try {
-          const r = await api.get(
-            `/events/${photoData.event_id}/albums/${photoData.album_id}/photos/${photoData.id}/`
-          )          
+          const r = await api.get(`/photos/${photoData.id}/`)
+          setPhotoData(r.data)
+       
           if (r.data) {
             setPhotoData(r.data)
             if (r.data.processing_status === 'done' || r.data.processing_status === 'failed') {
@@ -138,7 +138,14 @@ export default function PhotoInteractions({ photo }) {
         </button>
 
         <button
-          onClick={() => setShowDetails(!showDetails)}
+          onClick={async () => {
+            setShowDetails(!showDetails)
+            if (!showDetails && photoData?.id) {
+              const r = await api.get(`/photos/${photoData.id}/`)
+              setPhotoData(r.data)
+            }
+          }}
+          
           style={{
             display: 'flex',
             alignItems: 'center',
