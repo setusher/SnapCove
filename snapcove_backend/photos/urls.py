@@ -7,4 +7,6 @@ router.register(r'events/(?P<event_id>\d+)/albums/(?P<album_id>\d+)/photos', Pho
 
 urlpatterns = [
     path('photos/user/', UserPhotosView.as_view(), name='user-photos'),
+    path("photos/<int:pk>/", PhotoViewSet.as_view({'get': 'retrieve'})),
+
 ] + router.urls

@@ -3,7 +3,7 @@ import exifread
 import torch
 from torchvision import models, transforms
 
-model = models.resnet50(weights="IMAGENET1K_V1")
+model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
 model.eval()
 
 transform = transforms.Compose([
@@ -14,36 +14,41 @@ transform = transforms.Compose([
 
 def extract_exif(path):
     with open(path, 'rb') as f:
-        tags = exifread.process_file(f)
+        tags = exifread.process_file(f, details=False)
 
     camera = str(tags.get("Image Model", ""))
-    gps = tags.get("GPS GPSLatitude")
+    gps = str(tags.get("GPS GPSLatitude", ""))
+    capture_time = tags.get("EXIF DateTimeOriginal")
 
-    return camera, gps, tags
-
+    return camera, gps, capture_time, tags
 
 def run_resnet(path):
     img = Image.open(path).convert("RGB")
-    input_tensor = transform(img).unsqueeze(0)
+    tensor = transform(img).unsqueeze(0)
 
     with torch.no_grad():
-        output = model(input_tensor)
-        probs = torch.nn.functional.softmax(output[0], dim=0)
-        top = torch.topk(probs, 5)
+        out = model(tensor)
 
-    labels = [models.ResNet50_Weights.IMAGENET1K_V1.meta["categories"][i] for i in top.indices]
+    probs = torch.nn.functional.softmax(out[0], dim=0)
+    top = torch.topk(probs, 5).indices
+
+    labels = [models.ResNet50_Weights.IMAGENET1K_V1.meta["categories"][i] for i in top]
     return labels
 
 def process_photo(photo):
+    print("RUNNING REAL PIPELINE FOR", photo.id)
+
     photo.processing_status = "processing"
     photo.save()
 
-    camera, gps, exif = extract_exif(photo.image.path)
+    camera, gps, capture_time, exif = extract_exif(photo.image.path)
     labels = run_resnet(photo.image.path)
 
     photo.camera_model = camera
-    photo.gps_location = str(gps)
+    photo.gps_location = gps
     photo.exif_data = exif
     photo.ai_tags = labels
     photo.processing_status = "done"
     photo.save()
+
+    print("PHOTO METADATA SAVED")

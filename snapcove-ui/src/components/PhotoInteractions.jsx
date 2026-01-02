@@ -1,15 +1,57 @@
 import { useEffect, useState } from "react"
 import { api } from "../api/api"
-import { Heart, Send } from "lucide-react"
+import { Heart, Send, Info, X } from "lucide-react"
 
 export default function PhotoInteractions({ photo }) {
+  const [photoData, setPhotoData] = useState(photo)
   const [comments, setComments] = useState([])
-  const [liked, setLiked] = useState(photo.is_liked || false)
+  const [liked, setLiked] = useState(photo?.is_liked || false)
   const [text, setText] = useState("")
   const [loading, setLoading] = useState(true)
+  const [showDetails, setShowDetails] = useState(false)
+
+  // Update photoData when photo prop changes
+  useEffect(() => {
+    if (photo) {
+      setPhotoData(photo)
+      setLiked(photo.is_liked || false)
+    }
+  }, [photo])
+
+  // Auto-refresh photo data when processing - polling every 2 seconds until done
+  // Note: This requires the backend endpoint /photos/{id}/ to exist
+  // If it doesn't exist, polling will be skipped
+  useEffect(() => {
+    if (!photoData) return
+    
+    const processingStatus = photoData.processing_status
+    if (processingStatus && processingStatus !== 'done' && processingStatus !== 'failed') {
+      const interval = setInterval(async () => {
+        try {
+          const r = await api.get(
+            `/events/${photoData.event_id}/albums/${photoData.album_id}/photos/${photoData.id}/`
+          )          
+          if (r.data) {
+            setPhotoData(r.data)
+            if (r.data.processing_status === 'done' || r.data.processing_status === 'failed') {
+              clearInterval(interval)
+            }
+          }
+        } catch (err) {
+          // Endpoint might not exist - silently skip polling
+          console.log('Photo polling endpoint not available, skipping auto-refresh')
+          clearInterval(interval)
+        }
+      }, 2000)
+
+      return () => clearInterval(interval)
+    }
+  }, [photoData?.id, photoData?.processing_status])
 
   useEffect(() => {
-    api.get(`/photos/${photo.id}/comments/`)
+    if (!photoData?.id) return
+    
+    api.get(`/photos/${photoData.id}/comments/`)
       .then(r => {
         setComments(r.data)
         setLoading(false)
@@ -18,11 +60,12 @@ export default function PhotoInteractions({ photo }) {
         console.error(err)
         setLoading(false)
       })
-  }, [photo.id])
+  }, [photoData?.id])
 
   const toggleLike = async () => {
+    if (!photoData?.id) return
     try {
-      const r = await api.post(`/photos/${photo.id}/like/`)
+      const r = await api.post(`/photos/${photoData.id}/like/`)
       setLiked(r.data.liked)
     } catch (err) {
       console.error(err)
@@ -30,9 +73,9 @@ export default function PhotoInteractions({ photo }) {
   }
 
   const send = async () => {
-    if (!text.trim()) return
+    if (!text.trim() || !photoData?.id) return
     try {
-      const r = await api.post(`/photos/${photo.id}/comments/`, { content: text })
+      const r = await api.post(`/photos/${photoData.id}/comments/`, { content: text })
       setComments([r.data, ...comments])
       setText("")
     } catch (err) {
@@ -40,10 +83,25 @@ export default function PhotoInteractions({ photo }) {
     }
   }
 
+  const formatExifKey = (key) => {
+    return key
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  const formatExifValue = (value) => {
+    if (typeof value === 'object' && value !== null) {
+      return JSON.stringify(value, null, 2)
+    }
+    return String(value)
+  }
+
+  const hasMetadata = photoData?.exif_data || photoData?.camera_model || photoData?.gps_location || photoData?.capture_time || photoData?.width || photoData?.height
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '24px' }}>
-      {/* Like Button */}
-      <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
+      {/* Like and Details Buttons */}
+      <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: '16px' }}>
         <button
           onClick={toggleLike}
           style={{
@@ -78,7 +136,177 @@ export default function PhotoInteractions({ photo }) {
             {liked ? 'Liked' : 'Like'}
           </span>
         </button>
+
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            color: showDetails ? 'var(--accent)' : 'var(--text-primary)',
+            transition: 'color 200ms ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!showDetails) {
+              e.currentTarget.style.color = 'var(--accent)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!showDetails) {
+              e.currentTarget.style.color = 'var(--text-primary)'
+            }
+          }}
+        >
+          <Info
+            size={20}
+            strokeWidth={1.5}
+            style={{ color: showDetails ? 'var(--accent)' : 'currentColor' }}
+          />
+          <span style={{ fontSize: '14px', fontWeight: 500 }}>
+            {showDetails ? 'Hide Details' : 'Show Details'}
+          </span>
+        </button>
       </div>
+
+      {/* Details Panel */}
+      {showDetails && (
+        <div style={{
+          background: 'var(--bg)',
+          border: '1px solid var(--border)',
+          borderRadius: '8px',
+          padding: '20px',
+          marginBottom: '24px',
+          maxHeight: '400px',
+          overflowY: 'auto'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>Photo Details</h3>
+            <button
+              onClick={() => setShowDetails(false)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'color 200ms ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              <X size={16} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Dimensions */}
+            {(photoData.width || photoData.height) && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Dimensions
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {photoData.width && photoData.height ? `${photoData.width} × ${photoData.height} pixels` : photoData.width ? `${photoData.width}px width` : `${photoData.height}px height`}
+                </div>
+              </div>
+            )}
+
+            {/* Camera Model */}
+            {photoData.camera_model && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Camera
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {photoData.camera_model}
+                </div>
+              </div>
+            )}
+
+            {/* GPS Location */}
+            {photoData.gps_location && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Location
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {photoData.gps_location}
+                </div>
+              </div>
+            )}
+
+            {/* Capture Time */}
+            {photoData.capture_time && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Taken
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {new Date(photoData.capture_time).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Uploaded Time */}
+            {photoData.uploaded_at && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Uploaded
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {new Date(photoData.uploaded_at).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* EXIF Data */}
+            {photoData.exif_data && typeof photoData.exif_data === 'object' && Object.keys(photoData.exif_data).length > 0 && (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  EXIF Metadata
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {Object.entries(photoData.exif_data).map(([key, value]) => (
+                    <div key={key} style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                        {formatExifKey(key)}
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                        {formatExifValue(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!photoData.exif_data && !photoData.camera_model && !photoData.gps_location && !photoData.capture_time && !photoData.width && !photoData.height && (
+              <div style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                No metadata available for this photo
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Comments Feed - Scrollable */}
       <div style={{ flex: 1, overflowY: 'auto', marginBottom: '24px' }}>

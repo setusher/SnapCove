@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
+    'django_celery_results',
 
     # Local Apps
     'accounts',
@@ -203,3 +204,10 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = f"SnapCove <{EMAIL_HOST_USER}>"
 print("EMAIL USER:", EMAIL_HOST_USER)
 print("EMAIL PASS LOADED:", bool(EMAIL_HOST_PASSWORD))
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_WORKER_POOL = 'solo'
+CELERY_TASK_ALWAYS_EAGER = False
+CELERYD_FORCE_EXECV = True

@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404 
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .tasks import process_photo_task
+from celery import current_app
 
 class PhotoViewSet(viewsets.ModelViewSet):
     fiterset_fields = ['album', 'is_approved']
@@ -23,11 +24,11 @@ class PhotoViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         album = Album.objects.get(id=self.kwargs['album_id'])
-        serializer.save(
+        photo = serializer.save(
             uploaded_by=self.request.user,
             album=album
         )
-        process_photo_task.delay(photo.id)
+        current_app.send_task("photos.process_photo_task", args=[photo.id])
 
 class PendingPhotosView(ListAPIView):
     serializer_class = PhotoSerializer
