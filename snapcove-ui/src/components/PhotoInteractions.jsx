@@ -286,7 +286,7 @@ export default function PhotoInteractions({ photo }) {
             )}
 
             {/* EXIF Data */}
-            {photoData.exif_data && typeof photoData.exif_data === 'object' && Object.keys(photoData.exif_data).length > 0 && (
+            {photoData.exif_data && (
               <div>
                 <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   EXIF Metadata
@@ -306,7 +306,7 @@ export default function PhotoInteractions({ photo }) {
               </div>
             )}
 
-            {!photoData.exif_data && !photoData.camera_model && !photoData.gps_location && !photoData.capture_time && !photoData.width && !photoData.height && (
+            {!photoData.camera_model && !photoData.gps_location && !photoData.capture_time && (
               <div style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                 No metadata available for this photo
               </div>

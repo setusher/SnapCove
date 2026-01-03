@@ -19,10 +19,48 @@ export default function AlbumGallery(){
     fetchPhotos()
   }, [eventId, albumId])
 
+  // Poll for processing photos to refresh when they're done
+  useEffect(() => {
+    const hasProcessingPhotos = photos.some(p => 
+      (p.processing_status === 'processing' || p.processing_status === 'pending') && !p.image
+    )
+    
+    if (!hasProcessingPhotos) return
+
+    const interval = setInterval(() => {
+      fetchPhotos()
+    }, 2000) // Poll every 2 seconds
+
+    return () => clearInterval(interval)
+  }, [photos, eventId, albumId])
+
   const fetchPhotos = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
+    // #endregion
+    
     api.get(`/events/${eventId}/albums/${albumId}/photos/`)
-      .then(r => setPhotos(r.data))
-      .catch(err => console.error(err))
+      .then(r => {
+        // Handle paginated response (DRF viewsets may return {results: [...]})
+        const photosData = r.data.results || r.data
+        const photosArray = Array.isArray(photosData) ? photosData : []
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:26',message:'fetchPhotos response received',data:{photoCount:photosArray.length,hasResults:!!r.data.results,isArray:Array.isArray(photosData),firstPhotoId:photosArray[0]?.id,firstPhotoImage:photosArray[0]?.image,firstPhotoThumbnail:photosArray[0]?.thumbnail,firstPhotoProcessingStatus:photosArray[0]?.processing_status,allPhotoIds:photosArray.map(p=>p.id),allPhotosWithImages:photosArray.filter(p=>p.image).length,allPhotosWithThumbnails:photosArray.filter(p=>p.thumbnail).length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H4'})}).catch(()=>{});
+        // #endregion
+        
+        console.log('Fetched photos data:', photosData)
+        console.log('First photo:', photosData?.[0])
+        console.log('First photo image field:', photosData?.[0]?.image)
+        setPhotos(photosArray)
+      })
+      .catch(err => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:32',message:'fetchPhotos error',data:{error:err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+        // #endregion
+        console.error('Error fetching photos:', err)
+        setPhotos([])
+      })
   }
 
   const handleFileSelect = (e) => {
@@ -38,19 +76,31 @@ export default function AlbumGallery(){
     setUploading(true)
     setUploadProgress(0)
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:45',message:'handleUpload started',data:{fileCount:uploadFiles.length,eventId,albumId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1,H3'})}).catch(()=>{});
+    // #endregion
+
     try {
       const uploadPromises = uploadFiles.map(async (file, index) => {
         const formData = new FormData()
         formData.append('image', file)
 
         try {
-          await api.post(`/events/${eventId}/albums/${albumId}/photos/`, formData, {
+          const response = await api.post(`/events/${eventId}/albums/${albumId}/photos/`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
           })
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:57',message:'Upload response received',data:{fileIndex:index,fileName:file.name,responseStatus:response?.status,responseData:response?.data,hasImage:!!response?.data?.image,imageField:response?.data?.image},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1,H4'})}).catch(()=>{});
+          // #endregion
+          
           setUploadProgress(((index + 1) / uploadFiles.length) * 100)
         } catch (err) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:64',message:'Upload error',data:{fileIndex:index,fileName:file.name,error:err?.response?.data||err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+          // #endregion
           console.error(`Failed to upload ${file.name}:`, err)
           throw err
         }
@@ -58,11 +108,25 @@ export default function AlbumGallery(){
 
       await Promise.all(uploadPromises)
       
-      // Clear files and refresh photos
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:69',message:'All uploads completed, about to fetchPhotos',data:{fileCount:uploadFiles.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+      // #endregion
+      
+      // Clear files and refresh photos - add small delay to ensure backend has saved photos
       setUploadFiles([])
       setUploadProgress(0)
-      fetchPhotos()
+      
+      // Wait a moment for backend to process, then fetch
+      setTimeout(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:76',message:'setTimeout callback executing fetchPhotos',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
+        fetchPhotos()
+      }, 500)
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:79',message:'Upload failed catch block',data:{error:err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
       console.error('Upload failed:', err)
       alert('Failed to upload photos. Please try again.')
     } finally {
@@ -278,38 +342,109 @@ export default function AlbumGallery(){
               gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
               gap: '16px'
             }}>
-              {photos.map(photo => (
-                <div 
-                  key={photo.id}
-                  onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
-                  style={{
-                    aspectRatio: '1',
-                    background: 'var(--bg)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'all 200ms ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--accent)'
-                    e.currentTarget.style.transform = 'translateY(-4px)'
-                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'none'
-                  }}
-                >
-                  <img 
-                    src={photo.image} 
-                    alt={`Photo ${photo.id}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    loading="lazy"
-                  />
-                </div>
-              ))}
+              {photos.map(photo => {
+                // Use image or thumbnail - prefer thumbnail for gallery, fallback to image
+                const imageSource = photo.thumbnail || photo.image
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:295',message:'Rendering photo',data:{photoId:photo.id,hasImage:!!photo.image,hasThumbnail:!!photo.thumbnail,imageValue:photo.image,thumbnailValue:photo.thumbnail,processingStatus:photo.processing_status,imageSource},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H5'})}).catch(()=>{});
+                // #endregion
+                
+                console.log('Rendering photo:', photo.id, 'image:', photo.image, 'thumbnail:', photo.thumbnail, 'processing_status:', photo.processing_status)
+                let imageUrl = null
+                if (imageSource) {
+                  if (imageSource.startsWith('http://') || imageSource.startsWith('https://')) {
+                    imageUrl = imageSource
+                  } else if (imageSource.startsWith('/')) {
+                    imageUrl = `http://localhost:8000${imageSource}`
+                  } else {
+                    imageUrl = `http://localhost:8000/${imageSource}`
+                  }
+                  
+                  // #region agent log
+                  fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:300',message:'Image URL constructed',data:{photoId:photo.id,imageUrl,imageSource},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+                  // #endregion
+                } else {
+                  // #region agent log
+                  fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:308',message:'No image source available',data:{photoId:photo.id,hasImage:!!photo.image,hasThumbnail:!!photo.thumbnail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                  // #endregion
+                }
+                
+                return (
+                  <div 
+                    key={photo.id}
+                    onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
+                    style={{
+                      aspectRatio: '1',
+                      background: 'var(--bg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      transition: 'all 200ms ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                      e.currentTarget.style.transform = 'translateY(-4px)'
+                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
+                  >
+                    {imageUrl ? (
+                      <img 
+                        src={imageUrl} 
+                        alt={`Photo ${photo.id}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        loading="lazy"
+                        onError={(e) => {
+                          console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
+                          e.target.style.display = 'none'
+                        }}
+                      />
+                    ) : photo.processing_status === 'processing' || photo.processing_status === 'pending' ? (
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        background: 'var(--surface)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '12px',
+                        gap: '8px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          border: '3px solid var(--border)',
+                          borderTopColor: 'var(--accent)',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                        <span>Processing...</span>
+                      </div>
+                    ) : (
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        background: 'var(--surface)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '12px'
+                      }}>
+                        No image
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

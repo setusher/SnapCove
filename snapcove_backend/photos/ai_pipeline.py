@@ -19,7 +19,6 @@ def extract_exif(path):
     camera = str(tags.get("Image Model", ""))
     gps = str(tags.get("GPS GPSLatitude", ""))
     capture_time = tags.get("EXIF DateTimeOriginal")
-
     return camera, gps, capture_time, tags
 
 def run_resnet(path):
@@ -31,13 +30,12 @@ def run_resnet(path):
 
     probs = torch.nn.functional.softmax(out[0], dim=0)
     top = torch.topk(probs, 5).indices
-
-    labels = [models.ResNet50_Weights.IMAGENET1K_V1.meta["categories"][i] for i in top]
-    return labels
+    return [models.ResNet50_Weights.IMAGENET1K_V1.meta["categories"][i] for i in top]
 
 def process_photo(photo):
-    print("RUNNING REAL PIPELINE FOR", photo.id)
+    print(">>> ENTERED REAL PIPELINE <<<", photo.id)
 
+    photo.refresh_from_db()
     photo.processing_status = "processing"
     photo.save()
 
@@ -51,4 +49,4 @@ def process_photo(photo):
     photo.processing_status = "done"
     photo.save()
 
-    print("PHOTO METADATA SAVED")
+    print(">>> PHOTO METADATA SAVED <<<")

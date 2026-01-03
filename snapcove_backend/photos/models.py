@@ -24,7 +24,7 @@ class Photo(models.Model):
 
     ai_tags = models.JSONField(default=list, blank=True)
 
-    is_approved = models.BooleanField()
+    is_approved = models.BooleanField(default=True)
     is_public = models.BooleanField(default=True)
 
     processing_status = models.CharField(

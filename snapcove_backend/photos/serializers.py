@@ -12,12 +12,19 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = '__all__'
-        read_only_fields = ['id','album','uploaded_by','image','thumbnail','caption','tags',
+        fields = [
+            'id','album','album_id','event_id','uploaded_by',
+            'image','thumbnail','caption','tags',
             'width','height','camera_model','gps_location','capture_time',
             'exif_data','ai_tags','is_public','is_approved','processing_status',
-            'uploaded_at','updated_at','likes_count','is_liked', 'album_id', 'event_id']
-
+            'uploaded_at','updated_at','likes_count','is_liked'
+        ]
+        extra_kwargs = {
+            'album': {'required': False},
+            'is_public': {'required': False},
+            'is_approved': {'required': False},
+        }
+        read_only_fields = ['uploaded_by','processing_status','thumbnail']
     def get_likes_count(self, obj):
         return Like.objects.filter(photo=obj).count()
 
