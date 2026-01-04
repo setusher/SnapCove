@@ -185,24 +185,6 @@ export default function MyPhotos() {
                         <ImageIcon size={32} style={{ color: 'var(--text-secondary)', opacity: 0.5 }} />
                       </div>
                     )}
-                    
-                    {/* Status Badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      padding: '4px 8px',
-                      borderRadius: 'var(--radius-button)',
-                      fontSize: '11px',
-                      fontWeight: 500,
-                      background: photo.is_approved 
-                        ? 'rgba(34, 197, 94, 0.2)' 
-                        : 'rgba(234, 179, 8, 0.2)',
-                      color: photo.is_approved ? '#22c55e' : '#eab308',
-                      border: `1px solid ${photo.is_approved ? '#22c55e' : '#eab308'}`
-                    }}>
-                      {photo.is_approved ? 'Approved' : 'Pending'}
-                    </div>
                   </div>
 
                   {/* Photo Info */}
@@ -491,26 +473,6 @@ export default function MyPhotos() {
                       </div>
                     </div>
 
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Status
-                      </div>
-                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: 'var(--radius-button)',
-                          fontSize: '12px',
-                          fontWeight: 500,
-                          background: photoMetrics.is_approved 
-                            ? 'rgba(34, 197, 94, 0.2)' 
-                            : 'rgba(234, 179, 8, 0.2)',
-                          color: photoMetrics.is_approved ? '#22c55e' : '#eab308',
-                          border: `1px solid ${photoMetrics.is_approved ? '#22c55e' : '#eab308'}`
-                        }}>
-                          {photoMetrics.is_approved ? 'Approved' : 'Pending Approval'}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
