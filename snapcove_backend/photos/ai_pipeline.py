@@ -97,10 +97,10 @@ def apply_watermark(image_path, text="SnapCove"):
     overlay = Image.new("RGBA", img.size, (255,255,255,0))
     draw = ImageDraw.Draw(overlay)
 
-    # dynamic size
+   
     font_size = max(20, int(img.size[0] * 0.04))
 
-    # use Pillow bundled font safely
+   
     try:
         font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size)
     except:
