@@ -97,7 +97,7 @@ PostgreSQL + Media Store
 | Async Workers | Celery + Redis |
 | AI Engine | Torch / Vision Models |
 | Storage | PostgreSQL + MediaFS |
-| Auth | JWT + OTP |
+| Auth | JWT + OTP + OAuth|
 | Admin | Django Admin |
 
 ## Folder Structure
@@ -118,50 +118,6 @@ snapcove-ui/
  │  ├ pages/
  │  └ utils/
 ```
-
-## Setup
-
-### Backend
-
-```bash
-git clone https://github.com/yourname/snapcove
-cd snapcove_backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-redis-server
-celery -A snapcove_backend worker -l info
-python manage.py runserver
-```
-
-### Frontend
-
-```bash
-cd snapcove-ui
-npm install
-npm run dev
-```
-
-## Admin Access
-
-```bash
-python manage.py createsuperuser
-```
-
-Login at: `http://localhost:8000/admin`
-
-## Environment Variables
-
-Create a `.env` file in `snapcove_backend/` with:
-
-```env
-SECRET_KEY=your-secret-key
-DEBUG=True
-DATABASE_URL=postgresql://user:password@localhost:5432/snapcove_db
-REDIS_URL=redis://localhost:6379/0
-```
-
 ## Running the Application
 
 1. **Start Redis** (required for Celery):
