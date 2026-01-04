@@ -35,4 +35,9 @@ class PhotoSerializer(serializers.ModelSerializer):
         return False
 
 class BulkPhotoSerializer(serializers.Serializer):
-    photos = PhotoSerializer(many=True)
+    files = serializers.ListField(
+        child=serializers.ImageField(),
+        allow_empty=False
+    )
+    caption = serializers.CharField(required=False)
+    tags = serializers.ListField(required=False, child=serializers.CharField())

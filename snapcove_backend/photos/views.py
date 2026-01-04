@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from .models import Photo
-from .serializers import PhotoSerializer
+from .serializers import PhotoSerializer, BulkPhotoSerializer
 from events.models import Album
 from accounts.permissions import IsCoordinator, IsAdmin
 from rest_framework.generics import ListAPIView 
@@ -27,7 +27,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
         return Photo.objects.filter(album_id=self.kwargs['album_id'])
     
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action in ['create', 'bulk_upload']:
             self.permission_classes = [IsPhotoUploader]
         return [IsAuthenticated()]
 
@@ -38,6 +38,34 @@ class PhotoViewSet(viewsets.ModelViewSet):
         transaction.on_commit(lambda: current_app.send_task(
         "photos.process_photo_task", args=[photo.id]
         ))
+
+    @action(detail=False, methods=["post"], url_path="bulk")
+    def bulk_upload(self, request, event_id = None, album_id = None):
+        serializer = BulkPhotoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        files = serializer.validated_data['files']
+        caption = serializer.validated_data.get["caption",""]
+        tags = serializer.validated_data.get["tags",[]]
+
+        album = Album.objects.get(id=album_id)
+        created = []
+
+        for file in files:
+            photo = Photo.objects.create(
+                uploaded_by=request.user,
+                album=album,
+                image=file,
+                caption=caption,
+                tags=tags
+            )
+            created.append(photo.id)
+
+            transaction.on_commit(lambda pid=photo.id:
+                current_app.send_task("photos.process_photo_task", args=[pid])
+            )
+
+        return Response({"uploaded": created}, status=201)
+        
 
 class PendingPhotosView(ListAPIView):
     serializer_class = PhotoSerializer
