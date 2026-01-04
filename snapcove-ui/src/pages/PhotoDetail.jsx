@@ -2,6 +2,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import PhotoInteractions from "../components/PhotoInteractions"
 import { X } from "lucide-react"
+import { api } from "../api/api"
 
 export default function PhotoDetail() {
   const { photoId } = useParams()
@@ -9,26 +10,48 @@ export default function PhotoDetail() {
   const nav = useNavigate()
   const [photo, setPhoto] = useState(location.state?.photo || null)
   const [loading, setLoading] = useState(!location.state?.photo)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!photo) {
+    const fetchPhoto = async () => {
+      if (photo) {
+        // Photo already available from state
+        localStorage.setItem(`photo_${photoId}`, JSON.stringify(photo))
+        setLoading(false)
+        return
+      }
+
+      // Try localStorage first
       const savedPhoto = localStorage.getItem(`photo_${photoId}`)
       if (savedPhoto) {
         try {
           setPhoto(JSON.parse(savedPhoto))
           setLoading(false)
+          return
         } catch (e) {
-          console.error(e)
-          setLoading(false)
+          console.error("Error parsing saved photo:", e)
         }
-      } else {
+      }
+
+      // Fetch from API
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await api.get(`/photos/${photoId}/`)
+        setPhoto(response.data)
+        localStorage.setItem(`photo_${photoId}`, JSON.stringify(response.data))
+      } catch (err) {
+        console.error("Error fetching photo:", err)
+        setError(err.response?.status === 404 ? "Photo not found" : "Failed to load photo")
+      } finally {
         setLoading(false)
       }
-    } else {
-      localStorage.setItem(`photo_${photoId}`, JSON.stringify(photo))
-      setLoading(false)
     }
-  }, [photoId, photo])
+
+    if (photoId) {
+      fetchPhoto()
+    }
+  }, [photoId])
 
   if (loading) {
     return (
@@ -59,7 +82,7 @@ export default function PhotoDetail() {
     )
   }
 
-  if (!photo) {
+  if (!loading && (!photo || error)) {
     return (
       <div style={{ 
         position: 'fixed',
@@ -71,19 +94,24 @@ export default function PhotoDetail() {
         background: 'var(--bg)'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Photo not found</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            {error || 'Photo not found'}
+          </h2>
           <button 
             onClick={() => nav(-1)} 
             style={{
-              padding: '10px 20px',
+              padding: 'var(--button-padding)',
               background: 'var(--accent)',
-              color: 'var(--bg)',
+              color: 'var(--text-primary)',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-button)',
               fontSize: '14px',
               fontWeight: 500,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
           >
             Go Back
           </button>
