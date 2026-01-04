@@ -340,3 +340,30 @@ textarea.input {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Toast Notifications - Custom Styling */
+.Toastify__toast {
+  background: var(--elevated) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-card) !important;
+}
+
+.Toastify__toast-body {
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+}
+
+.Toastify__progress-bar {
+  background: var(--accent) !important;
+}
+
+.Toastify__close-button {
+  color: var(--text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+  color: var(--text-primary) !important;
+}

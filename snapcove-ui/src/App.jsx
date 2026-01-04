@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -16,7 +18,8 @@ import Profile from './pages/Profile'
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
@@ -47,7 +50,20 @@ function App() {
       <Route path="/events/:eventId/albums/:albumId" element={<ProtectedRoute><AlbumGallery/></ProtectedRoute>} />
       <Route path="/photos/:photoId" element={<ProtectedRoute><PhotoDetail/></ProtectedRoute>} />
       <Route path="/select-role" element={<ProtectedRoute><SelectRole/></ProtectedRoute>}/>
-    </Routes>
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+    </>
   )
 }
 

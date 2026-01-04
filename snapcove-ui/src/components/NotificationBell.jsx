@@ -2,12 +2,14 @@ import { useEffect, useState, useRef } from "react"
 import { Bell } from "lucide-react"
 import { api } from "../api/api"
 import NotificationPanel from "./NotificationPanel"
+import { toast } from "react-toastify"
 
 export default function NotificationBell(){
   const [open, setOpen] = useState(false)
   const [count, setCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const intervalRef = useRef(null)
+  const wsRef = useRef(null)
 
   const fetchUnreadCount = async () => {
     try {
@@ -20,6 +22,10 @@ export default function NotificationBell(){
     }
   }
 
+  const refetchNotifications = () => {
+    fetchUnreadCount()
+  }
+
   useEffect(() => {
     fetchUnreadCount()
     intervalRef.current = setInterval(() => {
@@ -29,6 +35,50 @@ export default function NotificationBell(){
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
+    }
+  }, [])
+
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token")
+    if (!token) return
+
+    const ws = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/?token=${token}`)
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      console.log("WebSocket connected")
+    }
+
+    ws.onmessage = (e) => {
+      try {
+        const notification = JSON.parse(e.data)
+        toast(notification.message, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        })
+        refetchNotifications()
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error)
+    }
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected")
+    }
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
       }
     }
   }, [])
