@@ -33,3 +33,10 @@ class HasSelectedRole(BasePermission):
             return True
 
         return request.user.role is not None
+
+class IsUploader(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            request.user.role in ["admin", "coordinator", "photographer"]
+        )

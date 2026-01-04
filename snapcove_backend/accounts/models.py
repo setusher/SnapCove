@@ -45,7 +45,8 @@ class User(AbstractUser, PermissionsMixin):
     name = models.CharField(max_length=255)
     profile_picture = models.ImageField(upload_to='profiles/', blank = True, null = True)
     
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, null=True, blank=True, )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+
     
     batch = models.CharField(max_length = 10, blank = True, null = True)
     department = models.CharField(max_length = 50, blank = True, null = True)

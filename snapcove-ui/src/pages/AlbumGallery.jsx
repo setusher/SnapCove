@@ -4,6 +4,7 @@ import { api } from "../api/api"
 import TopNav from "../components/TopNav"
 import { ChevronLeft, Upload, X } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
+import { canUpload } from "../utils/roles"
 
 export default function AlbumGallery(){
   const { eventId, albumId } = useParams()
@@ -178,7 +179,7 @@ export default function AlbumGallery(){
             </div>
 
             {/* Upload Button */}
-            {user && (
+            {user && canUpload(user.role) && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
                 <input
                   ref={fileInputRef}

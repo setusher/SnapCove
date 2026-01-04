@@ -4,6 +4,7 @@ import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
 import { Calendar, Camera, Plus } from "lucide-react"
+import { canCreateEvent } from "../utils/roles"
 
 export default function Dashboard(){
   const [events, setEvents] = useState([])
@@ -33,7 +34,7 @@ export default function Dashboard(){
               </p>
             </div>
             
-            {["admin", "coordinator"].includes(user?.role) && (
+            {canCreateEvent(user?.role) && (
               <button 
                 onClick={() => nav("/events/create")}
                 style={{
@@ -82,7 +83,7 @@ export default function Dashboard(){
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                 No events yet. Create your first event to get started.
               </p>
-              {["admin", "coordinator"].includes(user?.role) && (
+              {canCreateEvent(user?.role) && (
                 <button 
                   onClick={() => nav("/events/create")}
                   style={{
