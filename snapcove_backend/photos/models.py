@@ -42,3 +42,13 @@ class Photo(models.Model):
     
     def __str__(self):
         return f"Photo {self.id} "
+
+
+class PhotoTag(models.Model):
+    photo = models.ForeignKey("Photo", on_delete=models.CASCADE, related_name="tagged_users")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    tagged_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="tags_made")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("photo", "user")
