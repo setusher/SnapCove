@@ -16,6 +16,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permissions import IsPhotoUploader
 from rest_framework.decorators import action
 from .models import PhotoTag
+from django.db.models import Q
+from rest_framework.pagination import PageNumberPagination
 
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
@@ -145,4 +147,50 @@ class TaggedPhotosView(APIView):
         tags = PhotoTag.objects.filter(user=request.user)
         photos = Photo.objects.filter(id__in=tags.values_list("photo_id", flat=True))
         return Response(PhotoSerializer(photos, many=True, context={"request": request}).data)
-    
+
+class PhotoSearchPagination(PageNumberPagination):
+    page_size = 24
+
+class PhotoSearchView(ListAPIView):
+    serializer_class = PhotoSerializer
+    pagination_class = PhotoSearchPagination
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Photo.objects.filter(is_approved=True)
+
+        q = self.request.query_params.get("q")
+        tag = self.request.query_params.get("tag")
+        photographer = self.request.query_params.get("photographer")
+        event = self.request.query_params.get("event")
+        album = self.request.query_params.get("album")
+        from_date = self.request.query_params.get("from")
+        to_date = self.request.query_params.get("to")
+
+        if q:
+            qs = qs.filter(
+                Q(caption__icontains=q) |
+                Q(tags__icontains=q) |
+                Q(album__title__icontains=q) |
+                Q(album__event__title__icontains=q)
+            )
+
+        if tag:
+            qs = qs.filter(tagged_users__username__icontains=tag)
+
+        if photographer:
+            qs = qs.filter(uploaded_by_id=photographer)
+
+        if event:
+            qs = qs.filter(album__event_id=event)
+
+        if album:
+            qs = qs.filter(album_id=album)
+
+        if from_date:
+            qs = qs.filter(uploaded_at__date__gte=from_date)
+
+        if to_date:
+            qs = qs.filter(uploaded_at__date__lte=to_date)
+
+        return qs.order_by("-uploaded_at").distinct()
