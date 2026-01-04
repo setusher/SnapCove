@@ -185,15 +185,5 @@ REDIS_URL=redis://localhost:6379/0
    npm run dev
    ```
 
-## 📄 License
 
-[Add your license here]
-
-## 🤝 Contributing
-
-[Add contribution guidelines here]
-
-## 📧 Contact
-
-[Add contact information here]
 
