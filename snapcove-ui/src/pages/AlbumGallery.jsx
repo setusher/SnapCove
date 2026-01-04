@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Upload, X } from "lucide-react"
+import { ChevronLeft, Upload, X, UserPlus, XCircle } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
 import { canUpload } from "../utils/roles"
 
@@ -12,6 +12,9 @@ export default function AlbumGallery(){
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadFiles, setUploadFiles] = useState([])
+  const [showTagModal, setShowTagModal] = useState(false)
+  const [taggedUsers, setTaggedUsers] = useState([])
+  const [userEmailInput, setUserEmailInput] = useState("")
   const nav = useNavigate()
   const fileInputRef = useRef(null)
   const { user } = useAuth()
@@ -68,7 +71,33 @@ export default function AlbumGallery(){
     const files = Array.from(e.target.files)
     if (files.length > 0) {
       setUploadFiles(files)
+      setShowTagModal(true)
+      setTaggedUsers([])
+      setUserEmailInput("")
     }
+  }
+
+  const addTaggedUser = () => {
+    const email = userEmailInput.trim().toLowerCase()
+    if (email && !taggedUsers.includes(email)) {
+      setTaggedUsers([...taggedUsers, email])
+      setUserEmailInput("")
+    }
+  }
+
+  const removeTaggedUser = (email) => {
+    setTaggedUsers(taggedUsers.filter(e => e !== email))
+  }
+
+  const handleTagModalClose = () => {
+    setShowTagModal(false)
+    setTaggedUsers([])
+    setUserEmailInput("")
+  }
+
+  const handleTagModalConfirm = async () => {
+    setShowTagModal(false)
+    await handleUpload()
   }
 
   const handleUpload = async () => {
@@ -119,10 +148,38 @@ export default function AlbumGallery(){
       // Check if upload was successful
       if (response.data && response.data.uploaded) {
         console.log(`Successfully uploaded ${response.data.uploaded.length} photos`)
+        
+        // Tag users to all uploaded photos
+        if (taggedUsers.length > 0 && response.data.uploaded.length > 0) {
+          try {
+            // First, we need to get user IDs from emails
+            // For now, we'll try to tag by email - backend might need user_id
+            // If backend requires user_id, we'd need a user search endpoint
+            // For now, let's assume we can search users or the backend accepts email
+            
+            // Tag each user to each photo using their email
+            for (const photoId of response.data.uploaded) {
+              for (const userEmail of taggedUsers) {
+                try {
+                  await api.post(`/photos/${photoId}/tag/`, { 
+                    email: userEmail 
+                  })
+                } catch (tagErr) {
+                  console.warn(`Failed to tag ${userEmail} to photo ${photoId}:`, tagErr)
+                  // Continue with other tags even if one fails
+                }
+              }
+            }
+          } catch (tagError) {
+            console.error("Error tagging users:", tagError)
+            // Don't fail the upload if tagging fails
+          }
+        }
       }
       
       // Clear files and refresh photos - add small delay to ensure backend has saved photos
       setUploadFiles([])
+      setTaggedUsers([])
       setUploadProgress(0)
       
       // Wait a moment for backend to process, then fetch
@@ -226,7 +283,7 @@ export default function AlbumGallery(){
                 </button>
 
                 {/* Upload Files Preview */}
-                {uploadFiles.length > 0 && !uploading && (
+                {uploadFiles.length > 0 && !uploading && !showTagModal && (
                   <div style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border-subtle)',
@@ -268,23 +325,23 @@ export default function AlbumGallery(){
                       ))}
                     </div>
                     <button
-                      onClick={handleUpload}
+                      onClick={() => setShowTagModal(true)}
                       style={{
                         width: '100%',
-                        padding: '8px 16px',
+                        padding: 'var(--button-padding)',
                         background: 'var(--accent)',
-                        color: 'var(--bg)',
+                        color: 'var(--text-primary)',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-button)',
                         fontSize: '14px',
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'background 200ms ease'
+                        transition: 'background-color 0.2s ease'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#4da8a6'}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
                     >
-                      Upload {uploadFiles.length} {uploadFiles.length === 1 ? 'Photo' : 'Photos'}
+                      Continue to Tag People
                     </button>
                   </div>
                 )}
@@ -451,6 +508,234 @@ export default function AlbumGallery(){
           )}
         </div>
       </div>
+
+      {/* Tag People Modal */}
+      {showTagModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(10, 17, 40, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} onClick={handleTagModalClose}>
+          <div style={{
+            background: 'var(--elevated)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-card)',
+            padding: 'var(--card-padding)',
+            maxWidth: '560px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
+              <div>
+                <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  Tag People
+                </h2>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  Add people to tag in {uploadFiles.length} {uploadFiles.length === 1 ? 'photo' : 'photos'} (optional)
+                </p>
+              </div>
+              <button
+                onClick={handleTagModalClose}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Tag Input */}
+            <div style={{ marginBottom: 'var(--form-field-gap)' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Email Address
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="email"
+                  value={userEmailInput}
+                  onChange={(e) => setUserEmailInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addTaggedUser()
+                    }
+                  }}
+                  placeholder="user@example.com"
+                  style={{
+                    flex: 1,
+                    padding: '14px 16px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                    transition: 'border-color 0.2s ease, outline 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = '2px solid var(--accent)'
+                    e.target.style.outlineOffset = '0'
+                    e.target.style.borderColor = 'transparent'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.outline = 'none'
+                    e.target.style.borderColor = 'var(--border-subtle)'
+                  }}
+                />
+                <button
+                  onClick={addTaggedUser}
+                  style={{
+                    padding: 'var(--button-padding)',
+                    background: 'var(--accent)',
+                    color: 'var(--text-primary)',
+                    border: 'none',
+                    borderRadius: 'var(--radius-button)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
+                >
+                  <UserPlus size={16} />
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Tagged Users List */}
+            {taggedUsers.length > 0 && (
+              <div style={{ marginBottom: 'var(--form-field-gap)' }}>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Tagged People ({taggedUsers.length})
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  padding: '12px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-card)',
+                  minHeight: '60px',
+                  maxHeight: '200px',
+                  overflowY: 'auto'
+                }}>
+                  {taggedUsers.map((email, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 12px',
+                        background: 'var(--elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-button)',
+                        fontSize: '13px',
+                        color: 'var(--text-primary)'
+                      }}
+                    >
+                      <span>{email}</span>
+                      <button
+                        onClick={() => removeTaggedUser(email)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          padding: '0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                      >
+                        <XCircle size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px', paddingTop: 'var(--form-field-gap)' }}>
+              <button
+                onClick={handleTagModalClose}
+                style={{
+                  flex: 1,
+                  padding: 'var(--button-padding)',
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface)'
+                  e.currentTarget.style.color = 'var(--text-primary)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = 'var(--text-secondary)'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTagModalConfirm}
+                style={{
+                  flex: 1,
+                  padding: 'var(--button-padding)',
+                  background: 'var(--accent)',
+                  color: 'var(--text-primary)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-button)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
+              >
+                <Upload size={16} />
+                Upload & Tag
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

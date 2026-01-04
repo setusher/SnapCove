@@ -15,7 +15,7 @@ from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permissions import IsPhotoUploader
 from rest_framework.decorators import action
-
+from .models import PhotoTag
 
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
@@ -114,4 +114,35 @@ class PhotoDetailView(APIView):
         serializer = PhotoSerializer(photo, context={'request': request})
         return Response(serializer.data)
 
+class TagUserView(APIView):
+    permissions_classes = [IsPhotoUploader]
+    def post(self, request, pk):
+        from accounts.models import User
+        
+        user_id = request.data.get("user_id")
+        email = request.data.get("email")
+        
+        # Support both user_id and email
+        if email:
+            try:
+                user = User.objects.get(email=email)
+                user_id = user.id
+            except User.DoesNotExist:
+                return Response({"error": f"User with email {email} not found"}, status=404)
+        elif not user_id:
+            return Response({"error": "Either user_id or email must be provided"}, status=400)
+        
+        tag = PhotoTag.objects.create(
+            photo_id=pk,
+            user_id=user_id,
+            tagged_by=request.user
+        )
+        return Response({"status": "tagged"})
+    
+class TaggedPhotosView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        tags = PhotoTag.objects.filter(user=request.user)
+        photos = Photo.objects.filter(id__in=tags.values_list("photo_id", flat=True))
+        return Response(PhotoSerializer(photos, many=True, context={"request": request}).data)
     
