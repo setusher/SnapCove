@@ -46,6 +46,9 @@ export default function PhotoInteractions({ photo }) {
   const toggleLike = async () => {
     const r = await api.post(`/photos/${photoData.id}/like/`)
     setLiked(r.data.liked)
+    // Refresh photo data to get updated like count
+    const updatedPhoto = await api.get(`/photos/${photoData.id}/`)
+    setPhotoData(updatedPhoto.data)
   }
 
   const send = async () => {
@@ -123,7 +126,17 @@ export default function PhotoInteractions({ photo }) {
           }}
         >
           <Heart size={18} strokeWidth={liked ? 2.5 : 1.5} fill={liked ? 'currentColor' : 'none'} />
-          {liked ? "Liked" : "Like"}
+          <span>{liked ? "Liked" : "Like"}</span>
+          {photoData?.likes_count !== undefined && photoData.likes_count > 0 && (
+            <span style={{ 
+              fontSize: '13px', 
+              color: 'var(--text-secondary)',
+              fontWeight: 400,
+              marginLeft: '4px'
+            }}>
+              {photoData.likes_count}
+            </span>
+          )}
         </button>
         <button
           onClick={async () => {

@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { Bell } from "lucide-react"
 import { api } from "../api/api"
 import NotificationPanel from "./NotificationPanel"
 import { toast } from "react-toastify"
 
 export default function NotificationBell(){
+  const nav = useNavigate()
   const [open, setOpen] = useState(false)
   const [count, setCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -61,6 +63,15 @@ export default function NotificationBell(){
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
+          onClick: () => {
+            // Navigate to photo if notification has a photo
+            if (notification.photo) {
+              nav(`/photos/${notification.photo}`)
+            }
+          },
+          style: {
+            cursor: notification.photo ? 'pointer' : 'default'
+          }
         })
         refetchNotifications()
       } catch (err) {
@@ -156,15 +167,24 @@ export default function NotificationBell(){
           <span 
             style={{
               position: 'absolute',
-              top: '0',
-              right: '0',
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
+              top: '-4px',
+              right: '-4px',
+              minWidth: '20px',
+              height: '20px',
+              borderRadius: '10px',
               background: '#E5533D',
               border: '2px solid var(--bg)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: count > 9 ? '0 6px' : '0',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'white',
             }}
-          />
+          >
+            {count > 99 ? '99+' : count}
+          </span>
         )}
       </div>
 
