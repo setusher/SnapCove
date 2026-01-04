@@ -11,6 +11,7 @@ export default function EventDetail(){
   const { user } = useAuth()
   const [albums, setAlbums] = useState([])
   const [event, setEvent] = useState(null)
+  const [albumPhotoCounts, setAlbumPhotoCounts] = useState({})
   const [showAlbumThumbnailModal, setShowAlbumThumbnailModal] = useState(false)
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false)
   const [showAlbumDetailsModal, setShowAlbumDetailsModal] = useState(false)
@@ -33,7 +34,28 @@ export default function EventDetail(){
 
   const fetchAlbums = () => {
     api.get(`/events/${eventId}/albums/`)
-      .then(r => setAlbums(r.data))
+      .then(r => {
+        const albumsData = r.data.results || r.data || []
+        setAlbums(albumsData)
+        
+        // Fetch photo counts for each album
+        const photoCountPromises = albumsData.map(album => 
+          api.get(`/events/${eventId}/albums/${album.id}/photos/`)
+            .then(photoRes => {
+              const photos = photoRes.data.results || photoRes.data || []
+              return { albumId: album.id, count: photos.length }
+            })
+            .catch(() => ({ albumId: album.id, count: 0 }))
+        )
+        
+        Promise.all(photoCountPromises).then(counts => {
+          const countsMap = {}
+          counts.forEach(({ albumId, count }) => {
+            countsMap[albumId] = count
+          })
+          setAlbumPhotoCounts(countsMap)
+        })
+      })
       .catch(err => console.error(err))
   }
 
@@ -78,9 +100,13 @@ export default function EventDetail(){
         },
       })
       fetchAlbums()
-      // Update selectedAlbum in modal with the new data
+      // Update selectedAlbum in modal with the new data and preserve photo count
       if (response.data) {
-        setSelectedAlbum(response.data)
+        const photoCount = selectedAlbum.photoCount !== undefined ? selectedAlbum.photoCount : (albumPhotoCounts[selectedAlbum.id] || 0)
+        setSelectedAlbum({
+          ...response.data,
+          photoCount: photoCount
+        })
       }
     } catch (err) {
       console.error('Failed to upload album thumbnail:', err)
@@ -137,7 +163,7 @@ export default function EventDetail(){
                     {event.title}
                   </h1>
                   <p style={{ fontSize: '16px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-                    {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)} Photos · Active
+                    {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {Object.values(albumPhotoCounts).reduce((sum, count) => sum + count, 0)} Photos · Active
                   </p>
                 </div>
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -244,7 +270,7 @@ export default function EventDetail(){
               gap: '28px'
             }}>
               {albums.map(album => {
-                const photoCount = album.photos?.length || 0
+                const photoCount = albumPhotoCounts[album.id] || 0
                 return (
                   <div 
                     key={album.id}
@@ -476,7 +502,7 @@ export default function EventDetail(){
                         Total Photos
                       </div>
                       <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--accent)' }}>
-                        {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)}
+                        {Object.values(albumPhotoCounts).reduce((sum, count) => sum + count, 0)}
                       </div>
                     </div>
                   </div>
@@ -687,7 +713,7 @@ export default function EventDetail(){
                       Photos
                     </div>
                     <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--accent)' }}>
-                      {selectedAlbum.photos?.length || 0}
+                      {selectedAlbum.photoCount !== undefined ? selectedAlbum.photoCount : (albumPhotoCounts[selectedAlbum.id] || 0)}
                     </div>
                   </div>
 
