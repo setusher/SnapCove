@@ -89,7 +89,7 @@ export default function TopNav() {
         {/* Admin Panel */}
         {canViewAdminPanel(user?.role) && (
           <button
-            onClick={() => nav("/admin")}
+            onClick={() => window.open("http://127.0.0.1:8000/admin", "_blank")}
             style={{
               width: '36px',
               height: '36px',

@@ -33,3 +33,6 @@ class PhotoSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return Like.objects.filter(user=request.user, photo=obj).exists()
         return False
+
+class BulkPhotoSerializer(serializers.Serializer):
+    photos = PhotoSerializer(many=True)

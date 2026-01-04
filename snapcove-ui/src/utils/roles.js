@@ -15,12 +15,22 @@ export function canUpload(role) {
 
 /**
  * Check if user can create events
- * Allowed roles: coordinator only
+ * Allowed roles: admin, coordinator
  * @param {string} role - User role
  * @returns {boolean}
  */
 export function canCreateEvent(role) {
-  return role === "coordinator"
+  return role === "admin" || role === "coordinator"
+}
+
+/**
+ * Check if user can create albums
+ * Allowed roles: admin, coordinator, photographer
+ * @param {string} role - User role
+ * @returns {boolean}
+ */
+export function canCreateAlbum(role) {
+  return role === "admin" || role === "coordinator" || role === "photographer"
 }
 
 /**

@@ -4,6 +4,7 @@ import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
 import { ChevronLeft, Plus } from "lucide-react"
+import { canCreateAlbum } from "../utils/roles"
 
 export default function EventDetail(){
   const { eventId } = useParams()
@@ -61,7 +62,7 @@ export default function EventDetail(){
                   {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)} Photos · Active
                 </p>
               </div>
-              {["admin", "coordinator", "photographer"].includes(user?.role) && (
+              {canCreateAlbum(user?.role) && (
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
                   style={{
@@ -108,7 +109,7 @@ export default function EventDetail(){
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                 No albums yet. Create your first album to organize photos.
               </p>
-              {["admin", "coordinator", "photographer"].includes(user?.role) && (
+              {canCreateAlbum(user?.role) && (
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
                   style={{
