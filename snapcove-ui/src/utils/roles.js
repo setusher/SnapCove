@@ -43,3 +43,12 @@ export function canViewAdminPanel(role) {
   return role === "admin"
 }
 
+/**
+ * Check if user is a photographer
+ * @param {string} role - User role
+ * @returns {boolean}
+ */
+export function isPhotographer(role) {
+  return role === "photographer"
+}
+

@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/AuthProvider"
-import { Bell, Search, LogOut, Settings } from "lucide-react"
+import { Bell, Search, LogOut, Settings, Camera } from "lucide-react"
 import NotificationBell from "./NotificationBell"
 import { useState, useRef, useEffect } from "react"
-import { canViewAdminPanel } from "../utils/roles"
+import { canViewAdminPanel, isPhotographer } from "../utils/roles"
 
 export default function TopNav() {
   const nav = useNavigate()
@@ -114,6 +114,37 @@ export default function TopNav() {
             title="Admin Panel"
           >
             <Settings size={20} strokeWidth={1.5} />
+          </button>
+        )}
+
+        {/* My Photos - Photographer Only */}
+        {isPhotographer(user?.role) && (
+          <button
+            onClick={() => nav("/my-photos")}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              transition: 'all 200ms ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--surface)'
+              e.currentTarget.style.color = 'var(--accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = 'var(--text-secondary)'
+            }}
+            title="My Photos"
+          >
+            <Camera size={20} strokeWidth={1.5} />
           </button>
         )}
 

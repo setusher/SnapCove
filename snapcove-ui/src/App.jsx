@@ -15,6 +15,7 @@ import PhotoDetail from './pages/PhotoDetail'
 import VerifyOTP from './pages/VerifyOTP'
 import SelectRole from './pages/SelectRole'
 import Profile from './pages/Profile'
+import MyPhotos from './pages/MyPhotos'
 
 function App() {
   return (
@@ -34,6 +35,12 @@ function App() {
       <Route path="/profile" element={
         <ProtectedRoute>
           <Profile />
+        </ProtectedRoute>
+      }/>
+
+      <Route path="/my-photos" element={
+        <ProtectedRoute>
+          <MyPhotos />
         </ProtectedRoute>
       }/>
 
