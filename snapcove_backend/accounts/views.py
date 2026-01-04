@@ -15,6 +15,7 @@ from .utils import send_email_otp_raw
 import random
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Q
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SignUpView(APIView):
@@ -240,4 +241,21 @@ class ResendOTPView(APIView):
         send_email_otp_raw(email, otp)
 
         return Response({"success": True})
+
+class UserSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        
+        if not query or len(query) < 2:
+            return Response([])
+        
+        # Search by email or name
+        users = User.objects.filter(
+            Q(email__icontains=query) | Q(name__icontains=query)
+        )[:10]  # Limit to 10 results
+        
+        serializer = UserSerializer(users, many=True, context={'request': request})
+        return Response(serializer.data)
 

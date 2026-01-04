@@ -15,6 +15,10 @@ export default function AlbumGallery(){
   const [showTagModal, setShowTagModal] = useState(false)
   const [taggedUsers, setTaggedUsers] = useState([])
   const [userEmailInput, setUserEmailInput] = useState("")
+  const [userSuggestions, setUserSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [searchTimeout, setSearchTimeout] = useState(null)
+  const suggestionRef = useRef(null)
   const nav = useNavigate()
   const fileInputRef = useRef(null)
   const { user } = useAuth()
@@ -77,11 +81,55 @@ export default function AlbumGallery(){
     }
   }
 
+  const searchUsers = async (query) => {
+    if (!query || query.length < 2) {
+      setUserSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    try {
+      const response = await api.get(`/auth/users/search/?q=${encodeURIComponent(query)}`)
+      setUserSuggestions(response.data || [])
+      setShowSuggestions(true)
+    } catch (err) {
+      console.error("Error searching users:", err)
+      setUserSuggestions([])
+    }
+  }
+
+  const handleUserInputChange = (e) => {
+    const value = e.target.value
+    setUserEmailInput(value)
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+    
+    // Debounce search
+    const timeout = setTimeout(() => {
+      searchUsers(value)
+    }, 300)
+    setSearchTimeout(timeout)
+  }
+
+  const selectUser = (user) => {
+    const email = user.email.toLowerCase()
+    if (!taggedUsers.includes(email)) {
+      setTaggedUsers([...taggedUsers, email])
+    }
+    setUserEmailInput("")
+    setShowSuggestions(false)
+    setUserSuggestions([])
+  }
+
   const addTaggedUser = () => {
     const email = userEmailInput.trim().toLowerCase()
     if (email && !taggedUsers.includes(email)) {
       setTaggedUsers([...taggedUsers, email])
       setUserEmailInput("")
+      setShowSuggestions(false)
     }
   }
 
@@ -93,12 +141,32 @@ export default function AlbumGallery(){
     setShowTagModal(false)
     setTaggedUsers([])
     setUserEmailInput("")
+    setShowSuggestions(false)
+    setUserSuggestions([])
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
   }
 
   const handleTagModalConfirm = async () => {
     setShowTagModal(false)
+    setShowSuggestions(false)
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
     await handleUpload()
   }
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleUpload = async () => {
     if (uploadFiles.length === 0) return
@@ -571,43 +639,90 @@ export default function AlbumGallery(){
             </div>
 
             {/* Tag Input */}
-            <div style={{ marginBottom: 'var(--form-field-gap)' }}>
+            <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative' }} ref={suggestionRef}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Email Address
+                Search & Tag People
               </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="email"
-                  value={userEmailInput}
-                  onChange={(e) => setUserEmailInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addTaggedUser()
-                    }
-                  }}
-                  placeholder="user@example.com"
-                  style={{
-                    flex: 1,
-                    padding: '14px 16px',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-button)',
-                    color: 'var(--text-primary)',
-                    fontSize: '14px',
-                    fontFamily: 'inherit',
-                    transition: 'border-color 0.2s ease, outline 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.outline = '2px solid var(--accent)'
-                    e.target.style.outlineOffset = '0'
-                    e.target.style.borderColor = 'transparent'
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.outline = 'none'
-                    e.target.style.borderColor = 'var(--border-subtle)'
-                  }}
-                />
+              <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={userEmailInput}
+                    onChange={handleUserInputChange}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addTaggedUser()
+                      }
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.outline = '2px solid var(--accent)'
+                      e.target.style.outlineOffset = '0'
+                      e.target.style.borderColor = 'transparent'
+                      if (userSuggestions.length > 0) {
+                        setShowSuggestions(true)
+                      }
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.outline = 'none'
+                      e.target.style.borderColor = 'var(--border-subtle)'
+                    }}
+                    placeholder="Search by name or email..."
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-button)',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                      transition: 'border-color 0.2s ease, outline 0.2s ease'
+                    }}
+                  />
+                  
+                  {/* Suggestions Dropdown */}
+                  {showSuggestions && userSuggestions.length > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '4px',
+                      background: 'var(--elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-card)',
+                      maxHeight: '240px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                    }}>
+                      {userSuggestions
+                        .filter(u => !taggedUsers.includes(u.email.toLowerCase()))
+                        .map((user) => (
+                        <div
+                          key={user.id}
+                          onClick={() => selectUser(user)}
+                          style={{
+                            padding: '12px 16px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid var(--border-subtle)',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '2px' }}>
+                            {user.name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            {user.email}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={addTaggedUser}
                   style={{
@@ -622,7 +737,8 @@ export default function AlbumGallery(){
                     transition: 'background-color 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    flexShrink: 0
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}

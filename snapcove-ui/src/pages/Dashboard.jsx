@@ -3,17 +3,20 @@ import { useEffect, useState } from "react"
 import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
-import { Calendar, Camera, Plus } from "lucide-react"
+import { Calendar, Camera, Plus, Search, X } from "lucide-react"
 import { canCreateEvent } from "../utils/roles"
 
 export default function Dashboard(){
   const [events, setEvents] = useState([])
   const [eventStats, setEventStats] = useState({})
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchTimeout, setSearchTimeout] = useState(null)
   const { user } = useAuth()
   const nav = useNavigate()
 
-  useEffect(() => {
-    api.get("/events/")
+  const fetchEvents = (query = "") => {
+    const url = query ? `/events/?search=${encodeURIComponent(query)}` : "/events/"
+    api.get(url)
       .then(r => {
         const eventsData = r.data.results || r.data || []
         setEvents(eventsData)
@@ -57,7 +60,35 @@ export default function Dashboard(){
         })
       })
       .catch(err => console.error(err))
+  }
+
+  useEffect(() => {
+    fetchEvents()
   }, [])
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+    
+    // Debounce search
+    const timeout = setTimeout(() => {
+      fetchEvents(value)
+    }, 300)
+    setSearchTimeout(timeout)
+  }
+
+  const clearSearch = () => {
+    setSearchQuery("")
+    fetchEvents()
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -66,44 +97,115 @@ export default function Dashboard(){
       <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
           {/* Page Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--section-padding-y)' }}>
-            <div>
-              <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px', paddingTop: 'var(--space-2)' }}>
-                Events
-              </h1>
-              <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-                Manage and monitor all campus events
-              </p>
+          <div style={{ marginBottom: 'var(--section-padding-y)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--form-field-gap)' }}>
+              <div>
+                <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px', paddingTop: 'var(--space-2)' }}>
+                  Events
+                </h1>
+                <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+                  Manage and monitor all campus events
+                </p>
+              </div>
+              
+              {canCreateEvent(user?.role) && (
+                <button 
+                  onClick={() => nav("/events/create")}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: 'var(--button-padding)',
+                    background: 'var(--accent)',
+                    color: 'var(--text-primary)',
+                    border: 'none',
+                    borderRadius: 'var(--radius-button)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#1a9bc2'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--accent)'
+                  }}
+                >
+                  <Plus size={16} strokeWidth={2} />
+                  Create Event
+                </button>
+              )}
             </div>
-            
-            {canCreateEvent(user?.role) && (
-              <button 
-                onClick={() => nav("/events/create")}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: 'var(--button-padding)',
-                  background: 'var(--accent)',
-                  color: 'var(--text-primary)',
-                  border: 'none',
-                  borderRadius: 'var(--radius-button)',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1a9bc2'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--accent)'
-                }}
-              >
-                <Plus size={16} strokeWidth={2} />
-                Create Event
-              </button>
-            )}
+
+            {/* Search Bar */}
+            <div style={{ position: 'relative', maxWidth: '400px' }}>
+              <div style={{ position: 'relative' }}>
+                <Search 
+                  size={18} 
+                  strokeWidth={1.5}
+                  style={{
+                    position: 'absolute',
+                    left: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-secondary)',
+                    pointerEvents: 'none'
+                  }}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  placeholder="Search events by title or description..."
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 44px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                    transition: 'border-color 0.2s ease, outline 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = '2px solid var(--accent)'
+                    e.target.style.outlineOffset = '0'
+                    e.target.style.borderColor = 'transparent'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.outline = 'none'
+                    e.target.style.borderColor = 'var(--border-subtle)'
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                  >
+                    <X size={16} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Events Grid */}
