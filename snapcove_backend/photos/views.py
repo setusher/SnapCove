@@ -14,6 +14,8 @@ from celery import current_app
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permissions import IsPhotoUploader
+from rest_framework.decorators import action
+
 
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
@@ -44,8 +46,8 @@ class PhotoViewSet(viewsets.ModelViewSet):
         serializer = BulkPhotoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         files = serializer.validated_data['files']
-        caption = serializer.validated_data.get["caption",""]
-        tags = serializer.validated_data.get["tags",[]]
+        caption = serializer.validated_data.get("caption","")
+        tags = serializer.validated_data.get("tags",[])
 
         album = Album.objects.get(id=album_id)
         created = []

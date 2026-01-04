@@ -77,41 +77,49 @@ export default function AlbumGallery(){
     setUploading(true)
     setUploadProgress(0)
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:45',message:'handleUpload started',data:{fileCount:uploadFiles.length,eventId,albumId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1,H3'})}).catch(()=>{});
-    // #endregion
-
     try {
-      const uploadPromises = uploadFiles.map(async (file, index) => {
-        const formData = new FormData()
-        formData.append('image', file)
-
-        try {
-          const response = await api.post(`/events/${eventId}/albums/${albumId}/photos/`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          })
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:57',message:'Upload response received',data:{fileIndex:index,fileName:file.name,responseStatus:response?.status,responseData:response?.data,hasImage:!!response?.data?.image,imageField:response?.data?.image},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1,H4'})}).catch(()=>{});
-          // #endregion
-          
-          setUploadProgress(((index + 1) / uploadFiles.length) * 100)
-        } catch (err) {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:64',message:'Upload error',data:{fileIndex:index,fileName:file.name,error:err?.response?.data||err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-          // #endregion
-          console.error(`Failed to upload ${file.name}:`, err)
-          throw err
-        }
+      // Create FormData for bulk upload
+      const formData = new FormData()
+      
+      // Append all files to the formData
+      // The backend expects 'files' as a list field
+      uploadFiles.forEach((file) => {
+        formData.append('files', file)
       })
 
-      await Promise.all(uploadPromises)
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:69',message:'All uploads completed, about to fetchPhotos',data:{fileCount:uploadFiles.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-      // #endregion
+      // Optional: Add caption and tags if needed in the future
+      // formData.append('caption', '')
+      // formData.append('tags', JSON.stringify([]))
+
+      // Simulate progress during upload
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          // Gradually increase progress, but don't go to 100% until done
+          if (prev < 90) {
+            return prev + 10
+          }
+          return prev
+        })
+      }, 200)
+
+      // Make bulk upload request
+      const response = await api.post(
+        `/events/${eventId}/albums/${albumId}/photos/bulk/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+
+      // Check if upload was successful
+      if (response.data && response.data.uploaded) {
+        console.log(`Successfully uploaded ${response.data.uploaded.length} photos`)
+      }
       
       // Clear files and refresh photos - add small delay to ensure backend has saved photos
       setUploadFiles([])
@@ -119,17 +127,12 @@ export default function AlbumGallery(){
       
       // Wait a moment for backend to process, then fetch
       setTimeout(() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:76',message:'setTimeout callback executing fetchPhotos',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
         fetchPhotos()
       }, 500)
     } catch (err) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:79',message:'Upload failed catch block',data:{error:err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-      // #endregion
-      console.error('Upload failed:', err)
-      alert('Failed to upload photos. Please try again.')
+      console.error('Bulk upload failed:', err)
+      alert(`Failed to upload photos: ${err?.response?.data?.detail || err?.message || 'Unknown error'}`)
+      setUploadProgress(0)
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
