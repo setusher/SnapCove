@@ -4,6 +4,7 @@ from .models import Notification
 from interactions.models import Comment, Like
 from photos.models import Photo
 from asgiref.sync import async_to_sync
+from photos.models import PhotoTag
 from channels.layers import get_channel_layer
 
 def push_realtime(notification):

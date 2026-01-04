@@ -152,23 +152,32 @@ export default function AlbumGallery(){
         // Tag users to all uploaded photos
         if (taggedUsers.length > 0 && response.data.uploaded.length > 0) {
           try {
-            // First, we need to get user IDs from emails
-            // For now, we'll try to tag by email - backend might need user_id
-            // If backend requires user_id, we'd need a user search endpoint
-            // For now, let's assume we can search users or the backend accepts email
+            let successCount = 0
+            let failCount = 0
             
             // Tag each user to each photo using their email
+            // Backend will automatically send notifications via WebSocket when tags are created
             for (const photoId of response.data.uploaded) {
               for (const userEmail of taggedUsers) {
                 try {
                   await api.post(`/photos/${photoId}/tag/`, { 
                     email: userEmail 
                   })
+                  successCount++
                 } catch (tagErr) {
                   console.warn(`Failed to tag ${userEmail} to photo ${photoId}:`, tagErr)
+                  failCount++
                   // Continue with other tags even if one fails
                 }
               }
+            }
+            
+            // Provide feedback on tagging results
+            if (successCount > 0) {
+              console.log(`Successfully tagged ${successCount} user(s) in ${response.data.uploaded.length} photo(s)`)
+            }
+            if (failCount > 0) {
+              console.warn(`Failed to tag ${failCount} user(s). They may not exist in the system.`)
             }
           } catch (tagError) {
             console.error("Error tagging users:", tagError)
