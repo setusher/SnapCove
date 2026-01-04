@@ -81,14 +81,14 @@ export default function PhotoInteractions({ photo }) {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      background: 'var(--surface)'
+      background: 'var(--elevated)'
     }}>
       {/* Action Buttons - Top */}
       <div style={{
         display: 'flex',
         gap: '12px',
-        padding: '24px',
-        borderBottom: '1px solid var(--border)'
+        padding: 'var(--card-padding)',
+        borderBottom: '1px solid var(--border-subtle)'
       }}>
         <button
           onClick={toggleLike}
@@ -98,27 +98,27 @@ export default function PhotoInteractions({ photo }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            padding: '10px 16px',
+            padding: 'var(--button-padding)',
             background: liked ? 'var(--accent)' : 'transparent',
-            color: liked ? 'var(--bg)' : 'var(--text-primary)',
-            border: liked ? 'none' : '1px solid var(--border)',
-            borderRadius: '8px',
+            color: liked ? 'var(--text-primary)' : 'var(--text-primary)',
+            border: liked ? 'none' : '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-button)',
             fontSize: '14px',
             fontWeight: 500,
             cursor: 'pointer',
-            transition: 'all 200ms ease',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
             fontFamily: 'inherit'
           }}
           onMouseEnter={(e) => {
             if (!liked) {
-              e.currentTarget.style.background = 'var(--bg)'
+              e.currentTarget.style.background = 'var(--surface)'
               e.currentTarget.style.borderColor = 'var(--accent)'
             }
           }}
           onMouseLeave={(e) => {
             if (!liked) {
               e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.borderColor = 'var(--border)'
+              e.currentTarget.style.borderColor = 'var(--border-subtle)'
             }
           }}
         >
@@ -139,27 +139,27 @@ export default function PhotoInteractions({ photo }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            padding: '10px 16px',
-            background: showDetails ? 'var(--bg)' : 'transparent',
+            padding: 'var(--button-padding)',
+            background: showDetails ? 'var(--surface)' : 'transparent',
             color: 'var(--text-primary)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-button)',
             fontSize: '14px',
             fontWeight: 500,
             cursor: 'pointer',
-            transition: 'all 200ms ease',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
             fontFamily: 'inherit'
           }}
           onMouseEnter={(e) => {
             if (!showDetails) {
-              e.currentTarget.style.background = 'var(--bg)'
+              e.currentTarget.style.background = 'var(--surface)'
               e.currentTarget.style.borderColor = 'var(--accent)'
             }
           }}
           onMouseLeave={(e) => {
             if (!showDetails) {
               e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.borderColor = 'var(--border)'
+              e.currentTarget.style.borderColor = 'var(--border-subtle)'
             }
           }}
         >
@@ -171,8 +171,8 @@ export default function PhotoInteractions({ photo }) {
       {/* Details Panel */}
       {showDetails && (
         <div style={{
-          padding: '24px',
-          borderBottom: '1px solid var(--border)',
+          padding: 'var(--card-padding)',
+          borderBottom: '1px solid var(--border-subtle)',
           maxHeight: '40vh',
           overflowY: 'auto'
         }}>
@@ -253,9 +253,9 @@ export default function PhotoInteractions({ photo }) {
                     key={idx}
                     style={{
                       padding: '4px 12px',
-                      background: 'var(--bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '12px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-button)',
                       fontSize: '12px',
                       color: 'var(--text-secondary)'
                     }}
@@ -287,7 +287,7 @@ export default function PhotoInteractions({ photo }) {
                 {Object.entries(photoData.exif_data).map(([key, value]) => (
                   <div key={key} style={{
                     paddingBottom: '12px',
-                    borderBottom: '1px solid var(--border)'
+                    borderBottom: '1px solid var(--border-subtle)'
                   }}>
                     <div style={{
                       fontSize: '12px',
@@ -316,10 +316,10 @@ export default function PhotoInteractions({ photo }) {
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: '24px',
+        padding: 'var(--card-padding)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: 'var(--form-field-gap)'
       }}>
         {loading ? (
           <div style={{
@@ -365,8 +365,8 @@ export default function PhotoInteractions({ photo }) {
                     width: '32px',
                     height: '32px',
                     borderRadius: '50%',
-                    background: 'var(--bg)',
-                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
                     color: 'var(--text-primary)',
                     display: 'flex',
                     alignItems: 'center',
@@ -418,9 +418,9 @@ export default function PhotoInteractions({ photo }) {
 
       {/* Comment Input - Fixed at Bottom */}
       <div style={{
-        padding: '24px',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--surface)'
+        padding: 'var(--card-padding)',
+        borderTop: '1px solid var(--border-subtle)',
+        background: 'var(--elevated)'
       }}>
         <div style={{
           display: 'flex',
@@ -433,36 +433,43 @@ export default function PhotoInteractions({ photo }) {
             placeholder="Write a comment..."
             style={{
               flex: 1,
-              padding: '12px 16px',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
+              padding: '14px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-button)',
               color: 'var(--text-primary)',
               fontSize: '14px',
               fontFamily: 'inherit',
-              transition: 'border-color 200ms ease'
+              transition: 'border-color 0.2s ease, outline 0.2s ease'
             }}
-            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
-            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            onFocus={(e) => {
+              e.target.style.outline = '2px solid var(--accent)'
+              e.target.style.outlineOffset = '0'
+              e.target.style.borderColor = 'transparent'
+            }}
+            onBlur={(e) => {
+              e.target.style.outline = 'none'
+              e.target.style.borderColor = 'var(--border-subtle)'
+            }}
           />
           <button
             onClick={send}
             style={{
-              padding: '12px 16px',
+              padding: 'var(--button-padding)',
               background: 'var(--accent)',
-              color: 'var(--bg)',
+              color: 'var(--text-primary)',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-button)',
               fontSize: '14px',
               fontWeight: 500,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'background 200ms ease',
+              transition: 'background-color 0.2s ease',
               fontFamily: 'inherit'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#6b9b9f'}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
           >
             <Send size={18} strokeWidth={1.5} />

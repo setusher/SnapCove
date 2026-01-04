@@ -63,15 +63,15 @@ export default function Dashboard(){
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <TopNav />
       
-      <div style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
+      <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
           {/* Page Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--section-padding-y)' }}>
             <div>
-              <h1 style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
+              <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px', paddingTop: 'var(--space-2)' }}>
                 Events
               </h1>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
                 Manage and monitor all campus events
               </p>
             </div>
@@ -83,28 +83,21 @@ export default function Dashboard(){
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '10px 20px',
+                  padding: 'var(--button-padding)',
                   background: 'var(--accent)',
-                  color: 'var(--bg)',
+                  color: 'var(--text-primary)',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-button)',
                   fontSize: '14px',
                   fontWeight: 500,
                   cursor: 'pointer',
-                  transition: 'all 200ms ease'
+                  transition: 'background-color 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#6b9b9f'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(89, 131, 146, 0.3)'
+                  e.currentTarget.style.background = '#1a9bc2'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'var(--accent)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
                 <Plus size={16} strokeWidth={2} />
@@ -116,10 +109,10 @@ export default function Dashboard(){
           {/* Events Grid */}
           {events.length === 0 ? (
             <div style={{ 
-              background: 'var(--bg)', 
-              border: '1px solid var(--border)', 
-              borderRadius: '10px', 
-              padding: '48px', 
+              background: 'var(--surface)', 
+              border: '1px solid var(--border-subtle)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: 'var(--section-padding-y)', 
               textAlign: 'center' 
             }}>
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
@@ -129,16 +122,19 @@ export default function Dashboard(){
                 <button 
                   onClick={() => nav("/events/create")}
                   style={{
-                    marginTop: '24px',
-                    padding: '10px 20px',
+                    marginTop: 'var(--space-3)',
+                    padding: 'var(--button-padding)',
                     background: 'var(--accent)',
-                    color: 'var(--bg)',
+                    color: 'var(--text-primary)',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-button)',
                     fontSize: '14px',
                     fontWeight: 500,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
                 >
                   Create Event
                 </button>
@@ -148,7 +144,7 @@ export default function Dashboard(){
             <div style={{ 
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: '28px'
+              gap: 'var(--card-gap)'
             }}>
               {events.map(event => {
                 const coverImage = event.cover_image || null
@@ -161,36 +157,28 @@ export default function Dashboard(){
                     key={event.id}
                     onClick={() => nav(`/events/${event.id}`)}
                     style={{
-                      width: '100%',
-                      maxWidth: '380px',
-                      background: 'var(--bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '10px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-card)',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)'
+                      transition: 'border-color 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-6px)'
-                      e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.3)'
                       e.currentTarget.style.borderColor = 'var(--accent)'
-                      const img = e.currentTarget.querySelector('.cover-image')
-                      if (img) img.style.transform = 'scale(1.05)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                      e.currentTarget.style.borderColor = 'var(--border)'
-                      const img = e.currentTarget.querySelector('.cover-image')
-                      if (img) img.style.transform = 'scale(1)'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
                     }}
                   >
                     {/* Cover Image Section */}
                     <div style={{ 
-                      height: '240px',
+                      height: '200px',
                       width: '100%',
-                      background: coverImage ? 'none' : 'linear-gradient(135deg, #0F1620 0%, #1E2A3A 100%)',
-                      borderBottom: '1px solid var(--border)',
+                      background: coverImage ? 'none' : 'var(--elevated)',
                       overflow: 'hidden',
                       position: 'relative'
                     }}>
@@ -198,12 +186,10 @@ export default function Dashboard(){
                         <img 
                           src={coverImage} 
                           alt={event.title}
-                          className="cover-image"
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover',
-                            transition: 'transform 400ms ease'
+                            objectFit: 'cover'
                           }}
                         />
                       ) : (
@@ -217,21 +203,20 @@ export default function Dashboard(){
                           gap: '12px'
                         }}>
                           <Camera size={32} style={{ color: 'var(--text-secondary)', opacity: 0.5 }} />
-                          <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>No photos yet</p>
+                          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>No thumbnail</p>
                         </div>
                       )}
                     </div>
 
                     {/* Content Section */}
-                    <div style={{ padding: '20px' }}>
+                    <div style={{ padding: 'var(--card-padding)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       {/* Event Title */}
                       <h3 style={{ 
                         fontSize: '18px',
                         fontWeight: 600,
                         lineHeight: 1.3,
                         color: 'var(--text-primary)',
-                        marginBottom: '12px',
-                        maxHeight: '46.8px',
+                        marginBottom: '8px',
                         overflow: 'hidden',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -241,10 +226,10 @@ export default function Dashboard(){
                       </h3>
 
                       {/* Date Row */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                         <Calendar size={14} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
-                        <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          Created: {new Date(event.created_at).toLocaleDateString('en-US', { 
+                        <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          {new Date(event.created_at).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric',
                             year: 'numeric'
@@ -255,7 +240,7 @@ export default function Dashboard(){
                       {/* Stats Row */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
                         <Camera size={14} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
-                        <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                           {albumCount} {albumCount === 1 ? 'Album' : 'Albums'} · {photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}
                         </span>
                       </div>
@@ -265,13 +250,14 @@ export default function Dashboard(){
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontSize: '13px',
+                        padding: '6px 12px',
+                        borderRadius: 'var(--radius-button)',
+                        fontSize: '12px',
                         fontWeight: 500,
-                        background: 'rgba(89, 131, 146, 0.12)',
+                        background: 'transparent',
                         color: 'var(--accent)',
-                        border: '1px solid rgba(89, 131, 146, 0.3)'
+                        border: '1px solid var(--accent)',
+                        marginTop: 'auto'
                       }}>
                         <div style={{
                           width: '6px',

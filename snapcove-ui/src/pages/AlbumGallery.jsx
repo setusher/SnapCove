@@ -145,7 +145,7 @@ export default function AlbumGallery(){
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <TopNav />
       
-      <div style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
+      <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
           {/* Back Button */}
           <button 
@@ -160,9 +160,8 @@ export default function AlbumGallery(){
               fontSize: '14px',
               cursor: 'pointer',
               padding: '12px 0',
-              marginBottom: '32px',
-              marginTop: '16px',
-              transition: 'color 200ms ease'
+              marginBottom: 'var(--section-padding-y)',
+              transition: 'color 0.2s ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
@@ -172,12 +171,12 @@ export default function AlbumGallery(){
           </button>
 
           {/* Page Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--section-padding-y)' }}>
             <div>
-              <h1 style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
+              <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
                 Gallery
               </h1>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
                 {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
               </p>
             </div>
@@ -200,27 +199,25 @@ export default function AlbumGallery(){
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    padding: '10px 20px',
+                    padding: 'var(--button-padding)',
                     background: 'var(--accent)',
-                    color: 'var(--bg)',
+                    color: 'var(--text-primary)',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-button)',
                     fontSize: '14px',
                     fontWeight: 500,
                     cursor: uploading ? 'not-allowed' : 'pointer',
                     opacity: uploading ? 0.6 : 1,
-                    transition: 'all 200ms ease'
+                    transition: 'background-color 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
                     if (!uploading) {
-                      e.currentTarget.style.background = '#6b9b9f'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.background = '#1a9bc2'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!uploading) {
                       e.currentTarget.style.background = 'var(--accent)'
-                      e.currentTarget.style.transform = 'translateY(0)'
                     }
                   }}
                 >
@@ -232,7 +229,7 @@ export default function AlbumGallery(){
                 {uploadFiles.length > 0 && !uploading && (
                   <div style={{
                     background: 'var(--surface)',
-                    border: '1px solid var(--border)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                     padding: '16px',
                     minWidth: '300px',
@@ -296,7 +293,7 @@ export default function AlbumGallery(){
                 {uploading && (
                   <div style={{
                     background: 'var(--surface)',
-                    border: '1px solid var(--border)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                     padding: '16px',
                     minWidth: '300px'
@@ -331,10 +328,10 @@ export default function AlbumGallery(){
           {/* Photos Grid */}
           {photos.length === 0 ? (
             <div style={{ 
-              background: 'var(--bg)', 
-              border: '1px solid var(--border)', 
-              borderRadius: '10px', 
-              padding: '48px', 
+              background: 'var(--surface)', 
+              border: '1px solid var(--border-subtle)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: 'var(--section-padding-y)', 
               textAlign: 'center' 
             }}>
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
@@ -426,7 +423,7 @@ export default function AlbumGallery(){
                         <div style={{
                           width: '32px',
                           height: '32px',
-                          border: '3px solid var(--border)',
+                          border: '2px solid var(--accent)',
                           borderTopColor: 'var(--accent)',
                           borderRadius: '50%',
                           animation: 'spin 1s linear infinite'

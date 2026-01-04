@@ -36,8 +36,8 @@ export default function TopNav() {
         zIndex: 50,
         height: '64px',
         background: 'var(--bg)',
-        borderBottom: '1px solid var(--border)',
-        padding: '0 48px',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: '0 var(--page-padding-x)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -129,7 +129,7 @@ export default function TopNav() {
               height: '36px',
               borderRadius: '50%',
               background: 'var(--accent)',
-              color: 'var(--bg)',
+              color: 'var(--text-primary)',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -150,16 +150,15 @@ export default function TopNav() {
                 top: '44px',
                 right: '0',
                 width: '220px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
+                background: 'var(--elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-card)',
                 padding: '8px',
-                zIndex: 100,
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+                zIndex: 100
               }}
             >
               {/* User Info */}
-              <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ padding: '12px', borderBottom: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                   {user?.name || 'User'}
                 </div>
@@ -186,7 +185,7 @@ export default function TopNav() {
                     color: 'var(--text-primary)',
                     transition: 'background 200ms ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
                   My Profile
@@ -203,7 +202,7 @@ export default function TopNav() {
                     color: 'var(--text-primary)',
                     transition: 'background 200ms ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
                   Help & Support
@@ -211,7 +210,7 @@ export default function TopNav() {
               </div>
 
               {/* Logout */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '4px' }}>
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '4px' }}>
                 <button
                   onClick={logout}
                   style={{

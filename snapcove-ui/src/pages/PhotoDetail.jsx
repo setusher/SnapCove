@@ -114,32 +114,30 @@ export default function PhotoDetail() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'var(--bg)',
-          border: '1px solid var(--border)',
-          borderRadius: '6px',
+          background: 'var(--surface)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-button)',
           color: 'var(--text-primary)',
           cursor: 'pointer',
-          transition: 'all 200ms ease'
+          transition: 'border-color 0.2s ease'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'var(--surface)'
           e.currentTarget.style.borderColor = 'var(--accent)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'var(--bg)'
-          e.currentTarget.style.borderColor = 'var(--border)'
+          e.currentTarget.style.borderColor = 'var(--border-subtle)'
         }}
       >
         <X size={20} strokeWidth={1.5} />
       </button>
 
-      {/* Photo Panel - 70% (LEFT SIDE) */}
+      {/* Photo Panel - Left Side */}
       <div style={{ 
-        width: '70%',
+        flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '40px',
+        padding: 'var(--card-padding)',
         background: 'var(--bg)'
       }}>
         <img 
@@ -148,17 +146,16 @@ export default function PhotoDetail() {
           style={{ 
             maxWidth: '100%',
             maxHeight: 'calc(100vh - 64px)',
-            objectFit: 'contain',
-            borderRadius: '8px'
+            objectFit: 'contain'
           }}
         />
       </div>
 
-      {/* Interactions Panel - 30% (RIGHT SIDE) */}
+      {/* Comments Panel - Right Side (360px) */}
       <div style={{ 
-        width: '30%',
-        background: 'var(--surface)',
-        borderLeft: '1px solid var(--border)',
+        width: '360px',
+        background: 'var(--elevated)',
+        borderLeft: '1px solid var(--border-subtle)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden'

@@ -129,7 +129,7 @@ export default function EventDetail(){
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <TopNav />
       
-      <div style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
+      <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
           {/* Back Button */}
           <button 
@@ -177,7 +177,7 @@ export default function EventDetail(){
                     padding: '10px 20px',
                     background: 'transparent',
                     color: 'var(--text-primary)',
-                    border: '1px solid var(--border)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 500,
@@ -205,7 +205,7 @@ export default function EventDetail(){
                       gap: '8px',
                       padding: '10px 20px',
                       background: 'var(--accent)',
-                      color: 'var(--bg)',
+                      color: 'var(--text-primary)',
                       border: 'none',
                       borderRadius: '8px',
                       fontSize: '14px',
@@ -214,9 +214,9 @@ export default function EventDetail(){
                       transition: 'all 200ms ease'
                     }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#6b9b9f'
+                    e.currentTarget.style.background = '#1a9bc2'
                     e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(89, 131, 146, 0.3)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(18, 130, 162, 0.3)'
                   }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'var(--accent)'
@@ -236,10 +236,10 @@ export default function EventDetail(){
           {/* Albums Grid */}
           {albums.length === 0 ? (
             <div style={{ 
-              background: 'var(--bg)', 
-              border: '1px solid var(--border)', 
-              borderRadius: '10px', 
-              padding: '48px', 
+              background: 'var(--surface)', 
+              border: '1px solid var(--border-subtle)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: 'var(--section-padding-y)', 
               textAlign: 'center' 
             }}>
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
@@ -249,16 +249,19 @@ export default function EventDetail(){
                 <button 
                   onClick={() => nav(`/events/${eventId}/albums/create`)}
                   style={{
-                    marginTop: '24px',
-                    padding: '10px 20px',
+                    marginTop: 'var(--space-3)',
+                    padding: 'var(--button-padding)',
                     background: 'var(--accent)',
-                    color: 'var(--bg)',
+                    color: 'var(--text-primary)',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-button)',
                     fontSize: '14px',
                     fontWeight: 500,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1a9bc2'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
                 >
                   Create Album
                 </button>
@@ -267,8 +270,8 @@ export default function EventDetail(){
           ) : (
             <div style={{ 
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '28px'
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: 'var(--card-gap)'
             }}>
               {albums.map(album => {
                 const photoCount = albumPhotoCounts[album.id] || 0
@@ -277,31 +280,28 @@ export default function EventDetail(){
                     key={album.id}
                     onClick={() => nav(`/events/${eventId}/albums/${album.id}`)}
                     style={{
-                      width: '280px',
-                      background: 'var(--bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '10px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-card)',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)'
+                      transition: 'border-color 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-6px)'
-                      e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.3)'
                       e.currentTarget.style.borderColor = 'var(--accent)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                      e.currentTarget.style.borderColor = 'var(--border)'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
                     }}
                   >
                     {/* Album Cover */}
                     <div style={{ 
                       height: '200px',
                       width: '100%',
-                      background: album.cover_image ? 'none' : 'linear-gradient(135deg, #0F1620 0%, #1E2A3A 100%)',
-                      borderBottom: '1px solid var(--border)',
+                      background: album.cover_image ? 'none' : 'var(--elevated)',
                       overflow: 'hidden'
                     }}>
                       {album.cover_image ? (
@@ -317,13 +317,13 @@ export default function EventDetail(){
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{album.title}</span>
+                          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{album.title}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
-                    <div style={{ padding: '20px' }}>
+                    <div style={{ padding: 'var(--card-padding)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <h3 style={{ 
                         fontSize: '18px',
                         fontWeight: 600,
@@ -333,35 +333,36 @@ export default function EventDetail(){
                       }}>
                         {album.title}
                       </h3>
-                      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                         {photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}
                       </p>
                       <button
                         onClick={(e) => openAlbumDetailsModal(album, e)}
                         style={{
                           width: '100%',
-                          padding: '8px 12px',
+                          padding: 'var(--button-padding)',
                           background: 'transparent',
                           color: 'var(--text-secondary)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '6px',
-                          fontSize: '12px',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-button)',
+                          fontSize: '14px',
                           fontWeight: 500,
                           cursor: 'pointer',
-                          transition: 'all 200ms ease',
+                          transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '6px'
+                          gap: '8px',
+                          marginTop: 'auto'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'var(--surface)'
+                          e.currentTarget.style.background = 'var(--elevated)'
                           e.currentTarget.style.borderColor = 'var(--accent)'
                           e.currentTarget.style.color = 'var(--accent)'
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'transparent'
-                          e.currentTarget.style.borderColor = 'var(--border)'
+                          e.currentTarget.style.borderColor = 'var(--border-subtle)'
                           e.currentTarget.style.color = 'var(--text-secondary)'
                         }}
                       >
@@ -380,23 +381,23 @@ export default function EventDetail(){
             <div style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.7)',
+              background: 'rgba(10, 17, 40, 0.8)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000
             }} onClick={() => setShowEventDetailsModal(false)}>
               <div style={{
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: '10px',
-                padding: '24px',
+                background: 'var(--elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-card)',
+                padding: 'var(--card-padding)',
                 maxWidth: '600px',
                 width: '90%',
                 maxHeight: '90vh',
                 overflow: 'auto'
               }} onClick={(e) => e.stopPropagation()}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     Event Details
                   </h2>
@@ -521,9 +522,9 @@ export default function EventDetail(){
                       borderRadius: '6px',
                       fontSize: '13px',
                       fontWeight: 500,
-                      background: 'rgba(89, 131, 146, 0.12)',
+                      background: 'transparent',
                       color: 'var(--accent)',
-                      border: '1px solid rgba(89, 131, 146, 0.3)'
+                      border: '1px solid var(--accent)'
                     }}>
                       <div style={{
                         width: '6px',
@@ -547,7 +548,7 @@ export default function EventDetail(){
                         height: '200px',
                         borderRadius: '8px',
                         overflow: 'hidden',
-                        border: '1px solid var(--border)',
+                        border: '1px solid var(--border-subtle)',
                         marginBottom: '12px'
                       }}>
                         <img 
@@ -585,11 +586,11 @@ export default function EventDetail(){
                       onClick={() => eventThumbnailInputRef.current?.click()}
                       disabled={uploadingThumbnail}
                       style={{
-                        padding: '10px 20px',
+                        padding: 'var(--button-padding)',
                         background: 'var(--accent)',
-                        color: 'var(--bg)',
+                        color: 'var(--text-primary)',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-button)',
                         fontSize: '14px',
                         fontWeight: 500,
                         cursor: uploadingThumbnail ? 'not-allowed' : 'pointer',
@@ -597,11 +598,11 @@ export default function EventDetail(){
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        transition: 'all 200ms ease'
+                        transition: 'background-color 0.2s ease'
                       }}
                       onMouseEnter={(e) => {
                         if (!uploadingThumbnail) {
-                          e.currentTarget.style.background = '#6b9b9f'
+                          e.currentTarget.style.background = '#1a9bc2'
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -624,7 +625,7 @@ export default function EventDetail(){
             <div style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.7)',
+              background: 'rgba(10, 17, 40, 0.8)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -634,16 +635,16 @@ export default function EventDetail(){
               setSelectedAlbum(null)
             }}>
               <div style={{
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: '10px',
-                padding: '24px',
+                background: 'var(--elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-card)',
+                padding: 'var(--card-padding)',
                 maxWidth: '600px',
                 width: '90%',
                 maxHeight: '90vh',
                 overflow: 'auto'
               }} onClick={(e) => e.stopPropagation()}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     Album Details
                   </h2>
@@ -730,7 +731,7 @@ export default function EventDetail(){
                         height: '200px',
                         borderRadius: '8px',
                         overflow: 'hidden',
-                        border: '1px solid var(--border)',
+                        border: '1px solid var(--border-subtle)',
                         marginBottom: '12px'
                       }}>
                         <img 
@@ -768,11 +769,11 @@ export default function EventDetail(){
                       onClick={() => albumThumbnailInputRef.current?.click()}
                       disabled={uploadingThumbnail}
                       style={{
-                        padding: '10px 20px',
+                        padding: 'var(--button-padding)',
                         background: 'var(--accent)',
-                        color: 'var(--bg)',
+                        color: 'var(--text-primary)',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-button)',
                         fontSize: '14px',
                         fontWeight: 500,
                         cursor: uploadingThumbnail ? 'not-allowed' : 'pointer',
@@ -780,11 +781,11 @@ export default function EventDetail(){
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        transition: 'all 200ms ease'
+                        transition: 'background-color 0.2s ease'
                       }}
                       onMouseEnter={(e) => {
                         if (!uploadingThumbnail) {
-                          e.currentTarget.style.background = '#6b9b9f'
+                          e.currentTarget.style.background = '#1a9bc2'
                         }
                       }}
                       onMouseLeave={(e) => {
