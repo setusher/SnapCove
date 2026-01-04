@@ -1,5 +1,5 @@
 /* ============================================
-   SNAPCOVE UI - MODERN DESIGN SYSTEM
+   SNAPCOVE UI - REFINED DESIGN SYSTEM
    ============================================ */
 
 * {
@@ -9,17 +9,24 @@
 }
 
 :root {
-  /* Dark Theme Color Palette */
-  --bg: #0B0F14;
-  --surface: #0F1620;
-  --border: #1E2A3A;
+  /* Refined Color Palette */
+  --bg: #344e41;
+  --surface: #3a5a40;
+  --border: #588157;
   
-  --text-primary: #E6EDF3;
-  --text-secondary: #9AA4AF;
+  --text-primary: #dad7cd;
+  --text-secondary: #a3b18a;
   
-  --accent: #5BC0BE;
-  --accent-secondary: #6FFFE9;
-  --danger: #E5533D;
+  --accent: #588157;
+  --accent-hover: #6b9b6f;
+  --accent-light: #a3b18a;
+  --danger: #c1666b;
+  
+  /* Legacy variable support */
+  --primary-bg: #344e41;
+  --secondary-bg: #3a5a40;
+  --secondary-text: #a3b18a;
+  --error: #c1666b;
   
   /* Spacing */
   --space-1: 4px;
@@ -34,10 +41,10 @@
   --space-16: 64px;
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35);
   
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
@@ -75,12 +82,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #141a28;
+  background: var(--accent);
 }
 
 ::selection {
   background: var(--accent);
-  color: white;
+  color: var(--text-primary);
 }
 
 *:focus-visible {
@@ -144,7 +151,7 @@ html {
 /* Buttons */
 .btn {
   padding: var(--space-3) var(--space-4);
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 500;
   font-size: 14px;
   font-family: inherit;
@@ -160,14 +167,14 @@ html {
 
 .btn-primary {
   background: var(--accent);
-  color: var(--bg);
-  box-shadow: none;
+  color: var(--text-primary);
+  border: 1px solid var(--accent);
 }
 
 .btn-primary:hover {
-  background: #4da8a6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(91, 192, 190, 0.3);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-2px);
 }
 
 .btn-primary:active {
@@ -181,8 +188,9 @@ html {
 }
 
 .btn-secondary:hover {
-  background: #141a28;
+  background: var(--accent);
   border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .btn-ghost {
@@ -195,6 +203,7 @@ html {
   background: var(--surface);
   color: var(--text-primary);
   border-color: var(--border);
+  transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -204,8 +213,9 @@ html {
 }
 
 .btn-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: var(--error);
+  background: rgba(193, 102, 107, 0.15);
+  border-color: var(--danger);
+  transform: translateY(-2px);
 }
 
 /* Inputs */
@@ -214,7 +224,7 @@ html {
   padding: var(--space-3) var(--space-4);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
@@ -224,7 +234,7 @@ html {
 .input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  background: var(--bg);
 }
 
 .input::placeholder {
@@ -239,9 +249,9 @@ textarea.input {
 
 /* Cards */
 .card {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: var(--space-6);
   transition: all 200ms ease;
 }
@@ -255,9 +265,9 @@ textarea.input {
 }
 
 .card-interactive:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: var(--accent);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Badges */
@@ -273,9 +283,9 @@ textarea.input {
 }
 
 .badge-primary {
-  background: rgba(91, 192, 190, 0.12);
-  color: var(--accent);
-  border-color: rgba(91, 192, 190, 0.3);
+  background: rgba(88, 129, 87, 0.2);
+  color: var(--accent-light);
+  border-color: var(--accent);
 }
 
 .badge-primary::before {
@@ -283,9 +293,9 @@ textarea.input {
 }
 
 .badge-success {
-  background: rgba(91, 192, 190, 0.12);
-  color: var(--accent);
-  border-color: rgba(91, 192, 190, 0.3);
+  background: rgba(88, 129, 87, 0.2);
+  color: var(--accent-light);
+  border-color: var(--accent);
 }
 
 .badge-success::before {
@@ -293,15 +303,15 @@ textarea.input {
 }
 
 .badge-warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(218, 215, 205, 0.15);
+  color: var(--text-secondary);
+  border-color: var(--text-secondary);
 }
 
 .badge-error {
-  background: rgba(229, 83, 61, 0.15);
+  background: rgba(193, 102, 107, 0.2);
   color: var(--danger);
-  border-color: rgba(229, 83, 61, 0.3);
+  border-color: var(--danger);
 }
 
 /* Utilities */
