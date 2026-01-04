@@ -54,33 +54,42 @@ export default function Signup(){
     setLoading(true)
     try {
       const res = await api.post("/auth/signup/", { name, email, password })
-      localStorage.setItem("access_token", res.data.access)
-      localStorage.setItem("refresh_token", res.data.refresh)
-      localStorage.setItem("user", JSON.stringify(res.data.user))
-      nav("/dashboard")
+      
+      // Check if OTP verification is needed
+      if (res.data.needs_verification) {
+        // Navigate to verify OTP page with email
+        nav("/verify-otp", { state: { email } })
+      } else {
+        // Direct signup (shouldn't happen with current backend, but handle it)
+        localStorage.setItem("access_token", res.data.access)
+        localStorage.setItem("refresh_token", res.data.refresh)
+        localStorage.setItem("user", JSON.stringify(res.data.user))
+        nav("/dashboard")
+      }
     } catch(e){
-      alert("Signup failed: " + (e.response?.data?.error || JSON.stringify(e.response?.data) || "Please try again"))
+      const errorMsg = e.response?.data?.error || e.response?.data?.detail || "Please try again"
+      alert("Signup failed: " + errorMsg)
     } finally {
       setLoading(false)
     }
   }
 
   return(
-    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-12) var(--space-4)' }}>
+    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-4) var(--space-4)' }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
           <h1 className="heading-xl" style={{ marginBottom: 'var(--space-2)' }}>SnapCove</h1>
-          <h2 className="heading-lg" style={{ marginBottom: 'var(--space-3)' }}>Create Account</h2>
+          <h2 className="heading-lg" style={{ marginBottom: 'var(--space-2)' }}>Create Account</h2>
           <p className="text-body" style={{ color: 'var(--secondary-text)' }}>
             Get started with your free account
           </p>
         </div>
 
-        <div className="card" style={{ padding: 'var(--space-8)' }}>
-          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-            <div ref={googleButtonRef} style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-6)' }}></div>
+        <div className="card" style={{ padding: 'var(--card-padding)' }}>
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--form-field-gap)' }}>
+            <div ref={googleButtonRef} style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: 'var(--form-field-gap)' }}></div>
 
-            <div style={{ position: 'relative', margin: 'var(--space-6) 0' }}>
+            <div style={{ position: 'relative', margin: 'var(--form-field-gap) 0' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
                 <div style={{ width: '100%', height: '1px', background: 'var(--border)' }}></div>
               </div>

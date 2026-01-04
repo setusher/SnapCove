@@ -32,44 +32,81 @@ export default function VerifyOTP() {
   }
   
 
-  return (
-    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-12) var(--space-4)' }}>
-      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: 'var(--space-10)' }}>
-        <h2 className="heading-lg" style={{ textAlign: 'center', marginBottom: 'var(--space-2)' }}>Verify OTP</h2>
-        <p style={{ textAlign: 'center', color: 'var(--secondary-text)', marginBottom: 'var(--space-6)' }}>
-          We sent a 6-digit code to <span style={{ color: 'var(--accent)' }}>{email}</span>
-        </p>
+  const handleResendOTP = async () => {
+    try {
+      await api.post("/auth/resend-otp/", { email })
+      alert("New OTP sent to your email")
+    } catch (err) {
+      alert("Failed to resend OTP. Please try again.")
+    }
+  }
 
-        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+  // Redirect to signup if no email provided
+  if (!email) {
+    nav("/signup")
+    return null
+  }
+
+  return (
+    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-4) var(--space-4)' }}>
+      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: 'var(--card-padding)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+          <h2 className="heading-lg" style={{ marginBottom: 'var(--space-2)' }}>Verify OTP</h2>
+          <p style={{ textAlign: 'center', color: 'var(--secondary-text)', fontSize: '14px' }}>
+            We sent a 6-digit code to <span style={{ color: 'var(--accent)', fontWeight: 500 }}>{email}</span>
+          </p>
+        </div>
+
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--form-field-gap)' }}>
           <input
             value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
             placeholder="Enter 6-digit OTP"
             maxLength={6}
             className="input"
             style={{ textAlign: 'center', letterSpacing: '0.5em', fontSize: '18px', fontWeight: 600 }}
             required
           />
+          
           <button
             type="button"
-            onClick={async () => {
-              await api.post("/auth/resend-otp/", { email })
-              alert("New OTP sent")
+            onClick={handleResendOTP}
+            className="btn btn-ghost"
+            style={{ 
+              width: '100%',
+              fontSize: '14px',
+              padding: 'var(--button-padding)'
             }}
-            className="text-caption"
-            style={{ color: 'var(--accent)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center' }}
           >
             Resend OTP
           </button>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || otp.length !== 6}
             className="btn btn-primary"
-            style={{ width: '100%', padding: 'var(--space-4)' }}
+            style={{ width: '100%' }}
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
+
+          <div style={{ textAlign: 'center', paddingTop: 'var(--space-2)' }}>
+            <button
+              type="button"
+              onClick={() => nav("/signup")}
+              className="text-body"
+              style={{ 
+                fontWeight: 500, 
+                color: 'var(--accent)', 
+                background: 'transparent', 
+                border: 'none', 
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Back to Signup
+            </button>
+          </div>
         </form>
       </div>
     </div>

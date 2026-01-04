@@ -65,7 +65,7 @@ class VerifyOTPView(APIView):
             email=pending.email,
             password=pending.password,
             name=pending.name,
-            role=pending.role,
+            role=pending.role or "student",
             batch=pending.batch,
             department=pending.department,
         )
@@ -116,7 +116,6 @@ class MeView(APIView):
 class GoogleAuthView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        # Frontend sends 'id_token', accept both for compatibility
         token = request.data.get('id_token') or request.data.get('token')
 
         if not token:
@@ -154,29 +153,29 @@ class GoogleAuthView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Try to find user by google_sub first
+      
         user = User.objects.filter(google_sub=sub).first()
 
-        # If not found, try to find by email
+       
         if not user:
             user = User.objects.filter(email=email).first()
             if user:
-                # Update existing user with Google info
+                
                 user.google_sub = sub
                 user.auth_provider = "google"
                 if name and not user.name:
                     user.name = name
                 user.save()
 
-        # Create new user if doesn't exist
+       
         if not user:
             user = User.objects.create_user(
                 email=email,
-                password=None,  # Google users don't need passwords
+                password=None,  
                 name=name or email.split('@')[0],
                 auth_provider="google",
                 google_sub=sub,
-                role=None  # User will need to select role later
+                role="student"
             )
 
         # if not email: 
@@ -233,7 +232,6 @@ class ResendOTPView(APIView):
         if not pending:
             return Response({"error":"No pending signup"}, 404)
 
-        # Generate new OTP
         otp = str(random.randint(100000,999999))
         pending.otp = otp
         pending.expires_at = timezone.now() + timedelta(minutes=10)

@@ -65,18 +65,18 @@ export default function Login(){
   }
 
   return(
-    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-12) var(--space-4)' }}>
+    <div className="flex-center" style={{ minHeight: '100vh', background: 'var(--primary-bg)', padding: 'var(--space-4) var(--space-4)' }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
           <h1 className="heading-xl" style={{ marginBottom: 'var(--space-2)' }}>SnapCove</h1>
-          <h2 className="heading-lg" style={{ marginBottom: 'var(--space-3)' }}>Welcome Back</h2>
+          <h2 className="heading-lg" style={{ marginBottom: 'var(--space-2)' }}>Welcome Back</h2>
           <p className="text-body" style={{ color: 'var(--secondary-text)' }}>
             Sign in to your account
           </p>
         </div>
 
-        <div className="card" style={{ padding: 'var(--space-8)' }}>
-          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+        <div className="card" style={{ padding: 'var(--card-padding)' }}>
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--form-field-gap)' }}>
             <div>
               <label className="text-caption" style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--secondary-text)' }}>
                 Email Address
@@ -123,7 +123,7 @@ export default function Login(){
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
 
-            <div style={{ position: 'relative', margin: 'var(--space-6) 0' }}>
+            <div style={{ position: 'relative', margin: 'var(--form-field-gap) 0' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
                 <div style={{ width: '100%', height: '1px', background: 'var(--border)' }}></div>
               </div>
