@@ -92,28 +92,30 @@ def run_resnet(path):
 
     return tags
 
-
-def apply_watermark(image_path, text="SnapCove"): 
+def apply_watermark(image_path, text="SnapCove"):
     img = Image.open(image_path).convert("RGBA")
-    txt = Image.new("RGBA", img.size, (255,255,255,0))
-    draw = ImageDraw.Draw(txt)
+    overlay = Image.new("RGBA", img.size, (255,255,255,0))
+    draw = ImageDraw.Draw(overlay)
 
-    font_size = max(18, int(img.size[0] * 0.04))
-    font = ImageFont.load_default()
+    # dynamic size
+    font_size = max(20, int(img.size[0] * 0.04))
 
-    scale = font_size / 11
-    font = ImageFont.FreeTypeFont(font.path, int(font.size * scale))
+    # use Pillow bundled font safely
+    try:
+        font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size)
+    except:
+        font = ImageFont.load_default()
 
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    bbox = draw.textbbox((0,0), text, font=font)
+    w = bbox[2]-bbox[0]
+    h = bbox[3]-bbox[1]
 
-    x = img.size[0] - text_w - 25
-    y = img.size[1] - text_h - 25
+    x = img.size[0] - w - 25
+    y = img.size[1] - h - 25
 
     draw.text((x,y), text, fill=(255,255,255,160), font=font)
 
-    Image.alpha_composite(img, txt).convert("RGB").save(image_path)
+    Image.alpha_composite(img, overlay).convert("RGB").save(image_path)
 
 
 def process_photo(photo):
