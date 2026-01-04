@@ -5,6 +5,9 @@ import exifread
 import torch
 import open_clip
 from torchvision import models, transforms
+from PIL import ImageDraw, ImageFont
+
+font = ImageFont.load_default()
 
 clip_model, _, clip_preprocess = open_clip.create_model_and_transforms(
     'ViT-B-32',
@@ -19,7 +22,7 @@ SEMANTIC_TAGS = [
     "outdoor event", "indoor event"
 ]
 
-# Load ResNet50 once
+
 model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
 model.eval()
 
@@ -29,7 +32,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-# -------- EXIF --------
+
 
 def extract_exif(path):
     with open(path, 'rb') as f:
@@ -39,13 +42,11 @@ def extract_exif(path):
     gps = str(tags.get("GPS GPSLatitude", ""))
     capture_time = tags.get("EXIF DateTimeOriginal")
 
-    # convert to real JSON dict
+ 
     clean_exif = {k: str(v) for k, v in tags.items()}
 
     return camera, gps, capture_time, clean_exif
 
-
-# -------- RESNET --------
 
 def run_resnet(path):
     import exifread
@@ -92,12 +93,31 @@ def run_resnet(path):
     return tags
 
 
-# -------- MAIN PIPELINE --------
+def apply_watermark(image_path, text="SnapCove"): 
+    img = Image.open(image_path).convert("RGBA")
+    txt = Image.new("RGBA", img.size, (255,255,255,0))
+    draw = ImageDraw.Draw(txt)
+
+    font_size = max(18, int(img.size[0] * 0.04))
+    font = ImageFont.load_default()
+
+    scale = font_size / 11
+    font = ImageFont.FreeTypeFont(font.path, int(font.size * scale))
+
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+
+    x = img.size[0] - text_w - 25
+    y = img.size[1] - text_h - 25
+
+    draw.text((x,y), text, fill=(255,255,255,160), font=font)
+
+    Image.alpha_composite(img, txt).convert("RGB").save(image_path)
+
 
 def process_photo(photo):
-    print(">>> ENTERED REAL PIPELINE <<<", photo.id)
-
-    # wait until file exists (macOS Celery fix)
+    print(" ENTERED REAL PIPELINE ", photo.id)
     for _ in range(30):
         photo.refresh_from_db()
         if photo.image and os.path.exists(photo.image.path):
@@ -112,7 +132,7 @@ def process_photo(photo):
 
     photo.processing_status = "processing"
     photo.save()
-
+    apply_watermark(photo.image.path)
     camera, gps, capture_time, exif = extract_exif(photo.image.path)
     labels = run_resnet(photo.image.path)
 
@@ -132,4 +152,5 @@ def process_photo(photo):
         "capture_time"
     ])
 
-    print(">>> PHOTO METADATA SAVED <<<")
+    print("PHOTO METADATA SAVED")
+
