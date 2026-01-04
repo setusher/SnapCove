@@ -17,7 +17,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            return [IsCoordinator()| IsAdmin()]
+            return [IsAlbumUploader()]
         if self.action in ['update', 'partial_update', 'destroy']:
             return [IsEventOwnerOrAdmin()]
         return [IsAuthenticated()]
