@@ -143,8 +143,9 @@ export default function EventDetail(){
               color: 'var(--text-secondary)',
               fontSize: '14px',
               cursor: 'pointer',
-              padding: '8px 0',
-              marginBottom: '24px',
+              padding: '12px 0',
+              marginBottom: '32px',
+              marginTop: '16px',
               transition: 'color 200ms ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
@@ -212,11 +213,11 @@ export default function EventDetail(){
                       cursor: 'pointer',
                       transition: 'all 200ms ease'
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#4da8a6'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(91, 192, 190, 0.3)'
-                    }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#6b9b9f'
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(89, 131, 146, 0.3)'
+                  }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'var(--accent)'
                       e.currentTarget.style.transform = 'translateY(0)'
@@ -520,9 +521,9 @@ export default function EventDetail(){
                       borderRadius: '6px',
                       fontSize: '13px',
                       fontWeight: 500,
-                      background: 'rgba(91, 192, 190, 0.12)',
+                      background: 'rgba(89, 131, 146, 0.12)',
                       color: 'var(--accent)',
-                      border: '1px solid rgba(91, 192, 190, 0.3)'
+                      border: '1px solid rgba(89, 131, 146, 0.3)'
                     }}>
                       <div style={{
                         width: '6px',
@@ -600,7 +601,7 @@ export default function EventDetail(){
                       }}
                       onMouseEnter={(e) => {
                         if (!uploadingThumbnail) {
-                          e.currentTarget.style.background = '#4da8a6'
+                          e.currentTarget.style.background = '#6b9b9f'
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -783,7 +784,7 @@ export default function EventDetail(){
                       }}
                       onMouseEnter={(e) => {
                         if (!uploadingThumbnail) {
-                          e.currentTarget.style.background = '#4da8a6'
+                          e.currentTarget.style.background = '#6b9b9f'
                         }
                       }}
                       onMouseLeave={(e) => {

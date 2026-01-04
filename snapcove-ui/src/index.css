@@ -9,23 +9,23 @@
 }
 
 :root {
-  /* Refined Color Palette */
-  --bg: #344e41;
-  --surface: #3a5a40;
-  --border: #588157;
+  /* New Color Palette */
+  --bg: #01161e;
+  --surface: #124559;
+  --border: #598392;
   
-  --text-primary: #dad7cd;
-  --text-secondary: #a3b18a;
+  --text-primary: #eff6e0;
+  --text-secondary: #aec3b0;
   
-  --accent: #588157;
-  --accent-hover: #6b9b6f;
-  --accent-light: #a3b18a;
+  --accent: #598392;
+  --accent-hover: #6b9b9f;
+  --accent-light: #aec3b0;
   --danger: #c1666b;
   
   /* Legacy variable support */
-  --primary-bg: #344e41;
-  --secondary-bg: #3a5a40;
-  --secondary-text: #a3b18a;
+  --primary-bg: #01161e;
+  --secondary-bg: #124559;
+  --secondary-text: #aec3b0;
   --error: #c1666b;
   
   /* Spacing */
@@ -283,7 +283,7 @@ textarea.input {
 }
 
 .badge-primary {
-  background: rgba(88, 129, 87, 0.2);
+  background: rgba(89, 131, 146, 0.2);
   color: var(--accent-light);
   border-color: var(--accent);
 }
@@ -293,7 +293,7 @@ textarea.input {
 }
 
 .badge-success {
-  background: rgba(88, 129, 87, 0.2);
+  background: rgba(89, 131, 146, 0.2);
   color: var(--accent-light);
   border-color: var(--accent);
 }

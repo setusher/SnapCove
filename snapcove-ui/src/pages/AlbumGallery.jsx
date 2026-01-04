@@ -159,8 +159,9 @@ export default function AlbumGallery(){
               color: 'var(--text-secondary)',
               fontSize: '14px',
               cursor: 'pointer',
-              padding: '8px 0',
-              marginBottom: '24px',
+              padding: '12px 0',
+              marginBottom: '32px',
+              marginTop: '16px',
               transition: 'color 200ms ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
@@ -212,7 +213,7 @@ export default function AlbumGallery(){
                   }}
                   onMouseEnter={(e) => {
                     if (!uploading) {
-                      e.currentTarget.style.background = '#4da8a6'
+                      e.currentTarget.style.background = '#6b9b9f'
                       e.currentTarget.style.transform = 'translateY(-1px)'
                     }
                   }}

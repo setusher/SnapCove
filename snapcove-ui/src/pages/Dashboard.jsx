@@ -94,9 +94,9 @@ export default function Dashboard(){
                   transition: 'all 200ms ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#4da8a6'
+                  e.currentTarget.style.background = '#6b9b9f'
                   e.currentTarget.style.transform = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(91, 192, 190, 0.3)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(89, 131, 146, 0.3)'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'var(--accent)'
@@ -269,9 +269,9 @@ export default function Dashboard(){
                         borderRadius: '6px',
                         fontSize: '13px',
                         fontWeight: 500,
-                        background: 'rgba(91, 192, 190, 0.12)',
+                        background: 'rgba(89, 131, 146, 0.12)',
                         color: 'var(--accent)',
-                        border: '1px solid rgba(91, 192, 190, 0.3)'
+                        border: '1px solid rgba(89, 131, 146, 0.3)'
                       }}>
                         <div style={{
                           width: '6px',

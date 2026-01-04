@@ -462,7 +462,7 @@ export default function PhotoInteractions({ photo }) {
               transition: 'background 200ms ease',
               fontFamily: 'inherit'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#4da8a6'}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#6b9b9f'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
           >
             <Send size={18} strokeWidth={1.5} />
