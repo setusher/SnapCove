@@ -3,6 +3,29 @@ from django.dispatch import receiver
 from .models import Notification
 from interactions.models import Comment, Like
 from photos.models import Photo
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
+def push_realtime(notification):
+    if not notification.recipient_id:
+        return
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{notification.recipient_id}",
+        {
+            "type": "notify",
+            "data": {
+                "id": notification.id,
+                "message": notification.message,
+                "type": notification.notification_type,
+                "photo": notification.photo_id,
+                "created_at": notification.created_at.isoformat(),
+            }
+        }
+    )
+
+
 
 @receiver(post_save, sender=Like)
 def notify_like(sender, instance, created, **kwargs):
@@ -17,13 +40,14 @@ def notify_like(sender, instance, created, **kwargs):
         return
 
     try:
-        Notification.objects.create(
+        notif = Notification.objects.create(
             recipient=recipient,
             actor=actor,
             notification_type='like',
             photo=photo,
             message=f"{actor.name} liked your photo",
         )
+        push_realtime(notif)
     except Exception as e:
         import sys
         print(f"Error creating like notification: {e}", file=sys.stderr)
@@ -83,7 +107,7 @@ def notify_comment(sender, instance, created, **kwargs):
                     photo=instance.photo,  # Add photo field
                     message=f"{actor.name} replied to your comment",
                 )
-                # #region agent log
+                push_realtime(notif)
                 try:
                     with open('/Users/shachithakur/Desktop/CODES/SnapCove/.cursor/debug.log', 'a') as f:
                         f.write(json.dumps({
@@ -129,7 +153,7 @@ def notify_comment(sender, instance, created, **kwargs):
                     "timestamp": int(__import__('time').time() * 1000)
                 }) + '\n')
         except: pass
-        # #endregion
+        
         
         if recipient and recipient != actor:
             try:
@@ -138,10 +162,11 @@ def notify_comment(sender, instance, created, **kwargs):
                     actor=actor,
                     notification_type='comment',
                     comment=instance,
-                    photo=instance.photo,  # Add photo field
+                    photo=instance.photo,  
                     message=f"{actor.name} commented on your photo",
                 )
-                # #region agent log
+                push_realtime(notif)
+                
                 try:
                     with open('/Users/shachithakur/Desktop/CODES/SnapCove/.cursor/debug.log', 'a') as f:
                         f.write(json.dumps({
@@ -154,9 +179,9 @@ def notify_comment(sender, instance, created, **kwargs):
                             "timestamp": int(__import__('time').time() * 1000)
                         }) + '\n')
                 except: pass
-                # #endregion
+              
             except Exception as e:
-                # #region agent log
+               
                 try:
                     with open('/Users/shachithakur/Desktop/CODES/SnapCove/.cursor/debug.log', 'a') as f:
                         f.write(json.dumps({
@@ -169,7 +194,7 @@ def notify_comment(sender, instance, created, **kwargs):
                             "timestamp": int(__import__('time').time() * 1000)
                         }) + '\n')
                 except: pass
-                # #endregion
+               
                 print(f"Error creating comment notification: {e}", file=sys.stderr)
 
 @receiver(post_save, sender=Photo)
@@ -180,13 +205,14 @@ def notify_photo(sender, instance,created, **kwargs):
     if instance.album and instance.album.event:
         event = instance.album.event
         if event.created_by != instance.uploaded_by:
-            Notification.objects.create(
+            notif = Notification.objects.create(
                 recipient=event.created_by,
                 actor=instance.uploaded_by,
                 notification_type='upload',
                 photo=instance,
                 message=f"{instance.uploaded_by.name} uploaded a new photo to the event {event.title}",
             )
+            push_realtime(notif)
 
 
     

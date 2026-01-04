@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'django_celery_results',
+    'channels',
 
     # Local Apps
     'accounts',
@@ -95,6 +96,7 @@ WSGI_APPLICATION = 'snapcove_backend.wsgi.application'
 
 GOOGLE_CLIENT_ID = "447171812608-0c66t6gioscl9kl3m5gqqkkj8r4ni29n.apps.googleusercontent.com"
 
+ASGI_APPLICATION = "snapcove_backend.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -211,3 +213,10 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_WORKER_POOL = 'solo'
 CELERY_TASK_ALWAYS_EAGER = False
 CELERYD_FORCE_EXECV = True
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
+    }
+}
