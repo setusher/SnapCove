@@ -1,10 +1,10 @@
-# 📸 SnapCove
+# SnapCove
 
 SnapCove is a role-based, AI-powered event photo management platform for colleges, fests and universities.
 It securely handles uploads, approvals, AI metadata extraction, watermarking, and public distribution of event photos.
 Built for scale, moderation, and real campus workflows.
 
-## 🚀 What SnapCove Solves
+## What SnapCove Solves
 
 College events generate thousands of photos:
 - No structure
@@ -24,9 +24,9 @@ College events generate thousands of photos:
 | No access control | Role-based upload & view |
 | No AI | Smart tagging & classification |
 
-## ✨ Core Features
+## Core Features
 
-### 🔐 Role Based System
+### Role Based System
 
 | Role | Powers |
 |------|--------|
@@ -35,7 +35,7 @@ College events generate thousands of photos:
 | **Photographer** | Upload & manage photos |
 | **Student** | View public approved photos |
 
-### 🖼 Smart Upload Pipeline
+### Smart Upload Pipeline
 
 - Bulk & single uploads
 - Automatic background processing (Celery)
@@ -44,7 +44,7 @@ College events generate thousands of photos:
 - Auto watermarking
 - Approval workflow
 
-### 🧠 AI Metadata Engine
+### AI Metadata Engine
 
 Each photo automatically gets:
 
@@ -58,7 +58,7 @@ Each photo automatically gets:
 | Event type tags | AI |
 | Watermark | Auto applied |
 
-### 🧾 Moderation Workflow
+### Moderation Workflow
 
 | Stage | Description |
 |-------|-------------|
@@ -68,13 +68,13 @@ Each photo automatically gets:
 | **Approved** | Publicly visible |
 | **Rejected** | Hidden |
 
-### 🔔 Real-time Notifications
+### Real-time Notifications
 
 - Like alerts
 - Comment alerts
 - Approval alerts
 
-## 🏗 Architecture
+## Architecture
 
 ```
 React Frontend
@@ -88,7 +88,7 @@ AI + EXIF Pipeline
 PostgreSQL + Media Store
 ```
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Tech |
 |-------|------|
@@ -100,7 +100,7 @@ PostgreSQL + Media Store
 | Auth | JWT + OTP |
 | Admin | Django Admin |
 
-## 📂 Folder Structure
+## Folder Structure
 
 ```
 snapcove_backend/
@@ -119,7 +119,7 @@ snapcove-ui/
  │  └ utils/
 ```
 
-## 🔧 Setup
+## Setup
 
 ### Backend
 
@@ -143,7 +143,7 @@ npm install
 npm run dev
 ```
 
-## 👑 Admin Access
+## Admin Access
 
 ```bash
 python manage.py createsuperuser
@@ -151,7 +151,7 @@ python manage.py createsuperuser
 
 Login at: `http://localhost:8000/admin`
 
-## 📝 Environment Variables
+## Environment Variables
 
 Create a `.env` file in `snapcove_backend/` with:
 
@@ -162,7 +162,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/snapcove_db
 REDIS_URL=redis://localhost:6379/0
 ```
 
-## 🚦 Running the Application
+## Running the Application
 
 1. **Start Redis** (required for Celery):
    ```bash
