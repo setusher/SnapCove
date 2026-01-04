@@ -214,5 +214,17 @@ def notify_photo(sender, instance,created, **kwargs):
             )
             push_realtime(notif)
 
+@receiver(post_save, sender=PhotoTag)
+def notify_tag(sender, instance, created, **kwargs):
+    if created:
+        notif = Notification.objects.create(
+            recipient=instance.user,
+            actor=instance.tagged_by,
+            photo=instance.photo,
+            notification_type="tag",
+            message=f"You were tagged in a photo"
+        )
+        push_realtime(notif)
+
 
     
