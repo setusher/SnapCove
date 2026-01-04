@@ -48,6 +48,7 @@ export default function NotificationPanel({ onClose, refresh }){
 
   const handleNotificationClick = async (notification) => {
     await mark(notification.id)
+    // Navigate to photo if notification has a photo
     if (notification.photo) {
       nav(`/photos/${notification.photo}`)
       onClose()
@@ -132,7 +133,7 @@ export default function NotificationPanel({ onClose, refresh }){
           width: '480px',
           zIndex: 50,
           background: 'var(--surface)',
-          borderLeft: '1px solid var(--border)',
+          borderLeft: '1px solid var(--border-subtle)',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.5)'
@@ -144,7 +145,7 @@ export default function NotificationPanel({ onClose, refresh }){
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '24px',
-          borderBottom: '1px solid var(--border)'
+          borderBottom: '1px solid var(--border-subtle)'
         }}>
           <div>
             <h2 style={{ fontSize: '20px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '4px' }}>
@@ -180,7 +181,7 @@ export default function NotificationPanel({ onClose, refresh }){
           display: 'flex',
           justifyContent: 'flex-end',
           padding: '12px 24px',
-          borderBottom: '1px solid var(--border)'
+          borderBottom: '1px solid var(--border-subtle)'
         }}>
           <button 
             onClick={markAll}
@@ -208,8 +209,8 @@ export default function NotificationPanel({ onClose, refresh }){
             </div>
           ) : items.length === 0 ? (
             <div style={{ 
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '10px',
               padding: '48px',
               textAlign: 'center'
@@ -228,7 +229,7 @@ export default function NotificationPanel({ onClose, refresh }){
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '32px 0 16px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>Today</span>
-                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }}></div>
                   </div>
                   {grouped.today.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
@@ -239,7 +240,7 @@ export default function NotificationPanel({ onClose, refresh }){
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '32px 0 16px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>Yesterday</span>
-                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }}></div>
                   </div>
                   {grouped.yesterday.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
@@ -250,7 +251,7 @@ export default function NotificationPanel({ onClose, refresh }){
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '32px 0 16px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>This Week</span>
-                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }}></div>
                   </div>
                   {grouped.thisWeek.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
@@ -261,7 +262,7 @@ export default function NotificationPanel({ onClose, refresh }){
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '32px 0 16px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>Older</span>
-                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }}></div>
                   </div>
                   {grouped.older.map(n => (
                     <NotificationItem key={n.id} notification={n} onClick={handleNotificationClick} getIcon={getNotificationIcon} getIconBg={getNotificationIconBg} />
@@ -282,27 +283,25 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
 
   return (
     <div
-      onClick={() => onClick(notification)}
+      onClick={() => notification.photo && onClick(notification)}
       style={{
-        background: 'var(--bg)',
-        border: isUnread ? '1px solid var(--accent)' : '1px solid var(--border)',
-        borderLeft: isUnread ? '3px solid var(--accent)' : '1px solid var(--border)',
-        borderRadius: '8px',
-        padding: '20px',
-        cursor: 'pointer',
-        transition: 'all 200ms ease',
+        background: 'var(--surface)',
+        border: isUnread ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+        borderLeft: isUnread ? '3px solid var(--accent)' : '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-card)',
+        padding: 'var(--card-padding)',
+        cursor: notification.photo ? 'pointer' : 'default',
+        transition: 'border-color 0.2s ease',
         position: 'relative'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--accent)'
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'
+        if (notification.photo) {
+          e.currentTarget.style.borderColor = 'var(--accent)'
+        }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = isUnread ? 'var(--accent)' : 'var(--border)'
-        e.currentTarget.style.borderLeft = isUnread ? '3px solid var(--accent)' : '1px solid var(--border)'
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.borderColor = isUnread ? 'var(--accent)' : 'var(--border-subtle)'
+        e.currentTarget.style.borderLeft = isUnread ? '3px solid var(--accent)' : '1px solid var(--border-subtle)'
       }}
     >
       {/* Unread dot indicator */}
@@ -357,7 +356,7 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
               <img 
                 src={notification.photo_url} 
                 alt="Photo"
-                style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }}
+                style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-button)', border: '1px solid var(--border-subtle)' }}
               />
             </div>
           )}
