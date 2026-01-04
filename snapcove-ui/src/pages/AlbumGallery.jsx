@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Upload, X, UserPlus, XCircle } from "lucide-react"
+import { ChevronLeft, Upload, X, UserPlus, XCircle, Search } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
 import { canUpload } from "../utils/roles"
 
@@ -18,6 +18,8 @@ export default function AlbumGallery(){
   const [userSuggestions, setUserSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [searchTimeout, setSearchTimeout] = useState(null)
+  const [tagFilter, setTagFilter] = useState("")
+  const [tagFilterTimeout, setTagFilterTimeout] = useState(null)
   const suggestionRef = useRef(null)
   const nav = useNavigate()
   const fileInputRef = useRef(null)
@@ -42,12 +44,13 @@ export default function AlbumGallery(){
     return () => clearInterval(interval)
   }, [photos, eventId, albumId])
 
-  const fetchPhotos = () => {
+  const fetchPhotos = (tag = "") => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,tag},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
     // #endregion
     
-    api.get(`/events/${eventId}/albums/${albumId}/photos/`)
+    const url = tag ? `/events/${eventId}/albums/${albumId}/photos/?tag=${encodeURIComponent(tag)}` : `/events/${eventId}/albums/${albumId}/photos/`
+    api.get(url)
       .then(r => {
         // Handle paginated response (DRF viewsets may return {results: [...]})
         const photosData = r.data.results || r.data
@@ -69,6 +72,30 @@ export default function AlbumGallery(){
         console.error('Error fetching photos:', err)
         setPhotos([])
       })
+  }
+
+  const handleTagFilterChange = (e) => {
+    const value = e.target.value
+    setTagFilter(value)
+    
+    // Clear existing timeout
+    if (tagFilterTimeout) {
+      clearTimeout(tagFilterTimeout)
+    }
+    
+    // Debounce filter
+    const timeout = setTimeout(() => {
+      fetchPhotos(value)
+    }, 300)
+    setTagFilterTimeout(timeout)
+  }
+
+  const clearTagFilter = () => {
+    setTagFilter("")
+    fetchPhotos()
+    if (tagFilterTimeout) {
+      clearTimeout(tagFilterTimeout)
+    }
   }
 
   const handleFileSelect = (e) => {
@@ -315,8 +342,8 @@ export default function AlbumGallery(){
               </p>
             </div>
 
-            {/* Upload Button */}
-            {user && canUpload(user.role) && (
+              {/* Upload Button */}
+              {user && canUpload(user.role) && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
                 <input
                   ref={fileInputRef}
@@ -457,6 +484,75 @@ export default function AlbumGallery(){
                 )}
               </div>
             )}
+          </div>
+
+          {/* Tag Filter Bar */}
+          <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
+            <div style={{ position: 'relative' }}>
+              <Search 
+                size={18} 
+                strokeWidth={1.5}
+                style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-secondary)',
+                  pointerEvents: 'none'
+                }}
+              />
+              <input
+                type="text"
+                value={tagFilter}
+                onChange={handleTagFilterChange}
+                placeholder="Filter photos by tag..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px 12px 44px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              />
+              {tagFilter && (
+                <button
+                  onClick={clearTagFilter}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                  <X size={16} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Photos Grid */}

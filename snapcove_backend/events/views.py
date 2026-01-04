@@ -41,6 +41,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
     serializer_class = AlbumSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description']
 
     def get_permissions(self):
         if self.action == 'create':

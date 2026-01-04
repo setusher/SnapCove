@@ -22,13 +22,22 @@ from rest_framework.pagination import PageNumberPagination
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     fiterset_fields = ['album', 'is_approved']
-    search_fields = ['caption', 'tags']
+    search_fields = ['caption']
     serializer_class = PhotoSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
 
     def get_queryset(self):
-        return Photo.objects.filter(album_id=self.kwargs['album_id'])
+        queryset = Photo.objects.filter(album_id=self.kwargs['album_id'])
+        
+        # Filter by tag if provided
+        tag_filter = self.request.query_params.get('tag', None)
+        if tag_filter:
+            # For PostgreSQL JSONField with list, use contains operator
+            # This searches for the tag string in the tags array
+            queryset = queryset.filter(tags__contains=[tag_filter])
+        
+        return queryset
     
     def get_permissions(self):
         if self.action in ['create', 'bulk_upload']:

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Plus, Image as ImageIcon, X, Upload, Info } from "lucide-react"
+import { ChevronLeft, Plus, Image as ImageIcon, X, Upload, Info, Search } from "lucide-react"
 import { canCreateAlbum } from "../utils/roles"
 
 export default function EventDetail(){
@@ -17,6 +17,8 @@ export default function EventDetail(){
   const [showAlbumDetailsModal, setShowAlbumDetailsModal] = useState(false)
   const [selectedAlbum, setSelectedAlbum] = useState(null)
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchTimeout, setSearchTimeout] = useState(null)
   const eventThumbnailInputRef = useRef(null)
   const albumThumbnailInputRef = useRef(null)
   const nav = useNavigate()
@@ -32,8 +34,9 @@ export default function EventDetail(){
       .catch(err => console.error(err))
   }
 
-  const fetchAlbums = () => {
-    api.get(`/events/${eventId}/albums/`)
+  const fetchAlbums = (query = "") => {
+    const url = query ? `/events/${eventId}/albums/?search=${encodeURIComponent(query)}` : `/events/${eventId}/albums/`
+    api.get(url)
       .then(r => {
         const albumsData = r.data.results || r.data || []
         setAlbums(albumsData)
@@ -57,6 +60,30 @@ export default function EventDetail(){
         })
       })
       .catch(err => console.error(err))
+  }
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+    
+    // Debounce search
+    const timeout = setTimeout(() => {
+      fetchAlbums(value)
+    }, 300)
+    setSearchTimeout(timeout)
+  }
+
+  const clearSearch = () => {
+    setSearchQuery("")
+    fetchAlbums()
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
   }
 
   const handleEventThumbnailUpload = async (e) => {
@@ -232,6 +259,75 @@ export default function EventDetail(){
               </div>
             </div>
           )}
+
+          {/* Search Bar */}
+          <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
+            <div style={{ position: 'relative' }}>
+              <Search 
+                size={18} 
+                strokeWidth={1.5}
+                style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-secondary)',
+                  pointerEvents: 'none'
+                }}
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search albums by title or description..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px 12px 44px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                  <X size={16} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Albums Grid */}
           {albums.length === 0 ? (
