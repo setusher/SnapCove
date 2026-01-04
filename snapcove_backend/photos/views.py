@@ -28,14 +28,25 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
 
     def get_queryset(self):
-        queryset = Photo.objects.filter(album_id=self.kwargs['album_id'])
+        queryset = Photo.objects.filter(album_id=self.kwargs['album_id']).select_related('uploaded_by').prefetch_related('tagged_users__user')
         
-        # Filter by tag if provided
-        tag_filter = self.request.query_params.get('tag', None)
-        if tag_filter:
-            # For PostgreSQL JSONField with list, use contains operator
-            # This searches for the tag string in the tags array
-            queryset = queryset.filter(tags__contains=[tag_filter])
+        # Filter by photographer (uploaded_by) or tagged user
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            from accounts.models import User
+            # Search for users by email or name
+            matching_users = User.objects.filter(
+                Q(email__icontains=search_query) | Q(name__icontains=search_query)
+            )
+            
+            # Filter photos where:
+            # 1. uploaded_by matches any of the found users, OR
+            # 2. any tagged user matches any of the found users
+            user_ids = list(matching_users.values_list('id', flat=True))
+            queryset = queryset.filter(
+                Q(uploaded_by_id__in=user_ids) | 
+                Q(tagged_users__user_id__in=user_ids)
+            ).distinct()
         
         return queryset
     

@@ -18,8 +18,8 @@ export default function AlbumGallery(){
   const [userSuggestions, setUserSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [searchTimeout, setSearchTimeout] = useState(null)
-  const [tagFilter, setTagFilter] = useState("")
-  const [tagFilterTimeout, setTagFilterTimeout] = useState(null)
+  const [photoSearchQuery, setPhotoSearchQuery] = useState("")
+  const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
   const suggestionRef = useRef(null)
   const nav = useNavigate()
   const fileInputRef = useRef(null)
@@ -44,12 +44,12 @@ export default function AlbumGallery(){
     return () => clearInterval(interval)
   }, [photos, eventId, albumId])
 
-  const fetchPhotos = (tag = "") => {
+  const fetchPhotos = (search = "") => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,tag},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,search},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
     // #endregion
     
-    const url = tag ? `/events/${eventId}/albums/${albumId}/photos/?tag=${encodeURIComponent(tag)}` : `/events/${eventId}/albums/${albumId}/photos/`
+    const url = search ? `/events/${eventId}/albums/${albumId}/photos/?search=${encodeURIComponent(search)}` : `/events/${eventId}/albums/${albumId}/photos/`
     api.get(url)
       .then(r => {
         // Handle paginated response (DRF viewsets may return {results: [...]})
@@ -74,27 +74,27 @@ export default function AlbumGallery(){
       })
   }
 
-  const handleTagFilterChange = (e) => {
+  const handlePhotoSearchChange = (e) => {
     const value = e.target.value
-    setTagFilter(value)
+    setPhotoSearchQuery(value)
     
     // Clear existing timeout
-    if (tagFilterTimeout) {
-      clearTimeout(tagFilterTimeout)
+    if (photoSearchTimeout) {
+      clearTimeout(photoSearchTimeout)
     }
     
-    // Debounce filter
+    // Debounce search
     const timeout = setTimeout(() => {
       fetchPhotos(value)
     }, 300)
-    setTagFilterTimeout(timeout)
+    setPhotoSearchTimeout(timeout)
   }
 
-  const clearTagFilter = () => {
-    setTagFilter("")
+  const clearPhotoSearch = () => {
+    setPhotoSearchQuery("")
     fetchPhotos()
-    if (tagFilterTimeout) {
-      clearTimeout(tagFilterTimeout)
+    if (photoSearchTimeout) {
+      clearTimeout(photoSearchTimeout)
     }
   }
 
@@ -486,7 +486,7 @@ export default function AlbumGallery(){
             )}
           </div>
 
-          {/* Tag Filter Bar */}
+          {/* Photo Search Bar */}
           <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
             <div style={{ position: 'relative' }}>
               <Search 
@@ -503,9 +503,9 @@ export default function AlbumGallery(){
               />
               <input
                 type="text"
-                value={tagFilter}
-                onChange={handleTagFilterChange}
-                placeholder="Filter photos by tag..."
+                value={photoSearchQuery}
+                onChange={handlePhotoSearchChange}
+                placeholder="Search by photographer or tagged person..."
                 style={{
                   width: '100%',
                   padding: '12px 16px 12px 44px',
@@ -527,9 +527,9 @@ export default function AlbumGallery(){
                   e.target.style.borderColor = 'var(--border-subtle)'
                 }}
               />
-              {tagFilter && (
+              {photoSearchQuery && (
                 <button
-                  onClick={clearTagFilter}
+                  onClick={clearPhotoSearch}
                   style={{
                     position: 'absolute',
                     right: '12px',
