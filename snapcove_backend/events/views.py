@@ -6,6 +6,7 @@ from .serializers import EventSerializer, AlbumSerializer
 from accounts.permissions import IsCoordinator, IsAdmin, IsPhotographer
 from .permissions import IsEventOwnerOrAdmin, IsEventOwnerOrAdminOrPhotographer
 from rest_framework.filters import SearchFilter, OrderingFilter
+from accounts.permissions import IsAlbumUploader
 
 class EventViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
@@ -43,7 +44,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            return [IsCoordinator()| IsAdmin()|IsPhotographer()]
+            return [IsAlbumUploader()]
         if self.action in ['update', 'partial_update', 'destroy']:
             return [IsEventOwnerOrAdminOrPhotographer()]
         return [IsAuthenticated()]

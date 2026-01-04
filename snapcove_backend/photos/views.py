@@ -13,6 +13,7 @@ from .tasks import process_photo_task
 from celery import current_app
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
+from accounts.permissions import IsPhotoUploader
 
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
@@ -25,6 +26,11 @@ class PhotoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Photo.objects.filter(album_id=self.kwargs['album_id'])
     
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [IsPhotoUploader]
+        return [IsAuthenticated()]
+
     def perform_create(self, serializer):
         album = Album.objects.get(id=self.kwargs['album_id'])
         photo = serializer.save(uploaded_by=self.request.user, album=album)
