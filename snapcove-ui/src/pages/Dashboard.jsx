@@ -8,12 +8,54 @@ import { canCreateEvent } from "../utils/roles"
 
 export default function Dashboard(){
   const [events, setEvents] = useState([])
+  const [eventStats, setEventStats] = useState({})
   const { user } = useAuth()
   const nav = useNavigate()
 
   useEffect(() => {
     api.get("/events/")
-      .then(r => setEvents(r.data))
+      .then(r => {
+        const eventsData = r.data.results || r.data || []
+        setEvents(eventsData)
+        
+        // Fetch stats for each event
+        eventsData.forEach(event => {
+          api.get(`/events/${event.id}/albums/`)
+            .then(albumRes => {
+              const albums = albumRes.data.results || albumRes.data || []
+              setEventStats(prev => ({
+                ...prev,
+                [event.id]: { albumCount: albums.length, photoCount: 0 }
+              }))
+              
+              // Fetch photo counts
+              const photoPromises = albums.map(album => 
+                api.get(`/events/${event.id}/albums/${album.id}/photos/`)
+                  .then(photoRes => {
+                    const photos = photoRes.data.results || photoRes.data || []
+                    return photos.length
+                  })
+                  .catch(() => 0)
+              )
+              
+              Promise.all(photoPromises).then(counts => {
+                setEventStats(prev => ({
+                  ...prev,
+                  [event.id]: {
+                    ...prev[event.id],
+                    photoCount: counts.reduce((sum, count) => sum + count, 0)
+                  }
+                }))
+              })
+            })
+            .catch(() => {
+              setEventStats(prev => ({
+                ...prev,
+                [event.id]: { albumCount: 0, photoCount: 0 }
+              }))
+            })
+        })
+      })
       .catch(err => console.error(err))
   }, [])
 
@@ -110,8 +152,9 @@ export default function Dashboard(){
             }}>
               {events.map(event => {
                 const coverImage = event.cover_image || null
-                const albumCount = event.albums?.length || 0
-                const photoCount = event.albums?.reduce((sum, album) => sum + (album.photos?.length || 0), 0) || 0
+                const stats = eventStats[event.id] || { albumCount: 0, photoCount: 0 }
+                const albumCount = stats.albumCount
+                const photoCount = stats.photoCount
                 
                 return (
                   <div
@@ -201,7 +244,7 @@ export default function Dashboard(){
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                         <Calendar size={14} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
                         <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          {new Date(event.start_date).toLocaleDateString('en-US', { 
+                          Created: {new Date(event.created_at).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric',
                             year: 'numeric'

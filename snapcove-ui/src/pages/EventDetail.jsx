@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import { useAuth } from "../auth/AuthProvider"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Plus } from "lucide-react"
+import { ChevronLeft, Plus, Image as ImageIcon, X, Upload, Info } from "lucide-react"
 import { canCreateAlbum } from "../utils/roles"
 
 export default function EventDetail(){
@@ -11,16 +11,92 @@ export default function EventDetail(){
   const { user } = useAuth()
   const [albums, setAlbums] = useState([])
   const [event, setEvent] = useState(null)
+  const [showEventThumbnailModal, setShowEventThumbnailModal] = useState(false)
+  const [showAlbumThumbnailModal, setShowAlbumThumbnailModal] = useState(false)
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false)
+  const [selectedAlbum, setSelectedAlbum] = useState(null)
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
+  const eventThumbnailInputRef = useRef(null)
+  const albumThumbnailInputRef = useRef(null)
   const nav = useNavigate()
 
   useEffect(() => {
+    fetchEvent()
+    fetchAlbums()
+  }, [eventId])
+
+  const fetchEvent = () => {
     api.get(`/events/${eventId}/`)
       .then(r => setEvent(r.data))
       .catch(err => console.error(err))
+  }
+
+  const fetchAlbums = () => {
     api.get(`/events/${eventId}/albums/`)
       .then(r => setAlbums(r.data))
       .catch(err => console.error(err))
-  }, [eventId])
+  }
+
+  const handleEventThumbnailUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploadingThumbnail(true)
+    const formData = new FormData()
+    formData.append('cover_image', file)
+
+    try {
+      await api.patch(`/events/${eventId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      fetchEvent()
+      setShowEventThumbnailModal(false)
+    } catch (err) {
+      console.error('Failed to upload event thumbnail:', err)
+      alert('Failed to upload thumbnail. Please try again.')
+    } finally {
+      setUploadingThumbnail(false)
+      if (eventThumbnailInputRef.current) {
+        eventThumbnailInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleAlbumThumbnailUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file || !selectedAlbum) return
+
+    setUploadingThumbnail(true)
+    const formData = new FormData()
+    formData.append('cover_image', file)
+
+    try {
+      await api.patch(`/events/${eventId}/albums/${selectedAlbum.id}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      fetchAlbums()
+      setShowAlbumThumbnailModal(false)
+      setSelectedAlbum(null)
+    } catch (err) {
+      console.error('Failed to upload album thumbnail:', err)
+      alert('Failed to upload thumbnail. Please try again.')
+    } finally {
+      setUploadingThumbnail(false)
+      if (albumThumbnailInputRef.current) {
+        albumThumbnailInputRef.current.value = ''
+      }
+    }
+  }
+
+  const openAlbumThumbnailModal = (album, e) => {
+    e.stopPropagation()
+    setSelectedAlbum(album)
+    setShowAlbumThumbnailModal(true)
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -53,26 +129,27 @@ export default function EventDetail(){
 
           {/* Page Header */}
           {event && (
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '40px' }}>
-              <div>
-                <h1 style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                  {event.title}
-                </h1>
-                <p style={{ fontSize: '16px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-                  {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)} Photos · Active
-                </p>
-              </div>
-              {canCreateAlbum(user?.role) && (
+            <div style={{ marginBottom: '40px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div>
+                  <h1 style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    {event.title}
+                  </h1>
+                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+                    {albums.length} {albums.length === 1 ? 'Album' : 'Albums'} · {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)} Photos · Active
+                  </p>
+                </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <button 
-                  onClick={() => nav(`/events/${eventId}/albums/create`)}
+                  onClick={() => setShowEventDetailsModal(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
                     padding: '10px 20px',
-                    background: 'var(--accent)',
-                    color: 'var(--bg)',
-                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 500,
@@ -80,20 +157,120 @@ export default function EventDetail(){
                     transition: 'all 200ms ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#4da8a6'
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(91, 192, 190, 0.3)'
+                    e.currentTarget.style.background = 'var(--surface)'
+                    e.currentTarget.style.borderColor = 'var(--accent)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--accent)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.borderColor = 'var(--border)'
                   }}
                 >
-                  <Plus size={16} strokeWidth={2} />
-                  Create Album
+                  <Info size={16} strokeWidth={2} />
+                  Event Details
                 </button>
-              )}
+                {canCreateAlbum(user?.role) && (
+                  <button 
+                    onClick={() => nav(`/events/${eventId}/albums/create`)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      background: 'var(--accent)',
+                      color: 'var(--bg)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 200ms ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#4da8a6'
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(91, 192, 190, 0.3)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'var(--accent)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
+                  >
+                    <Plus size={16} strokeWidth={2} />
+                    Create Album
+                  </button>
+                )}
+              </div>
+              </div>
+
+              {/* Event Thumbnail Section */}
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px',
+                padding: '24px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Event Thumbnail
+                  </h3>
+                  <button
+                    onClick={() => setShowEventThumbnailModal(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 16px',
+                      background: 'var(--accent)',
+                      color: 'var(--bg)',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 200ms ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#4da8a6'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
+                  >
+                    <ImageIcon size={16} strokeWidth={2} />
+                    {event.cover_image ? 'Change Thumbnail' : 'Set Thumbnail'}
+                  </button>
+                </div>
+                {event.cover_image ? (
+                  <div style={{
+                    width: '100%',
+                    maxWidth: '400px',
+                    height: '200px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border)'
+                  }}>
+                    <img 
+                      src={event.cover_image} 
+                      alt="Event thumbnail"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    maxWidth: '400px',
+                    height: '200px',
+                    borderRadius: '8px',
+                    border: '1px dashed var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--surface)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '14px'
+                  }}>
+                    No thumbnail set
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -197,13 +374,421 @@ export default function EventDetail(){
                       }}>
                         {album.title}
                       </h3>
-                      <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                         {photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}
                       </p>
+                      <button
+                        onClick={(e) => openAlbumThumbnailModal(album, e)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          background: 'transparent',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 200ms ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'var(--surface)'
+                          e.currentTarget.style.borderColor = 'var(--accent)'
+                          e.currentTarget.style.color = 'var(--accent)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent'
+                          e.currentTarget.style.borderColor = 'var(--border)'
+                          e.currentTarget.style.color = 'var(--text-secondary)'
+                        }}
+                      >
+                        <ImageIcon size={14} strokeWidth={2} />
+                        {album.cover_image ? 'Change Thumbnail' : 'Set Thumbnail'}
+                      </button>
                     </div>
                   </div>
                 )
               })}
+            </div>
+          )}
+
+          {/* Event Thumbnail Modal */}
+          {showEventThumbnailModal && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }} onClick={() => setShowEventThumbnailModal(false)}>
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px',
+                padding: '24px',
+                maxWidth: '500px',
+                width: '90%',
+                maxHeight: '90vh',
+                overflow: 'auto'
+              }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Event Thumbnail
+                  </h2>
+                  <button
+                    onClick={() => setShowEventThumbnailModal(false)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                  >
+                    <X size={20} strokeWidth={2} />
+                  </button>
+                </div>
+
+                {event?.cover_image && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Current Thumbnail:</p>
+                    <div style={{
+                      width: '100%',
+                      height: '200px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <img 
+                        src={event.cover_image} 
+                        alt="Current thumbnail"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  ref={eventThumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleEventThumbnailUpload}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  onClick={() => eventThumbnailInputRef.current?.click()}
+                  disabled={uploadingThumbnail}
+                  style={{
+                    width: '100%',
+                    padding: '12px 20px',
+                    background: 'var(--accent)',
+                    color: 'var(--bg)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: uploadingThumbnail ? 'not-allowed' : 'pointer',
+                    opacity: uploadingThumbnail ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!uploadingThumbnail) {
+                      e.currentTarget.style.background = '#4da8a6'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!uploadingThumbnail) {
+                      e.currentTarget.style.background = 'var(--accent)'
+                    }
+                  }}
+                >
+                  <Upload size={16} strokeWidth={2} />
+                  {uploadingThumbnail ? 'Uploading...' : 'Upload New Thumbnail'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Event Details Modal */}
+          {showEventDetailsModal && event && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }} onClick={() => setShowEventDetailsModal(false)}>
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px',
+                padding: '24px',
+                maxWidth: '600px',
+                width: '90%',
+                maxHeight: '90vh',
+                overflow: 'auto'
+              }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Event Details
+                  </h2>
+                  <button
+                    onClick={() => setShowEventDetailsModal(false)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                  >
+                    <X size={20} strokeWidth={2} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Title */}
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Title
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {event.title}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {event.description && (
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Description
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                        {event.description}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dates */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Start Date
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                        {new Date(event.start_date).toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        End Date
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                        {new Date(event.end_date).toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Created Info */}
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Created
+                    </div>
+                    <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                      {new Date(event.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                      {event.created_by && (
+                        <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                          by {event.created_by.name || event.created_by.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Albums
+                      </div>
+                      <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--accent)' }}>
+                        {albums.length}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Total Photos
+                      </div>
+                      <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--accent)' }}>
+                        {albums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Status
+                    </div>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      background: 'rgba(91, 192, 190, 0.12)',
+                      color: 'var(--accent)',
+                      border: '1px solid rgba(91, 192, 190, 0.3)'
+                    }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: 'var(--accent)'
+                      }}></div>
+                      {event.is_public ? 'Public' : 'Private'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Album Thumbnail Modal */}
+          {showAlbumThumbnailModal && selectedAlbum && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }} onClick={() => {
+              setShowAlbumThumbnailModal(false)
+              setSelectedAlbum(null)
+            }}>
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px',
+                padding: '24px',
+                maxWidth: '500px',
+                width: '90%',
+                maxHeight: '90vh',
+                overflow: 'auto'
+              }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Album Thumbnail - {selectedAlbum.title}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowAlbumThumbnailModal(false)
+                      setSelectedAlbum(null)
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                  >
+                    <X size={20} strokeWidth={2} />
+                  </button>
+                </div>
+
+                {selectedAlbum.cover_image && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Current Thumbnail:</p>
+                    <div style={{
+                      width: '100%',
+                      height: '200px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <img 
+                        src={selectedAlbum.cover_image} 
+                        alt="Current thumbnail"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  ref={albumThumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAlbumThumbnailUpload}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  onClick={() => albumThumbnailInputRef.current?.click()}
+                  disabled={uploadingThumbnail}
+                  style={{
+                    width: '100%',
+                    padding: '12px 20px',
+                    background: 'var(--accent)',
+                    color: 'var(--bg)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: uploadingThumbnail ? 'not-allowed' : 'pointer',
+                    opacity: uploadingThumbnail ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!uploadingThumbnail) {
+                      e.currentTarget.style.background = '#4da8a6'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!uploadingThumbnail) {
+                      e.currentTarget.style.background = 'var(--accent)'
+                    }
+                  }}
+                >
+                  <Upload size={16} strokeWidth={2} />
+                  {uploadingThumbnail ? 'Uploading...' : 'Upload New Thumbnail'}
+                </button>
+              </div>
             </div>
           )}
         </div>
