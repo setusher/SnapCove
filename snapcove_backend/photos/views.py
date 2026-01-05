@@ -14,20 +14,25 @@ from celery import current_app
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permissions import IsPhotoUploader
-from rest_framework.decorators import action
+# from rest_framework.decorators import action
 from .models import PhotoTag
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
 from django.http import FileResponse
 import os
+from rest_framework.decorators import action, parser_classes
+
 
 class PhotoViewSet(viewsets.ModelViewSet):
-    parser_classes = (MultiPartParser, FormParser)
+    default_parser_classes = (MultiPartParser, FormParser)
     fiterset_fields = ['album', 'is_approved']
     search_fields = ['caption']
     serializer_class = PhotoSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
+    def get_parser_classes(self):
+        return self.default_parser_classes
+
 
     def get_queryset(self):
         queryset = Photo.objects.filter(album_id=self.kwargs['album_id']).select_related('uploaded_by').prefetch_related('tagged_users__user')
@@ -94,22 +99,29 @@ class PhotoViewSet(viewsets.ModelViewSet):
         return Response({"uploaded": created}, status=201)
     
     @action(detail=False, methods=["post"], url_path="batch")
-    def batch(self, request, album_id=None):
-        ids = request.data.get("photo_ids", [])
-        action_type = request.data.get("action")
+    @parser_classes([MultiPartParser, FormParser])
+    def batch(self, request, event_id=None, album_id=None):
+        album = get_object_or_404(Album, id=album_id)
 
-        qs = Photo.objects.filter(id__in=ids, uploaded_by=request.user)
+        files = request.FILES.getlist("images")
+        caption = request.data.get("caption", "")
 
-        if action_type == "delete":
-            qs.delete()
+        created = []
 
-        elif action_type == "move":
-            qs.update(album_id=request.data.get("target_album"))
+        for file in files:
+            photo = Photo.objects.create(
+                album=album,
+                uploaded_by=request.user,
+                image=file,
+                caption=caption,
+            )
+            created.append(photo.id)
 
-        elif action_type == "privacy":
-            qs.update(is_private=request.data.get("value"))
+            transaction.on_commit(lambda pid=photo.id: current_app.send_task(
+                "photos.process_photo_task", args=[pid]
+            ))
 
-        return Response({"status": "done"})
+        return Response({"uploaded": created}, status=201)
         
 
 class PendingPhotosView(ListAPIView):

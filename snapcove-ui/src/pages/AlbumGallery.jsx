@@ -2,9 +2,9 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Upload, X, UserPlus, XCircle, Search, Download, Heart, Info } from "lucide-react"
+import { ChevronLeft, Upload, X, UserPlus, XCircle, Search, Download, Heart, Info, Trash2, Move, Lock, Unlock, CheckSquare, Square } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
-import { canUpload } from "../utils/roles"
+import { canUpload, canBatchOperate } from "../utils/roles"
 
 export default function AlbumGallery(){
   const { eventId, albumId } = useParams()
@@ -21,6 +21,12 @@ export default function AlbumGallery(){
   const [photoSearchQuery, setPhotoSearchQuery] = useState("")
   const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
   const [downloadingPhotos, setDownloadingPhotos] = useState(new Set())
+  const [selectedPhotos, setSelectedPhotos] = useState(new Set())
+  const [showBatchActions, setShowBatchActions] = useState(false)
+  const [showMoveModal, setShowMoveModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+  const [albums, setAlbums] = useState([])
+  const [batchProcessing, setBatchProcessing] = useState(false)
   const suggestionRef = useRef(null)
   const nav = useNavigate()
   const fileInputRef = useRef(null)
@@ -28,7 +34,14 @@ export default function AlbumGallery(){
 
   useEffect(() => {
     fetchPhotos()
-  }, [eventId, albumId])
+    if (canBatchOperate(user?.role)) {
+      fetchAlbums()
+    }
+  }, [eventId, albumId, user?.role])
+
+  useEffect(() => {
+    setShowBatchActions(selectedPhotos.size > 0)
+  }, [selectedPhotos])
 
   // Poll for processing photos to refresh when they're done
   useEffect(() => {
@@ -96,6 +109,65 @@ export default function AlbumGallery(){
     fetchPhotos()
     if (photoSearchTimeout) {
       clearTimeout(photoSearchTimeout)
+    }
+  }
+
+  const fetchAlbums = () => {
+    api.get(`/events/${eventId}/albums/`)
+      .then(r => {
+        const albumsData = r.data.results || r.data || []
+        setAlbums(albumsData)
+      })
+      .catch(err => console.error('Error fetching albums:', err))
+  }
+
+  const togglePhotoSelection = (photoId, e) => {
+    e.stopPropagation()
+    setSelectedPhotos(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(photoId)) {
+        newSet.delete(photoId)
+      } else {
+        newSet.add(photoId)
+      }
+      return newSet
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedPhotos.size === photos.length) {
+      setSelectedPhotos(new Set())
+    } else {
+      setSelectedPhotos(new Set(photos.map(p => p.id)))
+    }
+  }
+
+  const handleBatchOperation = async (action, data = {}) => {
+    if (selectedPhotos.size === 0) return
+    
+    try {
+      setBatchProcessing(true)
+      const response = await api.post(
+        `/events/${eventId}/albums/${albumId}/photos/batch/`,
+        {
+          photo_ids: Array.from(selectedPhotos),
+          action: action,
+          ...data
+        }
+      )
+      
+      if (response.data.status === "done") {
+        setSelectedPhotos(new Set())
+        setShowBatchActions(false)
+        setShowMoveModal(false)
+        setShowPrivacyModal(false)
+        fetchPhotos() // Refresh photos
+      }
+    } catch (error) {
+      console.error('Batch operation error:', error)
+      alert(`Failed to ${action} photos: ${error?.response?.data?.detail || error.message}`)
+    } finally {
+      setBatchProcessing(false)
     }
   }
 
@@ -538,6 +610,185 @@ export default function AlbumGallery(){
             )}
           </div>
 
+          {/* Batch Actions Toolbar */}
+          {canBatchOperate(user?.role) && selectedPhotos.size > 0 && (
+            <div style={{
+              marginBottom: 'var(--form-field-gap)',
+              padding: 'var(--card-padding)',
+              background: 'var(--elevated)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-card)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                  {selectedPhotos.size} {selectedPhotos.size === 1 ? 'photo' : 'photos'} selected
+                </span>
+                <button
+                  onClick={toggleSelectAll}
+                  style={{
+                    padding: '6px 12px',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--surface)'
+                    e.currentTarget.style.color = 'var(--text-primary)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = 'var(--text-secondary)'
+                  }}
+                >
+                  {selectedPhotos.size === photos.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setShowMoveModal(true)}
+                  disabled={batchProcessing}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                    opacity: batchProcessing ? 0.6 : 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
+                >
+                  <Move size={16} strokeWidth={1.5} />
+                  Move
+                </button>
+                <button
+                  onClick={() => setShowPrivacyModal(true)}
+                  disabled={batchProcessing}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                    opacity: batchProcessing ? 0.6 : 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
+                >
+                  <Lock size={16} strokeWidth={1.5} />
+                  Privacy
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete ${selectedPhotos.size} photo(s)? This action cannot be undone.`)) {
+                      handleBatchOperation('delete')
+                    }
+                  }}
+                  disabled={batchProcessing}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    border: '1px solid var(--danger)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--danger)',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                    opacity: batchProcessing ? 0.6 : 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'var(--danger)'
+                      e.currentTarget.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.color = 'var(--danger)'
+                    }
+                  }}
+                >
+                  <Trash2 size={16} strokeWidth={1.5} />
+                  Delete
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedPhotos(new Set())
+                    setShowBatchActions(false)
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--surface)'
+                    e.currentTarget.style.color = 'var(--text-primary)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = 'var(--text-secondary)'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Photo Search Bar */}
           <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
             <div style={{ position: 'relative' }}>
@@ -655,6 +906,7 @@ export default function AlbumGallery(){
                 }
                 
                 const isDownloading = downloadingPhotos.has(photo.id)
+                const isSelected = selectedPhotos.has(photo.id)
                 
                 return (
                   <div 
@@ -682,11 +934,63 @@ export default function AlbumGallery(){
                   >
                     {imageUrl ? (
                       <>
+                        {/* Selection Checkbox */}
+                        {canBatchOperate(user?.role) && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            zIndex: 10
+                          }}>
+                            <button
+                              onClick={(e) => togglePhotoSelection(photo.id, e)}
+                              style={{
+                                width: '24px',
+                                height: '24px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: isSelected ? 'var(--accent)' : 'rgba(10, 17, 40, 0.8)',
+                                border: isSelected ? 'none' : '2px solid var(--text-primary)',
+                                borderRadius: '4px',
+                                color: 'var(--text-primary)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.background = 'rgba(18, 130, 162, 0.8)'
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.background = 'rgba(10, 17, 40, 0.8)'
+                                }
+                              }}
+                            >
+                              {isSelected ? (
+                                <CheckSquare size={16} strokeWidth={2.5} fill="currentColor" />
+                              ) : (
+                                <Square size={16} strokeWidth={2} />
+                              )}
+                            </button>
+                          </div>
+                        )}
                         <img 
                           src={imageUrl} 
                           alt={`Photo ${photo.id}`}
-                          onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onClick={() => {
+                            if (!canBatchOperate(user?.role) || selectedPhotos.size === 0) {
+                              nav(`/photos/${photo.id}`, { state: { photo } })
+                            }
+                          }}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            opacity: isSelected ? 0.7 : 1,
+                            transition: 'opacity 0.2s ease'
+                          }}
                           loading="lazy"
                           onError={(e) => {
                             console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
@@ -824,6 +1128,297 @@ export default function AlbumGallery(){
           )}
         </div>
       </div>
+
+      {/* Move Photos Modal */}
+      {showMoveModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(10, 17, 40, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} onClick={() => setShowMoveModal(false)}>
+          <div style={{
+            background: 'var(--elevated)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-card)',
+            padding: 'var(--card-padding)',
+            maxWidth: '480px',
+            width: '90%'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                Move {selectedPhotos.size} {selectedPhotos.size === 1 ? 'Photo' : 'Photos'}
+              </h2>
+              <button
+                onClick={() => setShowMoveModal(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div style={{ marginBottom: 'var(--form-field-gap)' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Select Target Album
+              </label>
+              <select
+                id="targetAlbum"
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              >
+                <option value="">Select an album...</option>
+                {albums.filter(a => a.id !== parseInt(albumId)).map(album => (
+                  <option key={album.id} value={album.id}>
+                    {album.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowMoveModal(false)}
+                style={{
+                  padding: 'var(--button-padding)',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const targetAlbum = document.getElementById('targetAlbum').value
+                  if (!targetAlbum) {
+                    alert('Please select a target album')
+                    return
+                  }
+                  handleBatchOperation('move', { target_album: parseInt(targetAlbum) })
+                }}
+                disabled={batchProcessing}
+                style={{
+                  padding: 'var(--button-padding)',
+                  background: 'var(--accent)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                  opacity: batchProcessing ? 0.6 : 1,
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!batchProcessing) {
+                    e.currentTarget.style.background = '#1a9bc2'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!batchProcessing) {
+                    e.currentTarget.style.background = 'var(--accent)'
+                  }
+                }}
+              >
+                {batchProcessing ? 'Moving...' : 'Move Photos'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privacy Modal */}
+      {showPrivacyModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(10, 17, 40, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} onClick={() => setShowPrivacyModal(false)}>
+          <div style={{
+            background: 'var(--elevated)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-card)',
+            padding: 'var(--card-padding)',
+            maxWidth: '480px',
+            width: '90%'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                Change Privacy for {selectedPhotos.size} {selectedPhotos.size === 1 ? 'Photo' : 'Photos'}
+              </h2>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div style={{ marginBottom: 'var(--form-field-gap)' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Privacy Setting
+              </label>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => handleBatchOperation('privacy', { value: false })}
+                  disabled={batchProcessing}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: 'var(--button-padding)',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                    opacity: batchProcessing ? 0.6 : 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
+                >
+                  <Unlock size={18} strokeWidth={1.5} />
+                  Public
+                </button>
+                <button
+                  onClick={() => handleBatchOperation('privacy', { value: true })}
+                  disabled={batchProcessing}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: 'var(--button-padding)',
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: batchProcessing ? 'not-allowed' : 'pointer',
+                    opacity: batchProcessing ? 0.6 : 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!batchProcessing) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
+                >
+                  <Lock size={18} strokeWidth={1.5} />
+                  Private
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                style={{
+                  padding: 'var(--button-padding)',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tag People Modal */}
       {showTagModal && (

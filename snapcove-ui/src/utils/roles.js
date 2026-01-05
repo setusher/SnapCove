@@ -52,3 +52,13 @@ export function isPhotographer(role) {
   return role === "photographer"
 }
 
+/**
+ * Check if user can perform batch operations on photos
+ * Allowed roles: admin, coordinator, photographer
+ * @param {string} role - User role
+ * @returns {boolean}
+ */
+export function canBatchOperate(role) {
+  return role === "admin" || role === "coordinator" || role === "photographer"
+}
+
