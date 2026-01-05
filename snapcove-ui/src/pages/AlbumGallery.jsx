@@ -49,7 +49,7 @@ export default function AlbumGallery(){
     fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,search},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
     // #endregion
     
-    const url = search ? `/events/${eventId}/albums/${albumId}/photos/?search=${encodeURIComponent(search)}` : `/events/${eventId}/albums/${albumId}/photos/`
+    const url = search ? `/events/${eventId}/albums/${albumId}/photos/?user=${encodeURIComponent(search)}` : `/events/${eventId}/albums/${albumId}/photos/`
     api.get(url)
       .then(r => {
         // Handle paginated response (DRF viewsets may return {results: [...]})

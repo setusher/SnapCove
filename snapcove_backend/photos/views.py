@@ -30,23 +30,24 @@ class PhotoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Photo.objects.filter(album_id=self.kwargs['album_id']).select_related('uploaded_by').prefetch_related('tagged_users__user')
         
-        # Filter by photographer (uploaded_by) or tagged user
-        search_query = self.request.query_params.get('search', None)
-        if search_query:
+        
+        user_search = self.request.query_params.get('user', None)
+        if user_search:
             from accounts.models import User
-            # Search for users by email or name
+   
             matching_users = User.objects.filter(
-                Q(email__icontains=search_query) | Q(name__icontains=search_query)
+                Q(email__icontains=user_search) | Q(name__icontains=user_search)
             )
             
-            # Filter photos where:
-            # 1. uploaded_by matches any of the found users, OR
-            # 2. any tagged user matches any of the found users
+            
             user_ids = list(matching_users.values_list('id', flat=True))
-            queryset = queryset.filter(
-                Q(uploaded_by_id__in=user_ids) | 
-                Q(tagged_users__user_id__in=user_ids)
-            ).distinct()
+            if user_ids:
+                queryset = queryset.filter(
+                    Q(uploaded_by_id__in=user_ids) | 
+                    Q(tagged_users__user__in=user_ids)
+                ).distinct()
+            else:
+                queryset = queryset.none()
         
         return queryset
     
