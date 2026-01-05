@@ -55,12 +55,11 @@ export default function Signup(){
     try {
       const res = await api.post("/auth/signup/", { name, email, password })
       
-      // Check if OTP verification is needed
+      
       if (res.data.needs_verification) {
-        // Navigate to verify OTP page with email
+       
         nav("/verify-otp", { state: { email } })
       } else {
-        // Direct signup (shouldn't happen with current backend, but handle it)
         localStorage.setItem("access_token", res.data.access)
         localStorage.setItem("refresh_token", res.data.refresh)
         localStorage.setItem("user", JSON.stringify(res.data.user))

@@ -43,7 +43,7 @@ export default function Profile() {
       
       <div style={{ paddingTop: '64px', padding: '48px 64px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Profile Header */}
+       
           <div style={{ 
             background: 'var(--bg)',
             border: '1px solid var(--border)',
@@ -52,7 +52,7 @@ export default function Profile() {
             marginBottom: '40px'
           }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '32px' }}>
-              {/* Profile Picture / Avatar */}
+
               <div style={{
                 width: '120px',
                 height: '120px',
@@ -76,7 +76,7 @@ export default function Profile() {
                 )}
               </div>
 
-              {/* User Info */}
+
               <div style={{ flex: 1 }}>
                 <h1 style={{ 
                   fontSize: '32px', 
@@ -91,7 +91,6 @@ export default function Profile() {
                   {user?.email || 'user@example.com'}
                 </div>
 
-                {/* User Details Grid */}
                 <div style={{ 
                   display: 'grid', 
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
@@ -138,7 +137,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Photos Section */}
           <div>
             <h2 style={{ 
               fontSize: '24px', 

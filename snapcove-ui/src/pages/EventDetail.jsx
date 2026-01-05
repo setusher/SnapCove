@@ -41,7 +41,7 @@ export default function EventDetail(){
         const albumsData = r.data.results || r.data || []
         setAlbums(albumsData)
         
-        // Fetch photo counts for each album
+
         const photoCountPromises = albumsData.map(album => 
           api.get(`/events/${eventId}/albums/${album.id}/photos/`)
             .then(photoRes => {
@@ -66,12 +66,12 @@ export default function EventDetail(){
     const value = e.target.value
     setSearchQuery(value)
     
-    // Clear existing timeout
+  
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
     
-    // Debounce search
+
     const timeout = setTimeout(() => {
       fetchAlbums(value)
     }, 300)
@@ -127,7 +127,7 @@ export default function EventDetail(){
         },
       })
       fetchAlbums()
-      // Update selectedAlbum in modal with the new data and preserve photo count
+    
       if (response.data) {
         const photoCount = selectedAlbum.photoCount !== undefined ? selectedAlbum.photoCount : (albumPhotoCounts[selectedAlbum.id] || 0)
         setSelectedAlbum({
@@ -158,7 +158,7 @@ export default function EventDetail(){
       
       <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-          {/* Back Button */}
+
           <button 
             onClick={() => nav("/dashboard")}
             style={{
@@ -182,7 +182,7 @@ export default function EventDetail(){
             Back to Events
           </button>
 
-          {/* Page Header */}
+
           {event && (
             <div style={{ marginBottom: '40px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px' }}>
@@ -260,7 +260,7 @@ export default function EventDetail(){
             </div>
           )}
 
-          {/* Search Bar */}
+
           <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
             <div style={{ position: 'relative' }}>
               <Search 
@@ -329,7 +329,7 @@ export default function EventDetail(){
             </div>
           </div>
 
-          {/* Albums Grid */}
+
           {albums.length === 0 ? (
             <div style={{ 
               background: 'var(--surface)', 
@@ -393,7 +393,7 @@ export default function EventDetail(){
                       e.currentTarget.style.borderColor = 'var(--border-subtle)'
                     }}
                   >
-                    {/* Album Cover */}
+           
                     <div style={{ 
                       height: '200px',
                       width: '100%',
@@ -418,7 +418,7 @@ export default function EventDetail(){
                       )}
                     </div>
 
-                    {/* Content */}
+           
                     <div style={{ padding: 'var(--card-padding)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <h3 style={{ 
                         fontSize: '18px',
@@ -472,7 +472,6 @@ export default function EventDetail(){
             </div>
           )}
 
-          {/* Event Details Modal */}
           {showEventDetailsModal && event && (
             <div style={{
               position: 'fixed',
@@ -512,7 +511,7 @@ export default function EventDetail(){
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {/* Title */}
+  
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Title
@@ -522,7 +521,7 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Description */}
+
                   {event.description && (
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -534,7 +533,7 @@ export default function EventDetail(){
                     </div>
                   )}
 
-                  {/* Dates */}
+
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -564,7 +563,7 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Created Info */}
+
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Created
@@ -585,7 +584,7 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Stats */}
+  
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -605,7 +604,6 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Status */}
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Status
@@ -632,7 +630,6 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Thumbnail Section */}
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Thumbnail
@@ -716,7 +713,6 @@ export default function EventDetail(){
             </div>
           )}
 
-          {/* Album Details Modal */}
           {showAlbumDetailsModal && selectedAlbum && (
             <div style={{
               position: 'fixed',
@@ -762,7 +758,6 @@ export default function EventDetail(){
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {/* Title */}
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Title
@@ -772,7 +767,6 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Description */}
                   {selectedAlbum.description && (
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -784,7 +778,6 @@ export default function EventDetail(){
                     </div>
                   )}
 
-                  {/* Created Info */}
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Created
@@ -805,7 +798,6 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Photo Count */}
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Photos
@@ -815,7 +807,7 @@ export default function EventDetail(){
                     </div>
                   </div>
 
-                  {/* Thumbnail Section */}
+           
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Thumbnail

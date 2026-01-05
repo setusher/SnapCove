@@ -21,7 +21,6 @@ export default function Dashboard(){
         const eventsData = r.data.results || r.data || []
         setEvents(eventsData)
         
-        // Fetch stats for each event
         eventsData.forEach(event => {
           api.get(`/events/${event.id}/albums/`)
             .then(albumRes => {
@@ -31,7 +30,6 @@ export default function Dashboard(){
                 [event.id]: { albumCount: albums.length, photoCount: 0 }
               }))
               
-              // Fetch photo counts
               const photoPromises = albums.map(album => 
                 api.get(`/events/${event.id}/albums/${album.id}/photos/`)
                   .then(photoRes => {
@@ -70,12 +68,10 @@ export default function Dashboard(){
     const value = e.target.value
     setSearchQuery(value)
     
-    // Clear existing timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
     
-    // Debounce search
     const timeout = setTimeout(() => {
       fetchEvents(value)
     }, 300)
@@ -96,7 +92,7 @@ export default function Dashboard(){
       
       <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-          {/* Page Header */}
+      
           <div style={{ marginBottom: 'var(--section-padding-y)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--form-field-gap)' }}>
               <div>
@@ -138,7 +134,7 @@ export default function Dashboard(){
               )}
             </div>
 
-            {/* Search Bar */}
+  
             <div style={{ position: 'relative', maxWidth: '400px' }}>
               <div style={{ position: 'relative' }}>
                 <Search 
@@ -208,7 +204,7 @@ export default function Dashboard(){
             </div>
           </div>
 
-          {/* Events Grid */}
+   
           {events.length === 0 ? (
             <div style={{ 
               background: 'var(--surface)', 
@@ -276,7 +272,7 @@ export default function Dashboard(){
                       e.currentTarget.style.borderColor = 'var(--border-subtle)'
                     }}
                   >
-                    {/* Cover Image Section */}
+              
                     <div style={{ 
                       height: '200px',
                       width: '100%',
@@ -310,9 +306,9 @@ export default function Dashboard(){
                       )}
                     </div>
 
-                    {/* Content Section */}
+            
                     <div style={{ padding: 'var(--card-padding)', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      {/* Event Title */}
+        
                       <h3 style={{ 
                         fontSize: '18px',
                         fontWeight: 600,
@@ -327,7 +323,7 @@ export default function Dashboard(){
                         {event.title}
                       </h3>
 
-                      {/* Date Row */}
+      
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                         <Calendar size={14} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
                         <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -339,7 +335,7 @@ export default function Dashboard(){
                         </span>
                       </div>
 
-                      {/* Stats Row */}
+             
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
                         <Camera size={14} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
                         <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -347,7 +343,7 @@ export default function Dashboard(){
                         </span>
                       </div>
 
-                      {/* Status Badge */}
+                    
                       <div style={{
                         display: 'inline-flex',
                         alignItems: 'center',

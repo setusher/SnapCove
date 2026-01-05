@@ -5,7 +5,7 @@ export default function Landing() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
-      {/* Header */}
+     
       <header className="flex-between" style={{ padding: 'var(--space-8) var(--space-12)' }}>
         <div className="flex items-center" style={{ gap: 'var(--space-3)' }}>
           <div 
@@ -30,7 +30,7 @@ export default function Landing() {
         </button>
       </header>
 
-      {/* Hero Section */}
+ 
       <div className="container" style={{ paddingTop: 'var(--space-16)', paddingBottom: 'var(--space-16)' }}>
         <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto var(--space-16)' }}>
           <h1 className="heading-xl" style={{ marginBottom: 'var(--space-6)' }}>
@@ -47,7 +47,7 @@ export default function Landing() {
           </button>
         </div>
 
-        {/* Feature Grid */}
+
         <div className="grid" style={{ 
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
           gap: 'var(--space-6)',

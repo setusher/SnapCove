@@ -43,7 +43,6 @@ export default function AlbumGallery(){
     setShowBatchActions(selectedPhotos.size > 0)
   }, [selectedPhotos])
 
-  // Poll for processing photos to refresh when they're done
   useEffect(() => {
     const hasProcessingPhotos = photos.some(p => 
       (p.processing_status === 'processing' || p.processing_status === 'pending') && !p.image
@@ -53,26 +52,21 @@ export default function AlbumGallery(){
 
     const interval = setInterval(() => {
       fetchPhotos()
-    }, 2000) // Poll every 2 seconds
+    }, 2000)
 
     return () => clearInterval(interval)
   }, [photos, eventId, albumId])
 
   const fetchPhotos = (search = "") => {
-    // #region agent log
     fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,search},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
-    // #endregion
     
     const url = search ? `/events/${eventId}/albums/${albumId}/photos/?user=${encodeURIComponent(search)}` : `/events/${eventId}/albums/${albumId}/photos/`
     api.get(url)
       .then(r => {
-        // Handle paginated response (DRF viewsets may return {results: [...]})
         const photosData = r.data.results || r.data
         const photosArray = Array.isArray(photosData) ? photosData : []
         
-        // #region agent log
         fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:26',message:'fetchPhotos response received',data:{photoCount:photosArray.length,hasResults:!!r.data.results,isArray:Array.isArray(photosData),firstPhotoId:photosArray[0]?.id,firstPhotoImage:photosArray[0]?.image,firstPhotoThumbnail:photosArray[0]?.thumbnail,firstPhotoProcessingStatus:photosArray[0]?.processing_status,allPhotoIds:photosArray.map(p=>p.id),allPhotosWithImages:photosArray.filter(p=>p.image).length,allPhotosWithThumbnails:photosArray.filter(p=>p.thumbnail).length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H4'})}).catch(()=>{});
-        // #endregion
         
         console.log('Fetched photos data:', photosData)
         console.log('First photo:', photosData?.[0])
@@ -80,9 +74,7 @@ export default function AlbumGallery(){
         setPhotos(photosArray)
       })
       .catch(err => {
-        // #region agent log
         fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:32',message:'fetchPhotos error',data:{error:err?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
         console.error('Error fetching photos:', err)
         setPhotos([])
       })
@@ -92,12 +84,10 @@ export default function AlbumGallery(){
     const value = e.target.value
     setPhotoSearchQuery(value)
     
-    // Clear existing timeout
     if (photoSearchTimeout) {
       clearTimeout(photoSearchTimeout)
     }
     
-    // Debounce search
     const timeout = setTimeout(() => {
       fetchPhotos(value)
     }, 300)
@@ -161,7 +151,7 @@ export default function AlbumGallery(){
         setShowBatchActions(false)
         setShowMoveModal(false)
         setShowPrivacyModal(false)
-        fetchPhotos() // Refresh photos
+        fetchPhotos() 
       }
     } catch (error) {
       console.error('Batch operation error:', error)
@@ -173,7 +163,7 @@ export default function AlbumGallery(){
   }
 
   const handlePhotoDownload = async (photo, e) => {
-    e.stopPropagation() // Prevent navigation when clicking download
+    e.stopPropagation() 
     
     if (downloadingPhotos.has(photo.id)) return
     
@@ -191,7 +181,6 @@ export default function AlbumGallery(){
         throw new Error('Download failed')
       }
       
-      // Get filename from Content-Disposition header or use default
       const contentDisposition = response.headers.get('Content-Disposition')
       let filename = `photo-${photo.id}.jpg`
       if (contentDisposition) {
@@ -201,7 +190,6 @@ export default function AlbumGallery(){
         }
       }
       
-      // Create blob and download
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -309,7 +297,6 @@ export default function AlbumGallery(){
     await handleUpload()
   }
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
@@ -327,23 +314,14 @@ export default function AlbumGallery(){
     setUploadProgress(0)
 
     try {
-      // Create FormData for bulk upload
       const formData = new FormData()
-      
-      // Append all files to the formData
-      // The backend expects 'files' as a list field
       uploadFiles.forEach((file) => {
         formData.append('files', file)
       })
 
-      // Optional: Add caption and tags if needed in the future
-      // formData.append('caption', '')
-      // formData.append('tags', JSON.stringify([]))
 
-      // Simulate progress during upload
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
-          // Gradually increase progress, but don't go to 100% until done
           if (prev < 90) {
             return prev + 10
           }
@@ -351,7 +329,6 @@ export default function AlbumGallery(){
         })
       }, 200)
 
-      // Make bulk upload request
       const response = await api.post(
         `/events/${eventId}/albums/${albumId}/photos/bulk/`,
         formData,
@@ -365,18 +342,14 @@ export default function AlbumGallery(){
       clearInterval(progressInterval)
       setUploadProgress(100)
 
-      // Check if upload was successful
       if (response.data && response.data.uploaded) {
         console.log(`Successfully uploaded ${response.data.uploaded.length} photos`)
         
-        // Tag users to all uploaded photos
         if (taggedUsers.length > 0 && response.data.uploaded.length > 0) {
           try {
             let successCount = 0
             let failCount = 0
             
-            // Tag each user to each photo using their email
-            // Backend will automatically send notifications via WebSocket when tags are created
             for (const photoId of response.data.uploaded) {
               for (const userEmail of taggedUsers) {
                 try {
@@ -387,12 +360,10 @@ export default function AlbumGallery(){
                 } catch (tagErr) {
                   console.warn(`Failed to tag ${userEmail} to photo ${photoId}:`, tagErr)
                   failCount++
-                  // Continue with other tags even if one fails
                 }
               }
             }
             
-            // Provide feedback on tagging results
             if (successCount > 0) {
               console.log(`Successfully tagged ${successCount} user(s) in ${response.data.uploaded.length} photo(s)`)
             }
@@ -401,17 +372,16 @@ export default function AlbumGallery(){
             }
           } catch (tagError) {
             console.error("Error tagging users:", tagError)
-            // Don't fail the upload if tagging fails
           }
         }
       }
       
-      // Clear files and refresh photos - add small delay to ensure backend has saved photos
+     
       setUploadFiles([])
       setTaggedUsers([])
       setUploadProgress(0)
       
-      // Wait a moment for backend to process, then fetch
+     
       setTimeout(() => {
         fetchPhotos()
       }, 500)
@@ -433,7 +403,7 @@ export default function AlbumGallery(){
       
       <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-          {/* Back Button */}
+          
           <button 
             onClick={() => nav(`/events/${eventId}`)}
             style={{
@@ -456,7 +426,7 @@ export default function AlbumGallery(){
             Back to Albums
           </button>
 
-          {/* Page Header */}
+   
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--section-padding-y)' }}>
             <div>
               <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px' }}>
@@ -467,7 +437,7 @@ export default function AlbumGallery(){
               </p>
             </div>
 
-              {/* Upload Button */}
+          
               {user && canUpload(user.role) && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
                 <input
@@ -511,7 +481,7 @@ export default function AlbumGallery(){
                   {uploading ? 'Uploading...' : 'Upload Photos'}
                 </button>
 
-                {/* Upload Files Preview */}
+          
                 {uploadFiles.length > 0 && !uploading && !showTagModal && (
                   <div style={{
                     background: 'var(--surface)',
@@ -575,7 +545,7 @@ export default function AlbumGallery(){
                   </div>
                 )}
 
-                {/* Upload Progress */}
+         
                 {uploading && (
                   <div style={{
                     background: 'var(--surface)',
@@ -611,7 +581,7 @@ export default function AlbumGallery(){
             )}
           </div>
 
-          {/* Batch Actions Toolbar */}
+  
           {canBatchOperate(user?.role) && selectedPhotos.size > 0 && (
             <div style={{
               marginBottom: 'var(--form-field-gap)',
@@ -790,7 +760,7 @@ export default function AlbumGallery(){
             </div>
           )}
 
-          {/* Photo Search Bar */}
+
           <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
             <div style={{ position: 'relative' }}>
               <Search 
@@ -859,7 +829,6 @@ export default function AlbumGallery(){
             </div>
           </div>
 
-          {/* Photos Grid */}
           {photos.length === 0 ? (
             <div style={{ 
               background: 'var(--surface)', 
@@ -879,12 +848,10 @@ export default function AlbumGallery(){
               gap: '16px'
             }}>
               {photos.map(photo => {
-                // Use image or thumbnail - prefer thumbnail for gallery, fallback to image
                 const imageSource = photo.thumbnail || photo.image
                 
-                // #region agent log
                 fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:295',message:'Rendering photo',data:{photoId:photo.id,hasImage:!!photo.image,hasThumbnail:!!photo.thumbnail,imageValue:photo.image,thumbnailValue:photo.thumbnail,processingStatus:photo.processing_status,imageSource},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H5'})}).catch(()=>{});
-                // #endregion
+          
                 
                 console.log('Rendering photo:', photo.id, 'image:', photo.image, 'thumbnail:', photo.thumbnail, 'processing_status:', photo.processing_status)
                 let imageUrl = null
@@ -896,14 +863,13 @@ export default function AlbumGallery(){
                   } else {
                     imageUrl = `http://localhost:8000/${imageSource}`
                   }
-                  
-                  // #region agent log
+         
                   fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:300',message:'Image URL constructed',data:{photoId:photo.id,imageUrl,imageSource},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-                  // #endregion
+
                 } else {
-                  // #region agent log
+          
                   fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:308',message:'No image source available',data:{photoId:photo.id,hasImage:!!photo.image,hasThumbnail:!!photo.thumbnail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-                  // #endregion
+          
                 }
                 
                 const isDownloading = downloadingPhotos.has(photo.id)
@@ -1130,7 +1096,7 @@ export default function AlbumGallery(){
         </div>
       </div>
 
-      {/* Move Photos Modal */}
+    
       {showMoveModal && (
         <div style={{
           position: 'fixed',
@@ -1271,7 +1237,7 @@ export default function AlbumGallery(){
         </div>
       )}
 
-      {/* Privacy Modal */}
+  
       {showPrivacyModal && (
         <div style={{
           position: 'fixed',
@@ -1421,7 +1387,7 @@ export default function AlbumGallery(){
         </div>
       )}
 
-      {/* Tag People Modal */}
+   
       {showTagModal && (
         <div style={{
           position: 'fixed',
@@ -1442,7 +1408,7 @@ export default function AlbumGallery(){
             maxHeight: '90vh',
             overflow: 'auto'
           }} onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
+          
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--card-padding)' }}>
               <div>
                 <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
@@ -1473,7 +1439,7 @@ export default function AlbumGallery(){
               </button>
             </div>
 
-            {/* Tag Input */}
+          
             <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative' }} ref={suggestionRef}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Search & Tag People
@@ -1516,7 +1482,7 @@ export default function AlbumGallery(){
                     }}
                   />
                   
-                  {/* Suggestions Dropdown */}
+                  
                   {showSuggestions && userSuggestions.length > 0 && (
                     <div style={{
                       position: 'absolute',
@@ -1584,7 +1550,7 @@ export default function AlbumGallery(){
               </div>
             </div>
 
-            {/* Tagged Users List */}
+      
             {taggedUsers.length > 0 && (
               <div style={{ marginBottom: 'var(--form-field-gap)' }}>
                 <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -1641,7 +1607,7 @@ export default function AlbumGallery(){
               </div>
             )}
 
-            {/* Actions */}
+         
             <div style={{ display: 'flex', gap: '12px', paddingTop: 'var(--form-field-gap)' }}>
               <button
                 onClick={handleTagModalClose}

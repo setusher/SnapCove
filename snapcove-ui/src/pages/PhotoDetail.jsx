@@ -15,13 +15,13 @@ export default function PhotoDetail() {
   useEffect(() => {
     const fetchPhoto = async () => {
       if (photo) {
-        // Photo already available from state
+
         localStorage.setItem(`photo_${photoId}`, JSON.stringify(photo))
         setLoading(false)
         return
       }
 
-      // Try localStorage first
+
       const savedPhoto = localStorage.getItem(`photo_${photoId}`)
       if (savedPhoto) {
         try {
@@ -33,7 +33,7 @@ export default function PhotoDetail() {
         }
       }
 
-      // Fetch from API
+
       try {
         setLoading(true)
         setError(null)
@@ -129,7 +129,7 @@ export default function PhotoDetail() {
       background: 'var(--bg)',
       overflow: 'hidden'
     }}>
-      {/* Close Button - Top Left */}
+
       <button
         onClick={() => nav(-1)}
         style={{
@@ -159,7 +159,7 @@ export default function PhotoDetail() {
         <X size={20} strokeWidth={1.5} />
       </button>
 
-      {/* Photo Panel - Left Side */}
+    
       <div style={{ 
         flex: 1,
         display: 'flex',
@@ -179,7 +179,7 @@ export default function PhotoDetail() {
         />
       </div>
 
-      {/* Comments Panel - Right Side (360px) */}
+
       <div style={{ 
         width: '360px',
         background: 'var(--elevated)',

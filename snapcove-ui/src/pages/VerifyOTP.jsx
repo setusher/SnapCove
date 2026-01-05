@@ -16,12 +16,10 @@ export default function VerifyOTP() {
     try {
       const res = await api.post("/auth/verify-otp/", { email, otp })
   
-      // 🔐 LOGIN USER NOW
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
   
-      // now route to role or dashboard
       if (!res.data.user.role) nav("/select-role")
       else nav("/dashboard")
     } catch (err) {
@@ -41,7 +39,6 @@ export default function VerifyOTP() {
     }
   }
 
-  // Redirect to signup if no email provided
   if (!email) {
     nav("/signup")
     return null

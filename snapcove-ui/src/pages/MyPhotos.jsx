@@ -30,15 +30,15 @@ export default function MyPhotos() {
   const fetchPhotoMetrics = async (photoId) => {
     setLoadingMetrics(true)
     try {
-      // Fetch photo details
+      
       const photoRes = await api.get(`/photos/${photoId}/`)
       const photo = photoRes.data
 
-      // Fetch comments count
+
       const commentsRes = await api.get(`/photos/${photoId}/comments/`)
       const commentsCount = commentsRes.data?.length || 0
 
-      // Fetch album and event details
+      
       let album = null
       let event = null
       if (photo.album_id) {
@@ -74,7 +74,7 @@ export default function MyPhotos() {
   }
 
   const handleDownload = (photo) => {
-    // Create a temporary link to download the image
+
     const link = document.createElement('a')
     link.href = photo.image
     link.download = `photo-${photo.id}.jpg`
@@ -89,7 +89,6 @@ export default function MyPhotos() {
       
       <div style={{ paddingTop: '64px', padding: 'var(--section-padding-y) var(--page-padding-x)', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-          {/* Page Header */}
           <div style={{ marginBottom: 'var(--section-padding-y)' }}>
             <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px', paddingTop: 'var(--space-2)' }}>
               My Photos
@@ -99,7 +98,6 @@ export default function MyPhotos() {
             </p>
           </div>
 
-          {/* Photos Grid */}
           {loading ? (
             <div style={{ textAlign: 'center', padding: 'var(--section-padding-y)' }}>
               <div 
@@ -155,7 +153,6 @@ export default function MyPhotos() {
                     e.currentTarget.style.borderColor = 'var(--border-subtle)'
                   }}
                 >
-                  {/* Photo Thumbnail */}
                   <div style={{ 
                     height: '200px',
                     width: '100%',
@@ -187,7 +184,6 @@ export default function MyPhotos() {
                     )}
                   </div>
 
-                  {/* Photo Info */}
                   <div style={{ padding: 'var(--card-padding)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     {photo.caption && (
                       <p style={{ 
@@ -229,7 +225,6 @@ export default function MyPhotos() {
         </div>
       </div>
 
-      {/* Photo Metrics Modal */}
       {selectedPhoto && photoMetrics && (
         <div style={{
           position: 'fixed',
@@ -254,7 +249,6 @@ export default function MyPhotos() {
             overflow: 'auto',
             position: 'relative'
           }} onClick={(e) => e.stopPropagation()}>
-            {/* Close Button */}
             <button
               onClick={() => {
                 setSelectedPhoto(null)
@@ -297,7 +291,6 @@ export default function MyPhotos() {
               </div>
             ) : (
               <>
-                {/* Photo Image */}
                 <div style={{ marginBottom: 'var(--card-padding)' }}>
                   <img 
                     src={photoMetrics.image} 
@@ -311,14 +304,14 @@ export default function MyPhotos() {
                   />
                 </div>
 
-                {/* Metrics Grid */}
+ 
                 <div style={{ 
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                   gap: 'var(--form-field-gap)',
                   marginBottom: 'var(--card-padding)'
                 }}>
-                  {/* Likes Count */}
+        
                   <div style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border-subtle)',
@@ -348,7 +341,7 @@ export default function MyPhotos() {
                     </div>
                   </div>
 
-                  {/* Comments Count */}
+         
                   <div style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border-subtle)',
@@ -378,7 +371,7 @@ export default function MyPhotos() {
                     </div>
                   </div>
 
-                  {/* Downloads (placeholder) */}
+              
                   <div style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border-subtle)',
@@ -409,7 +402,7 @@ export default function MyPhotos() {
                   </div>
                 </div>
 
-                {/* Photo Details */}
+          
                 <div style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--border-subtle)',
@@ -476,7 +469,7 @@ export default function MyPhotos() {
                   </div>
                 </div>
 
-                {/* Actions */}
+      
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
                     onClick={() => nav(`/photos/${photoMetrics.id}`)}
