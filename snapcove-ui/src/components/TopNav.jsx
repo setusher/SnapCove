@@ -43,7 +43,7 @@ export default function TopNav() {
         justifyContent: 'space-between'
       }}
     >
-      {/* Logo Section */}
+ 
       <div 
         style={{ 
           cursor: 'pointer',
@@ -56,9 +56,9 @@ export default function TopNav() {
         SnapCove
       </div>
 
-      {/* Right Section - Icons Only */}
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* Search */}
+
         <button
           style={{
             width: '36px',
@@ -86,7 +86,7 @@ export default function TopNav() {
           <Search size={20} strokeWidth={1.5} />
         </button>
 
-        {/* Admin Panel */}
+
         {canViewAdminPanel(user?.role) && (
           <button
             onClick={() => window.open("http://127.0.0.1:8000/admin", "_blank")}
@@ -117,7 +117,7 @@ export default function TopNav() {
           </button>
         )}
 
-        {/* My Photos - Photographer Only */}
+
         {isPhotographer(user?.role) && (
           <button
             onClick={() => nav("/my-photos")}
@@ -148,10 +148,10 @@ export default function TopNav() {
           </button>
         )}
 
-        {/* Notifications */}
+  
         <NotificationBell />
 
-        {/* Profile Avatar */}
+        
         <div style={{ position: 'relative' }} ref={profileRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
@@ -173,7 +173,7 @@ export default function TopNav() {
             {user?.name?.[0]?.toUpperCase() || 'U'}
           </button>
 
-          {/* Profile Dropdown */}
+    
           {profileOpen && (
             <div 
               style={{
@@ -188,7 +188,7 @@ export default function TopNav() {
                 zIndex: 100
               }}
             >
-              {/* User Info */}
+
               <div style={{ padding: '12px', borderBottom: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                   {user?.name || 'User'}
@@ -198,7 +198,7 @@ export default function TopNav() {
                 </div>
               </div>
 
-              {/* Menu Items */}
+
               <div style={{ padding: '4px 0' }}>
                 <button
                   onClick={() => {
@@ -240,7 +240,7 @@ export default function TopNav() {
                 </button>
               </div>
 
-              {/* Logout */}
+
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '4px' }}>
                 <button
                   onClick={logout}
@@ -265,7 +265,7 @@ export default function TopNav() {
           )}
         </div>
 
-        {/* Logout Button */}
+
         <button
           style={{
             width: '36px',

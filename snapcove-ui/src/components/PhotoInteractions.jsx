@@ -17,13 +17,13 @@ export default function PhotoInteractions({ photo }) {
     }
   }, [photo])
 
-  // 🔥 Always load the real enriched photo object
+ 
   useEffect(() => {
     if (!photo?.id) return
     api.get(`/photos/${photo.id}/`).then(r => setPhotoData(r.data))
   }, [photo?.id])
 
-  /* 🔁 Auto refresh until AI done */
+ 
   useEffect(() => {
     if (!photo?.id) return
     if (photoData?.processing_status !== "done") {
@@ -47,7 +47,7 @@ export default function PhotoInteractions({ photo }) {
   const toggleLike = async () => {
     const r = await api.post(`/photos/${photoData.id}/like/`)
     setLiked(r.data.liked)
-    // Refresh photo data to get updated like count
+
     const updatedPhoto = await api.get(`/photos/${photoData.id}/`)
     setPhotoData(updatedPhoto.data)
   }
@@ -76,7 +76,7 @@ export default function PhotoInteractions({ photo }) {
         throw new Error('Download failed')
       }
       
-      // Get filename from Content-Disposition header or use default
+
       const contentDisposition = response.headers.get('Content-Disposition')
       let filename = `photo-${photoData.id}.jpg`
       if (contentDisposition) {
@@ -86,7 +86,7 @@ export default function PhotoInteractions({ photo }) {
         }
       }
       
-      // Create blob and download
+
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -112,12 +112,11 @@ export default function PhotoInteractions({ photo }) {
     (photoData.exif_data && Object.keys(photoData.exif_data).length > 0) ||
     (photoData.ai_tags && photoData.ai_tags.length > 0)
 
-  // Format EXIF key for display
+
   const formatExifKey = (key) => {
     return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')
   }
 
-  // Format EXIF value for display
   const formatExifValue = (value) => {
     if (typeof value === 'object' && value !== null) {
       return JSON.stringify(value)
@@ -132,7 +131,7 @@ export default function PhotoInteractions({ photo }) {
       height: '100%',
       background: 'var(--elevated)'
     }}>
-      {/* Action Buttons - Top */}
+      
       <div style={{
         display: 'flex',
         gap: '12px',
@@ -262,7 +261,7 @@ export default function PhotoInteractions({ photo }) {
         </button>
       </div>
 
-      {/* Details Panel */}
+      
       {showDetails && (
         <div style={{
           padding: 'var(--card-padding)',
@@ -406,7 +405,7 @@ export default function PhotoInteractions({ photo }) {
         </div>
       )}
 
-      {/* Comments Feed - Scrollable */}
+  
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -510,7 +509,7 @@ export default function PhotoInteractions({ photo }) {
         )}
       </div>
 
-      {/* Comment Input - Fixed at Bottom */}
+   
       <div style={{
         padding: 'var(--card-padding)',
         borderTop: '1px solid var(--border-subtle)',

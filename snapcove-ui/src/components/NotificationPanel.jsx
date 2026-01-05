@@ -110,7 +110,7 @@ export default function NotificationPanel({ onClose, refresh }){
 
   return (
     <>
-      {/* Backdrop */}
+      
       <div 
         style={{ 
           position: 'fixed',
@@ -122,7 +122,7 @@ export default function NotificationPanel({ onClose, refresh }){
         onClick={onClose}
       />
 
-      {/* Panel */}
+     
       <div 
         ref={panelRef}
         style={{
@@ -139,7 +139,7 @@ export default function NotificationPanel({ onClose, refresh }){
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.5)'
         }}
       >
-        {/* Header */}
+
         <div style={{ 
           display: 'flex',
           alignItems: 'center',
@@ -176,7 +176,7 @@ export default function NotificationPanel({ onClose, refresh }){
           </button>
         </div>
 
-        {/* Mark all read button */}
+
         <div style={{ 
           display: 'flex',
           justifyContent: 'flex-end',
@@ -201,7 +201,7 @@ export default function NotificationPanel({ onClose, refresh }){
           </button>
         </div>
 
-        {/* Notifications List */}
+
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '48px' }}>
@@ -304,7 +304,7 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
         e.currentTarget.style.borderLeft = isUnread ? '3px solid var(--accent)' : '1px solid var(--border-subtle)'
       }}
     >
-      {/* Unread dot indicator */}
+
       {isUnread && (
         <div 
           style={{
@@ -321,7 +321,7 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
       )}
 
       <div style={{ display: 'flex', gap: '16px' }}>
-        {/* Icon Circle */}
+
         <div 
           style={{
             width: '44px',
@@ -346,7 +346,7 @@ function NotificationItem({ notification, onClick, getIcon, getIconBg }) {
           )}
         </div>
 
-        {/* Content */}
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px', lineHeight: 1.5 }}>
             {notification.message}

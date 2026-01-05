@@ -64,7 +64,7 @@ export default function NotificationBell(){
           pauseOnHover: true,
           draggable: true,
           onClick: () => {
-            // Navigate to photo if notification has a photo
+      
             if (notification.photo) {
               nav(`/photos/${notification.photo}`)
             }
