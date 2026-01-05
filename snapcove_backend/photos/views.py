@@ -122,6 +122,63 @@ class PhotoViewSet(viewsets.ModelViewSet):
             ))
 
         return Response({"uploaded": created}, status=201)
+    
+    @action(detail=False, methods=["post"], url_path="batch-operations")
+    def batch_operations(self, request, event_id=None, album_id=None):
+        """
+        Batch operations for photos: delete, move, privacy
+        Allowed for admin, coordinator, and photographer
+        - Admin and coordinator can operate on any photos in the album
+        - Photographer can only operate on their own photos
+        """
+        ids = request.data.get("photo_ids", [])
+        action_type = request.data.get("action")
+        
+        if not ids or not action_type:
+            return Response({"error": "photo_ids and action are required"}, status=400)
+        
+        # Get the album to ensure it exists
+        album = get_object_or_404(Album, id=album_id)
+        
+        # Base queryset: photos in this album with the given IDs
+        qs = Photo.objects.filter(id__in=ids, album_id=album_id)
+        
+        # Permission check: photographers can only operate on their own photos
+        # Admin and coordinator can operate on any photos
+        if request.user.role not in ['admin', 'coordinator']:
+            # For photographer, only allow operations on their own photos
+            qs = qs.filter(uploaded_by=request.user)
+        
+        if action_type == "delete":
+            count = qs.count()
+            qs.delete()
+            return Response({"status": "done", "deleted": count})
+        
+        elif action_type == "move":
+            target_album_id = request.data.get("target_album")
+            if not target_album_id:
+                return Response({"error": "target_album is required for move operation"}, status=400)
+            
+            # Verify target album exists and is in the same event
+            target_album = get_object_or_404(Album, id=target_album_id)
+            if target_album.event_id != album.event_id:
+                return Response({"error": "Target album must be in the same event"}, status=400)
+            
+            count = qs.update(album_id=target_album_id)
+            return Response({"status": "done", "moved": count})
+        
+        elif action_type == "privacy":
+            value = request.data.get("value")
+            if value is None:
+                return Response({"error": "value is required for privacy operation"}, status=400)
+            
+            # Note: The model has is_public, but the request uses is_private
+            # So we need to invert the value
+            count = qs.update(is_public=not bool(value))
+            return Response({"status": "done", "updated": count})
+        
+        else:
+            return Response({"error": f"Unknown action: {action_type}"}, status=400)
         
 
 class PendingPhotosView(ListAPIView):

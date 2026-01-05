@@ -148,7 +148,7 @@ export default function AlbumGallery(){
     try {
       setBatchProcessing(true)
       const response = await api.post(
-        `/events/${eventId}/albums/${albumId}/photos/batch/`,
+        `/events/${eventId}/albums/${albumId}/photos/batch-operations/`,
         {
           photo_ids: Array.from(selectedPhotos),
           action: action,
@@ -165,7 +165,8 @@ export default function AlbumGallery(){
       }
     } catch (error) {
       console.error('Batch operation error:', error)
-      alert(`Failed to ${action} photos: ${error?.response?.data?.detail || error.message}`)
+      const errorMessage = error?.response?.data?.error || error?.response?.data?.detail || error.message
+      alert(`Failed to ${action} photos: ${errorMessage}`)
     } finally {
       setBatchProcessing(false)
     }
