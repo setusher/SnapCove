@@ -22,7 +22,6 @@ from django.http import FileResponse
 import os
 from rest_framework.decorators import action, parser_classes
 
-
 class PhotoViewSet(viewsets.ModelViewSet):
     default_parser_classes = (MultiPartParser, FormParser)
     fiterset_fields = ['album', 'is_approved']
