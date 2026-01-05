@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { api } from "../api/api"
-import { Heart, Send, Info, X } from "lucide-react"
+import { Heart, Send, Info, X, Download } from "lucide-react"
 
 export default function PhotoInteractions({ photo }) {
   const [photoData, setPhotoData] = useState(null)
@@ -9,6 +9,7 @@ export default function PhotoInteractions({ photo }) {
   const [text, setText] = useState("")
   const [loading, setLoading] = useState(true)
   const [showDetails, setShowDetails] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (photo) {
@@ -56,6 +57,51 @@ export default function PhotoInteractions({ photo }) {
     const r = await api.post(`/photos/${photoData.id}/comments/`, { content: text })
     setComments([r.data, ...comments])
     setText("")
+  }
+
+  const handleDownload = async () => {
+    if (!photoData?.id || downloading) return
+    
+    try {
+      setDownloading(true)
+      const token = localStorage.getItem("access_token")
+      const response = await fetch(`http://localhost:8000/api/photos/${photoData.id}/download/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('Download failed')
+      }
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = `photo-${photoData.id}.jpg`
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i)
+        if (filenameMatch) {
+          filename = filenameMatch[1]
+        }
+      }
+      
+      // Create blob and download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download photo. Please try again.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   if (!photoData) return null
@@ -137,6 +183,41 @@ export default function PhotoInteractions({ photo }) {
               {photoData.likes_count}
             </span>
           )}
+        </button>
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: 'var(--button-padding)',
+            background: 'transparent',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-button)',
+            fontSize: '14px',
+            fontWeight: 500,
+            cursor: downloading ? 'not-allowed' : 'pointer',
+            opacity: downloading ? 0.6 : 1,
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
+            fontFamily: 'inherit'
+          }}
+          onMouseEnter={(e) => {
+            if (!downloading) {
+              e.currentTarget.style.background = 'var(--surface)'
+              e.currentTarget.style.borderColor = 'var(--accent)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!downloading) {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.borderColor = 'var(--border-subtle)'
+            }
+          }}
+        >
+          <Download size={18} strokeWidth={1.5} />
         </button>
         <button
           onClick={async () => {

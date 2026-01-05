@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter    
 from django.urls import path
-from .views import PhotoViewSet, UserPhotosView, PhotoDetailView, TagUserView, TaggedPhotosView, PhotoSearchView
+from .views import PhotoViewSet, UserPhotosView, PhotoDetailView, TagUserView, TaggedPhotosView, PhotoSearchView, PhotoDownloadView
 
 router = DefaultRouter()
 router.register(r'events/(?P<event_id>\d+)/albums/(?P<album_id>\d+)/photos', PhotoViewSet, basename='album-photos')

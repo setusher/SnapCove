@@ -1,6 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
-from .models import Photo
+from .models import Photo, PhotoDownload
 from .serializers import PhotoSerializer, BulkPhotoSerializer
 from events.models import Album
 from accounts.permissions import IsCoordinator, IsAdmin
@@ -18,6 +18,8 @@ from rest_framework.decorators import action
 from .models import PhotoTag
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
+from django.http import FileResponse
+import os
 
 class PhotoViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
@@ -90,6 +92,24 @@ class PhotoViewSet(viewsets.ModelViewSet):
             )
 
         return Response({"uploaded": created}, status=201)
+    
+    @action(detail=False, methods=["post"], url_path="batch")
+    def batch(self, request, album_id=None):
+        ids = request.data.get("photo_ids", [])
+        action_type = request.data.get("action")
+
+        qs = Photo.objects.filter(id__in=ids, uploaded_by=request.user)
+
+        if action_type == "delete":
+            qs.delete()
+
+        elif action_type == "move":
+            qs.update(album_id=request.data.get("target_album"))
+
+        elif action_type == "privacy":
+            qs.update(is_private=request.data.get("value"))
+
+        return Response({"status": "done"})
         
 
 class PendingPhotosView(ListAPIView):

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Upload, X, UserPlus, XCircle, Search } from "lucide-react"
+import { ChevronLeft, Upload, X, UserPlus, XCircle, Search, Download, Heart, Info } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
 import { canUpload } from "../utils/roles"
 
@@ -20,6 +20,7 @@ export default function AlbumGallery(){
   const [searchTimeout, setSearchTimeout] = useState(null)
   const [photoSearchQuery, setPhotoSearchQuery] = useState("")
   const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
+  const [downloadingPhotos, setDownloadingPhotos] = useState(new Set())
   const suggestionRef = useRef(null)
   const nav = useNavigate()
   const fileInputRef = useRef(null)
@@ -95,6 +96,57 @@ export default function AlbumGallery(){
     fetchPhotos()
     if (photoSearchTimeout) {
       clearTimeout(photoSearchTimeout)
+    }
+  }
+
+  const handlePhotoDownload = async (photo, e) => {
+    e.stopPropagation() // Prevent navigation when clicking download
+    
+    if (downloadingPhotos.has(photo.id)) return
+    
+    try {
+      setDownloadingPhotos(prev => new Set(prev).add(photo.id))
+      const token = localStorage.getItem("access_token")
+      const response = await fetch(`http://localhost:8000/api/photos/${photo.id}/download/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('Download failed')
+      }
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = `photo-${photo.id}.jpg`
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i)
+        if (filenameMatch) {
+          filename = filenameMatch[1]
+        }
+      }
+      
+      // Create blob and download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download photo. Please try again.')
+    } finally {
+      setDownloadingPhotos(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(photo.id)
+        return newSet
+      })
     }
   }
 
@@ -602,18 +654,20 @@ export default function AlbumGallery(){
                   // #endregion
                 }
                 
+                const isDownloading = downloadingPhotos.has(photo.id)
+                
                 return (
                   <div 
                     key={photo.id}
-                    onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
                     style={{
                       aspectRatio: '1',
                       background: 'var(--bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-card)',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      transition: 'all 200ms ease'
+                      transition: 'all 200ms ease',
+                      position: 'relative'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = 'var(--accent)'
@@ -621,22 +675,111 @@ export default function AlbumGallery(){
                       e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)'
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
                       e.currentTarget.style.transform = 'translateY(0)'
                       e.currentTarget.style.boxShadow = 'none'
                     }}
                   >
                     {imageUrl ? (
-                      <img 
-                        src={imageUrl} 
-                        alt={`Photo ${photo.id}`}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        loading="lazy"
-                        onError={(e) => {
-                          console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
-                          e.target.style.display = 'none'
+                      <>
+                        <img 
+                          src={imageUrl} 
+                          alt={`Photo ${photo.id}`}
+                          onClick={() => nav(`/photos/${photo.id}`, { state: { photo } })}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          loading="lazy"
+                          onError={(e) => {
+                            console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
+                            e.target.style.display = 'none'
+                          }}
+                        />
+                        {/* Action Buttons Overlay */}
+                        <div style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          background: 'linear-gradient(to top, rgba(10, 17, 40, 0.9), transparent)',
+                          padding: '12px',
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          opacity: 0,
+                          transition: 'opacity 0.2s ease'
                         }}
-                      />
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = '1'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = '0'
+                        }}
+                        >
+                          <button
+                            onClick={(e) => handlePhotoDownload(photo, e)}
+                            disabled={isDownloading}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-button)',
+                              color: 'var(--text-primary)',
+                              cursor: isDownloading ? 'not-allowed' : 'pointer',
+                              opacity: isDownloading ? 0.6 : 1,
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isDownloading) {
+                                e.currentTarget.style.background = 'var(--accent)'
+                                e.currentTarget.style.borderColor = 'var(--accent)'
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isDownloading) {
+                                e.currentTarget.style.background = 'var(--surface)'
+                                e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                              }
+                            }}
+                            title="Download"
+                          >
+                            <Download size={18} strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              nav(`/photos/${photo.id}`, { state: { photo } })
+                            }}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-button)',
+                              color: 'var(--text-primary)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'var(--accent)'
+                              e.currentTarget.style.borderColor = 'var(--accent)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'var(--surface)'
+                              e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                            }}
+                            title="View Details"
+                          >
+                            <Info size={18} strokeWidth={1.5} />
+                          </button>
+                        </div>
+                      </>
                     ) : photo.processing_status === 'processing' || photo.processing_status === 'pending' ? (
                       <div style={{ 
                         width: '100%', 
