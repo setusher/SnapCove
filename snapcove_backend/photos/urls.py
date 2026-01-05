@@ -11,6 +11,7 @@ urlpatterns = [
     path("photos/<int:pk>/tag/", TagUserView.as_view()),
     path("photos/tagged/", TaggedPhotosView.as_view()),
     path("photos/search/", PhotoSearchView.as_view()),
+    path("photos/<int:pk>/download/", PhotoDownloadView.as_view()),
 
 
 ] + router.urls

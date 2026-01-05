@@ -215,3 +215,15 @@ class PhotoSearchView(ListAPIView):
             qs = qs.filter(uploaded_at__date__lte=to_date)
 
         return qs.order_by("-uploaded_at").distinct()
+
+class PhotoDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        photo = get_object_or_404(Photo, pk=pk, is_approved=True)
+        PhotoDownload.objects.get_or_create(photo=photo, user=request.user)
+
+        file_path = photo.image.path
+
+        response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
+        return response
