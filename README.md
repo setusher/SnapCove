@@ -122,16 +122,19 @@ snapcove-ui/
 
 1. **Start Redis** (required for Celery):
    ```bash
+   cd snapcove_backend
    redis-server
    ```
 
 2. **Start Celery Worker** (for background tasks):
    ```bash
+   cd snapcove_backend
    celery -A snapcove_backend worker -l info
    ```
 
 3. **Start Django Server**:
    ```bash
+   cd snapcove_backend
    python manage.py runserver
    ```
 
