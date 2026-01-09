@@ -4,26 +4,6 @@ SnapCove is a role-based, AI-powered event photo management platform for college
 It securely handles uploads, approvals, AI metadata extraction, watermarking, and public distribution of event photos.
 Built for scale, moderation, and real campus workflows.
 
-## What SnapCove Solves
-
-College events generate thousands of photos:
-- No structure
-- No moderation
-- No attribution
-- No metadata
-- No security
-
-**SnapCove fixes that.**
-
-| Traditional Way | SnapCove |
-|----------------|----------|
-| WhatsApp drives | Centralized albums |
-| No moderation | Admin approval workflow |
-| No metadata | AI + EXIF extraction |
-| No watermark | Automatic SnapCove watermark |
-| No access control | Role-based upload & view |
-| No AI | Smart tagging & classification |
-
 ## Core Features
 
 ### Role Based System
