@@ -221,45 +221,6 @@ export default function TopNav() {
                 >
                   My Profile
                 </button>
-                <button
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    color: 'var(--text-primary)',
-                    transition: 'background 200ms ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  Help & Support
-                </button>
-              </div>
-
-
-              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '4px' }}>
-                <button
-                  onClick={logout}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    color: 'var(--danger)',
-                    transition: 'background 200ms ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(229, 83, 61, 0.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  Logout
-                </button>
               </div>
             </div>
           )}
