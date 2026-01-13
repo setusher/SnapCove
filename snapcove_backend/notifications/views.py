@@ -64,4 +64,3 @@ class MarkUnreadView(APIView):
         Notification.objects.filter(id=pk, recipient=request.user).update(is_read=False)
         return Response({"success": True})
        
-#fff

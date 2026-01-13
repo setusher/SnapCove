@@ -606,44 +606,42 @@ function CommentItem({ comment, replyingTo, setReplyingTo, replyTexts, setReplyT
             })}
           </div>
         </div>
-        {!isReply && (
-          <button
-            onClick={() => {
-              setReplyingTo(isReplying ? null : comment.id)
-              if (!isReplying) {
-                setReplyTexts({ ...replyTexts, [comment.id]: "" })
-              }
-            }}
-            style={{
-              padding: '6px 12px',
-              background: isReplying ? 'var(--surface)' : 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-button)',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-              fontFamily: 'inherit'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--surface)'
-              e.currentTarget.style.color = 'var(--text-primary)'
-            }}
-            onMouseLeave={(e) => {
-              if (!isReplying) {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.color = 'var(--text-secondary)'
-              }
-            }}
-          >
-            <Reply size={14} strokeWidth={1.5} />
-            Reply
-          </button>
-        )}
+        <button
+          onClick={() => {
+            setReplyingTo(isReplying ? null : comment.id)
+            if (!isReplying) {
+              setReplyTexts({ ...replyTexts, [comment.id]: "" })
+            }
+          }}
+          style={{
+            padding: '6px 12px',
+            background: isReplying ? 'var(--surface)' : 'transparent',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-button)',
+            fontSize: '12px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease',
+            fontFamily: 'inherit'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--surface)'
+            e.currentTarget.style.color = 'var(--text-primary)'
+          }}
+          onMouseLeave={(e) => {
+            if (!isReplying) {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = 'var(--text-secondary)'
+            }
+          }}
+        >
+          <Reply size={14} strokeWidth={1.5} />
+          Reply
+        </button>
       </div>
       <p style={{
         fontSize: '14px',
