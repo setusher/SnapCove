@@ -35,6 +35,11 @@
   --space-6: 48px;
   --space-7: 56px;
   --space-8: 64px;
+  --space-10: 80px;
+  --space-12: 96px;
+  --space-16: 128px;
+  --space-20: 160px;
+  --space-24: 192px;
   
   /* Page padding */
   --page-padding-x: 64px;
@@ -378,5 +383,21 @@ textarea.input {
     border-bottom: 1px solid var(--border-subtle) !important;
     padding-bottom: var(--space-6) !important;
     margin-bottom: var(--space-4) !important;
+  }
+
+  /* Reduce section padding on mobile for better use of space */
+  .landing-section {
+    padding-top: var(--space-12) !important;
+    padding-bottom: var(--space-12) !important;
+  }
+
+  .landing-hero {
+    padding-top: var(--space-12) !important;
+    padding-bottom: var(--space-16) !important;
+  }
+
+  .landing-footer {
+    padding-top: var(--space-8) !important;
+    padding-bottom: var(--space-8) !important;
   }
 }
