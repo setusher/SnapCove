@@ -26,6 +26,7 @@ SEMANTIC_TAGS = [
 model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
 model.eval()
 
+#making pic fit for resnet
 transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -47,7 +48,7 @@ def extract_exif(path):
 
     return camera, gps, capture_time, clean_exif
 
-
+#resnet ka data -> use for photo properties inference 
 def run_resnet(path):
     import exifread
     tags = []
@@ -92,6 +93,7 @@ def run_resnet(path):
 
     return tags
 
+
 def apply_watermark(image_path, text="SnapCove"):
     img = Image.open(image_path).convert("RGBA")
     overlay = Image.new("RGBA", img.size, (255,255,255,0))
@@ -132,6 +134,7 @@ def process_photo(photo):
         photo.save()
         return
 
+#process: save ->watermark->exif data-> resnet-> save exif data-> save resnet data
     photo.processing_status = "processing"
     photo.save()
     apply_watermark(photo.image.path)
