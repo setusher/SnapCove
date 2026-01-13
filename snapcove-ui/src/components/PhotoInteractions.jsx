@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { api } from "../api/api"
-import { Heart, Send, Info, X, Download } from "lucide-react"
+import { Heart, Send, Info, X, Download, Reply } from "lucide-react"
 
 export default function PhotoInteractions({ photo }) {
   const [photoData, setPhotoData] = useState(null)
@@ -10,6 +10,8 @@ export default function PhotoInteractions({ photo }) {
   const [loading, setLoading] = useState(true)
   const [showDetails, setShowDetails] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [replyingTo, setReplyingTo] = useState(null)
+  const [replyTexts, setReplyTexts] = useState({})
 
   useEffect(() => {
     if (photo) {
@@ -57,6 +59,32 @@ export default function PhotoInteractions({ photo }) {
     const r = await api.post(`/photos/${photoData.id}/comments/`, { content: text })
     setComments([r.data, ...comments])
     setText("")
+  }
+
+  const sendReply = async (commentId) => {
+    const replyText = replyTexts[commentId]
+    if (!replyText?.trim()) return
+    
+    try {
+      const r = await api.post(`/comments/${commentId}/reply/`, { content: replyText })
+      
+      // Update the comment with the new reply
+      setComments(comments.map(comment => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            replies: [...(comment.replies || []), r.data]
+          }
+        }
+        return comment
+      }))
+      
+      // Clear reply input
+      setReplyTexts({ ...replyTexts, [commentId]: "" })
+      setReplyingTo(null)
+    } catch (error) {
+      console.error("Error replying to comment:", error)
+    }
   }
 
   const handleDownload = async () => {
@@ -440,71 +468,15 @@ export default function PhotoInteractions({ photo }) {
           </div>
         ) : (
           comments.map(c => (
-            <div
+            <CommentItem
               key={c.id}
-              style={{
-                paddingBottom: '16px',
-                borderBottom: '1px solid var(--border)'
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '8px'
-              }}>
-                <div
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--text-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 600,
-                    fontSize: '12px',
-                    flexShrink: 0
-                  }}
-                >
-                  {c.user?.name?.[0]?.toUpperCase() || c.user?.email?.[0]?.toUpperCase() || 'U'}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: 'var(--text-primary)',
-                    marginBottom: '4px'
-                  }}>
-                    {c.user?.name || c.user?.email?.split('@')[0] || 'Unknown'}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'var(--text-secondary)'
-                  }}>
-                    {new Date(c.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-              </div>
-              <p style={{
-                fontSize: '14px',
-                color: 'var(--text-primary)',
-                marginLeft: '44px',
-                lineHeight: 1.5,
-                margin: 0,
-                wordBreak: 'break-word'
-              }}>
-                {c.content}
-              </p>
-            </div>
+              comment={c}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              replyTexts={replyTexts}
+              setReplyTexts={setReplyTexts}
+              sendReply={sendReply}
+            />
           ))
         )}
       </div>
@@ -569,6 +541,244 @@ export default function PhotoInteractions({ photo }) {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function CommentItem({ comment, replyingTo, setReplyingTo, replyTexts, setReplyTexts, sendReply, isReply = false }) {
+  const hasReplies = comment.replies && comment.replies.length > 0
+  const isReplying = replyingTo === comment.id
+
+  return (
+    <div
+      style={{
+        paddingBottom: '16px',
+        borderBottom: isReply ? 'none' : '1px solid var(--border)',
+        marginLeft: isReply ? '32px' : '0',
+        paddingLeft: isReply ? '16px' : '0',
+        borderLeft: isReply ? '2px solid var(--border-subtle)' : 'none',
+        marginTop: isReply ? '12px' : '0'
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '8px'
+      }}>
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: 'var(--surface)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 600,
+            fontSize: '12px',
+            flexShrink: 0
+          }}
+        >
+          {comment.user?.name?.[0]?.toUpperCase() || comment.user?.email?.[0]?.toUpperCase() || 'U'}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            marginBottom: '4px'
+          }}>
+            {comment.user?.name || comment.user?.email?.split('@')[0] || 'Unknown'}
+          </div>
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--text-secondary)'
+          }}>
+            {new Date(comment.created_at).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </div>
+        </div>
+        {!isReply && (
+          <button
+            onClick={() => {
+              setReplyingTo(isReplying ? null : comment.id)
+              if (!isReplying) {
+                setReplyTexts({ ...replyTexts, [comment.id]: "" })
+              }
+            }}
+            style={{
+              padding: '6px 12px',
+              background: isReplying ? 'var(--surface)' : 'transparent',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-button)',
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+              fontFamily: 'inherit'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--surface)'
+              e.currentTarget.style.color = 'var(--text-primary)'
+            }}
+            onMouseLeave={(e) => {
+              if (!isReplying) {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = 'var(--text-secondary)'
+              }
+            }}
+          >
+            <Reply size={14} strokeWidth={1.5} />
+            Reply
+          </button>
+        )}
+      </div>
+      <p style={{
+        fontSize: '14px',
+        color: 'var(--text-primary)',
+        marginLeft: '44px',
+        lineHeight: 1.5,
+        margin: 0,
+        marginBottom: hasReplies || isReplying ? '12px' : '0',
+        wordBreak: 'break-word'
+      }}>
+        {comment.content}
+      </p>
+
+      {isReplying && (
+        <div style={{
+          marginLeft: '44px',
+          marginTop: '12px',
+          marginBottom: '12px'
+        }}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'flex-start'
+          }}>
+            <input
+              value={replyTexts[comment.id] || ""}
+              onChange={e => setReplyTexts({ ...replyTexts, [comment.id]: e.target.value })}
+              onKeyPress={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  sendReply(comment.id)
+                }
+              }}
+              placeholder={`Reply to ${comment.user?.name || comment.user?.email?.split('@')[0] || 'this comment'}...`}
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-button)',
+                color: 'var(--text-primary)',
+                fontSize: '13px',
+                fontFamily: 'inherit',
+                transition: 'border-color 0.2s ease, outline 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.target.style.outline = '2px solid var(--accent)'
+                e.target.style.outlineOffset = '0'
+                e.target.style.borderColor = 'transparent'
+              }}
+              onBlur={(e) => {
+                e.target.style.outline = 'none'
+                e.target.style.borderColor = 'var(--border-subtle)'
+              }}
+              autoFocus
+            />
+            <button
+              onClick={() => sendReply(comment.id)}
+              disabled={!replyTexts[comment.id]?.trim()}
+              style={{
+                padding: '10px 14px',
+                background: replyTexts[comment.id]?.trim() ? 'var(--accent)' : 'var(--surface)',
+                color: replyTexts[comment.id]?.trim() ? 'var(--text-primary)' : 'var(--text-secondary)',
+                border: 'none',
+                borderRadius: 'var(--radius-button)',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: replyTexts[comment.id]?.trim() ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background-color 0.2s ease',
+                fontFamily: 'inherit',
+                opacity: replyTexts[comment.id]?.trim() ? 1 : 0.6
+              }}
+              onMouseEnter={(e) => {
+                if (replyTexts[comment.id]?.trim()) {
+                  e.currentTarget.style.background = '#1a9bc2'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (replyTexts[comment.id]?.trim()) {
+                  e.currentTarget.style.background = 'var(--accent)'
+                }
+              }}
+            >
+              <Send size={14} strokeWidth={1.5} />
+            </button>
+            <button
+              onClick={() => {
+                setReplyingTo(null)
+                setReplyTexts({ ...replyTexts, [comment.id]: "" })
+              }}
+              style={{
+                padding: '10px',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                border: 'none',
+                borderRadius: 'var(--radius-button)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'color 0.2s ease',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--text-primary)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)'
+              }}
+            >
+              <X size={16} strokeWidth={1.5} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {hasReplies && (
+        <div style={{ marginTop: '12px' }}>
+          {comment.replies.map(reply => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              replyTexts={replyTexts}
+              setReplyTexts={setReplyTexts}
+              sendReply={sendReply}
+              isReply={true}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
