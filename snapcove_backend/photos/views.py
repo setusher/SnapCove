@@ -62,6 +62,28 @@ class PhotoViewSet(viewsets.ModelViewSet):
             # Using icontains for case-insensitive partial matching
             queryset = queryset.filter(ai_tags__icontains=semantic_tag_search)
         
+        # Date filtering
+        from_date = self.request.query_params.get('from_date', None)
+        to_date = self.request.query_params.get('to_date', None)
+        date_filter = self.request.query_params.get('date', None)
+        
+        if date_filter:
+            queryset = queryset.filter(
+                Q(uploaded_at__date=date_filter) |
+                Q(capture_time__date=date_filter)
+            )
+        else:
+            if from_date:
+                queryset = queryset.filter(
+                    Q(uploaded_at__date__gte=from_date) |
+                    Q(capture_time__date__gte=from_date)
+                )
+            if to_date:
+                queryset = queryset.filter(
+                    Q(uploaded_at__date__lte=to_date) |
+                    Q(capture_time__date__lte=to_date)
+                )
+        
         return queryset
     
     def get_permissions(self):

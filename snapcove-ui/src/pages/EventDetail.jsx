@@ -19,6 +19,7 @@ export default function EventDetail(){
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchTimeout, setSearchTimeout] = useState(null)
+  const [dateFilter, setDateFilter] = useState("")
   const eventThumbnailInputRef = useRef(null)
   const albumThumbnailInputRef = useRef(null)
   const nav = useNavigate()
@@ -34,8 +35,18 @@ export default function EventDetail(){
       .catch(err => console.error(err))
   }
 
-  const fetchAlbums = (query = "") => {
-    const url = query ? `/events/${eventId}/albums/?search=${encodeURIComponent(query)}` : `/events/${eventId}/albums/`
+  const fetchAlbums = (query = "", date = "") => {
+    let url = `/events/${eventId}/albums/`
+    const params = new URLSearchParams()
+    if (query) {
+      params.append('search', query)
+    }
+    if (date) {
+      params.append('date', date)
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`
+    }
     api.get(url)
       .then(r => {
         const albumsData = r.data.results || r.data || []
@@ -73,13 +84,20 @@ export default function EventDetail(){
     
 
     const timeout = setTimeout(() => {
-      fetchAlbums(value)
+      fetchAlbums(value, dateFilter)
     }, 300)
     setSearchTimeout(timeout)
   }
 
+  const handleDateChange = (e) => {
+    const value = e.target.value
+    setDateFilter(value)
+    fetchAlbums(searchQuery, value)
+  }
+
   const clearSearch = () => {
     setSearchQuery("")
+    setDateFilter("")
     fetchAlbums()
     if (searchTimeout) {
       clearTimeout(searchTimeout)
@@ -261,8 +279,8 @@ export default function EventDetail(){
           )}
 
 
-          <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: 'var(--form-field-gap)', maxWidth: '500px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
               <Search 
                 size={18} 
                 strokeWidth={1.5}
@@ -324,6 +342,62 @@ export default function EventDetail(){
                   onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                 >
                   <X size={16} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={handleDateChange}
+                style={{
+                  padding: '12px 16px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease',
+                  width: '160px'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              />
+              {dateFilter && (
+                <button
+                  onClick={() => {
+                    setDateFilter("")
+                    fetchAlbums(searchQuery, "")
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                  <X size={14} strokeWidth={1.5} />
                 </button>
               )}
             </div>

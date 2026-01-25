@@ -11,11 +11,22 @@ export default function Dashboard(){
   const [eventStats, setEventStats] = useState({})
   const [searchQuery, setSearchQuery] = useState("")
   const [searchTimeout, setSearchTimeout] = useState(null)
+  const [dateFilter, setDateFilter] = useState("")
   const { user } = useAuth()
   const nav = useNavigate()
 
-  const fetchEvents = (query = "") => {
-    const url = query ? `/events/?search=${encodeURIComponent(query)}` : "/events/"
+  const fetchEvents = (query = "", date = "") => {
+    let url = "/events/"
+    const params = new URLSearchParams()
+    if (query) {
+      params.append('search', query)
+    }
+    if (date) {
+      params.append('date', date)
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`
+    }
     api.get(url)
       .then(r => {
         const eventsData = r.data.results || r.data || []
@@ -73,13 +84,20 @@ export default function Dashboard(){
     }
     
     const timeout = setTimeout(() => {
-      fetchEvents(value)
+      fetchEvents(value, dateFilter)
     }, 300)
     setSearchTimeout(timeout)
   }
 
+  const handleDateChange = (e) => {
+    const value = e.target.value
+    setDateFilter(value)
+    fetchEvents(searchQuery, value)
+  }
+
   const clearSearch = () => {
     setSearchQuery("")
+    setDateFilter("")
     fetchEvents()
     if (searchTimeout) {
       clearTimeout(searchTimeout)
@@ -95,48 +113,48 @@ export default function Dashboard(){
       
           <div style={{ marginBottom: 'var(--section-padding-y)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--form-field-gap)' }}>
-              <div>
+            <div>
                 <h1 style={{ fontSize: '36px', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-primary)', marginBottom: '8px', paddingTop: 'var(--space-2)' }}>
-                  Events
-                </h1>
+                Events
+              </h1>
                 <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-                  Manage and monitor all campus events
-                </p>
-              </div>
-              
-              {canCreateEvent(user?.role) && (
-                <button 
-                  onClick={() => nav("/events/create")}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: 'var(--button-padding)',
-                    background: 'var(--accent)',
-                    color: 'var(--text-primary)',
-                    border: 'none',
-                    borderRadius: 'var(--radius-button)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#1a9bc2'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--accent)'
-                  }}
-                >
-                  <Plus size={16} strokeWidth={2} />
-                  Create Event
-                </button>
-              )}
+                Manage and monitor all campus events
+              </p>
             </div>
+            
+              {canCreateEvent(user?.role) && (
+              <button 
+                onClick={() => nav("/events/create")}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                    padding: 'var(--button-padding)',
+                  background: 'var(--accent)',
+                    color: 'var(--text-primary)',
+                  border: 'none',
+                    borderRadius: 'var(--radius-button)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#1a9bc2'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--accent)'
+                }}
+              >
+                <Plus size={16} strokeWidth={2} />
+                Create Event
+              </button>
+            )}
+          </div>
 
   
-            <div style={{ position: 'relative', maxWidth: '400px' }}>
-              <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', maxWidth: '500px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
                 <Search 
                   size={18} 
                   strokeWidth={1.5}
@@ -198,6 +216,62 @@ export default function Dashboard(){
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                   >
                     <X size={16} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={handleDateChange}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease, outline 0.2s ease',
+                    width: '160px'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = '2px solid var(--accent)'
+                    e.target.style.outlineOffset = '0'
+                    e.target.style.borderColor = 'transparent'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.outline = 'none'
+                    e.target.style.borderColor = 'var(--border-subtle)'
+                  }}
+                />
+                {dateFilter && (
+                  <button
+                    onClick={() => {
+                      setDateFilter("")
+                      fetchEvents(searchQuery, "")
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                  >
+                    <X size={14} strokeWidth={1.5} />
                   </button>
                 )}
               </div>

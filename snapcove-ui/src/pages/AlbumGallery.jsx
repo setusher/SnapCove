@@ -21,6 +21,7 @@ export default function AlbumGallery(){
   const [photoSearchQuery, setPhotoSearchQuery] = useState("")
   const [semanticTagSearchQuery, setSemanticTagSearchQuery] = useState("")
   const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
+  const [dateFilter, setDateFilter] = useState("")
   const [downloadingPhotos, setDownloadingPhotos] = useState(new Set())
   const [selectedPhotos, setSelectedPhotos] = useState(new Set())
   const [showBatchActions, setShowBatchActions] = useState(false)
@@ -58,8 +59,8 @@ export default function AlbumGallery(){
     return () => clearInterval(interval)
   }, [photos, eventId, albumId])
 
-  const fetchPhotos = (userSearch = "", semanticTagSearch = "") => {
-    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,userSearch,semanticTagSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
+  const fetchPhotos = (userSearch = "", semanticTagSearch = "", date = "") => {
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,userSearch,semanticTagSearch,date},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
     
     let url = `/events/${eventId}/albums/${albumId}/photos/`
     const params = new URLSearchParams()
@@ -68,6 +69,9 @@ export default function AlbumGallery(){
     }
     if (semanticTagSearch) {
       params.append('semantic_tag', semanticTagSearch)
+    }
+    if (date) {
+      params.append('date', date)
     }
     if (params.toString()) {
       url += `?${params.toString()}`
@@ -101,7 +105,7 @@ export default function AlbumGallery(){
     }
     
     const timeout = setTimeout(() => {
-      fetchPhotos(value, semanticTagSearchQuery)
+      fetchPhotos(value, semanticTagSearchQuery, dateFilter)
     }, 300)
     setPhotoSearchTimeout(timeout)
   }
@@ -115,14 +119,21 @@ export default function AlbumGallery(){
     }
     
     const timeout = setTimeout(() => {
-      fetchPhotos(photoSearchQuery, value)
+      fetchPhotos(photoSearchQuery, value, dateFilter)
     }, 300)
     setPhotoSearchTimeout(timeout)
+  }
+
+  const handleDateChange = (e) => {
+    const value = e.target.value
+    setDateFilter(value)
+    fetchPhotos(photoSearchQuery, semanticTagSearchQuery, value)
   }
 
   const clearPhotoSearch = () => {
     setPhotoSearchQuery("")
     setSemanticTagSearchQuery("")
+    setDateFilter("")
     fetchPhotos()
     if (photoSearchTimeout) {
       clearTimeout(photoSearchTimeout)
@@ -788,8 +799,8 @@ export default function AlbumGallery(){
           )}
 
 
-          <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: 'var(--form-field-gap)', maxWidth: '500px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
               <Search 
                 size={18} 
                 strokeWidth={1.5}
@@ -854,6 +865,62 @@ export default function AlbumGallery(){
                 </button>
               )}
             </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={handleDateChange}
+                style={{
+                  padding: '12px 16px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease',
+                  width: '160px'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              />
+              {dateFilter && (
+                <button
+                  onClick={() => {
+                    setDateFilter("")
+                    fetchPhotos(photoSearchQuery, semanticTagSearchQuery, "")
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                  <X size={14} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
@@ -900,7 +967,7 @@ export default function AlbumGallery(){
                 <button
                   onClick={() => {
                     setSemanticTagSearchQuery("")
-                    fetchPhotos(photoSearchQuery, "")
+                    fetchPhotos(photoSearchQuery, "", dateFilter)
                   }}
                   style={{
                     position: 'absolute',
