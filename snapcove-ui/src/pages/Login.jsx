@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
+import { useAuth } from "../auth/AuthProvider"
 
 const GOOGLE_CLIENT_ID = "447171812608-0c66t6gioscl9kl3m5gqqkkj8r4ni29n.apps.googleusercontent.com"
 
@@ -10,6 +11,7 @@ export default function Login(){
   const [loading, setLoading] = useState(false)
   const nav = useNavigate()
   const googleButtonRef = useRef(null)
+  const { refreshUser } = useAuth()
 
   useEffect(() => {
     const initGoogleSignIn = () => {
@@ -41,6 +43,7 @@ export default function Login(){
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
+      await refreshUser()
       nav("/dashboard")
     } catch(e) {
       alert("Google sign-in failed")
@@ -56,6 +59,7 @@ export default function Login(){
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
+      await refreshUser()
       nav("/dashboard")
     } catch(e) {
       alert("Invalid credentials")

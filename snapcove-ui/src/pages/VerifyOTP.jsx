@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { api } from "../api/api"
+import { useAuth } from "../auth/AuthProvider"
 
 export default function VerifyOTP() {
   const nav = useNavigate()
   const { state } = useLocation()
   const email = state?.email || ""
+  const { refreshUser } = useAuth()
 
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
@@ -19,6 +21,8 @@ export default function VerifyOTP() {
       localStorage.setItem("access_token", res.data.access)
       localStorage.setItem("refresh_token", res.data.refresh)
       localStorage.setItem("user", JSON.stringify(res.data.user))
+  
+      await refreshUser()
   
       if (!res.data.user.role) nav("/select-role")
       else nav("/dashboard")

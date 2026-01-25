@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
+import { useAuth } from "../auth/AuthProvider"
 
 const roles = ["student", "photographer", "coordinator"]
 
 export default function SelectRole() {
   const nav = useNavigate()
+  const { refreshUser } = useAuth()
 
   const select = async (role) => {
     await api.post("/auth/select-role/", { role })
+    await refreshUser()
     nav("/dashboard")
   }
 

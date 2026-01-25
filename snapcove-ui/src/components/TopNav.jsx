@@ -7,7 +7,7 @@ import { canViewAdminPanel, isPhotographer } from "../utils/roles"
 
 export default function TopNav() {
   const nav = useNavigate()
-  const { user } = useAuth()
+  const { user, logout: authLogout } = useAuth()
   const [profileOpen, setProfileOpen] = useState(false)
   const profileRef = useRef(null)
 
@@ -22,7 +22,7 @@ export default function TopNav() {
   }, [])
 
   const logout = () => {
-    localStorage.clear()
+    authLogout()
     nav("/login")
   }
 
