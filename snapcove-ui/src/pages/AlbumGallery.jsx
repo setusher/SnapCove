@@ -19,6 +19,7 @@ export default function AlbumGallery(){
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [searchTimeout, setSearchTimeout] = useState(null)
   const [photoSearchQuery, setPhotoSearchQuery] = useState("")
+  const [semanticTagSearchQuery, setSemanticTagSearchQuery] = useState("")
   const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
   const [downloadingPhotos, setDownloadingPhotos] = useState(new Set())
   const [selectedPhotos, setSelectedPhotos] = useState(new Set())
@@ -57,10 +58,21 @@ export default function AlbumGallery(){
     return () => clearInterval(interval)
   }, [photos, eventId, albumId])
 
-  const fetchPhotos = (search = "") => {
-    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,search},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
+  const fetchPhotos = (userSearch = "", semanticTagSearch = "") => {
+    fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:22',message:'fetchPhotos called',data:{eventId,albumId,userSearch,semanticTagSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2,H3'})}).catch(()=>{});
     
-    const url = search ? `/events/${eventId}/albums/${albumId}/photos/?user=${encodeURIComponent(search)}` : `/events/${eventId}/albums/${albumId}/photos/`
+    let url = `/events/${eventId}/albums/${albumId}/photos/`
+    const params = new URLSearchParams()
+    if (userSearch) {
+      params.append('user', userSearch)
+    }
+    if (semanticTagSearch) {
+      params.append('semantic_tag', semanticTagSearch)
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`
+    }
+    
     api.get(url)
       .then(r => {
         const photosData = r.data.results || r.data
@@ -89,13 +101,28 @@ export default function AlbumGallery(){
     }
     
     const timeout = setTimeout(() => {
-      fetchPhotos(value)
+      fetchPhotos(value, semanticTagSearchQuery)
+    }, 300)
+    setPhotoSearchTimeout(timeout)
+  }
+
+  const handleSemanticTagSearchChange = (e) => {
+    const value = e.target.value
+    setSemanticTagSearchQuery(value)
+    
+    if (photoSearchTimeout) {
+      clearTimeout(photoSearchTimeout)
+    }
+    
+    const timeout = setTimeout(() => {
+      fetchPhotos(photoSearchQuery, value)
     }, 300)
     setPhotoSearchTimeout(timeout)
   }
 
   const clearPhotoSearch = () => {
     setPhotoSearchQuery("")
+    setSemanticTagSearchQuery("")
     fetchPhotos()
     if (photoSearchTimeout) {
       clearTimeout(photoSearchTimeout)
@@ -314,7 +341,7 @@ export default function AlbumGallery(){
     setUploadProgress(0)
 
     try {
-      const formData = new FormData()
+        const formData = new FormData()
       uploadFiles.forEach((file) => {
         formData.append('files', file)
       })
@@ -333,9 +360,9 @@ export default function AlbumGallery(){
         `/events/${eventId}/albums/${albumId}/photos/bulk/`,
         formData,
         {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
         }
       )
 
@@ -829,6 +856,77 @@ export default function AlbumGallery(){
             </div>
           </div>
 
+          <div style={{ marginBottom: 'var(--form-field-gap)', position: 'relative', maxWidth: '400px' }}>
+            <div style={{ position: 'relative' }}>
+              <Search 
+                size={18} 
+                strokeWidth={1.5}
+                style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-secondary)',
+                  pointerEvents: 'none'
+                }}
+              />
+              <input
+                type="text"
+                value={semanticTagSearchQuery}
+                onChange={handleSemanticTagSearchChange}
+                placeholder="Search by semantic tags (e.g., concert, wedding, festival)..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px 12px 44px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-button)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  transition: 'border-color 0.2s ease, outline 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = '2px solid var(--accent)'
+                  e.target.style.outlineOffset = '0'
+                  e.target.style.borderColor = 'transparent'
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = 'none'
+                  e.target.style.borderColor = 'var(--border-subtle)'
+                }}
+              />
+              {semanticTagSearchQuery && (
+                <button
+                  onClick={() => {
+                    setSemanticTagSearchQuery("")
+                    fetchPhotos(photoSearchQuery, "")
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                  <X size={16} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+          </div>
+
           {photos.length === 0 ? (
             <div style={{ 
               background: 'var(--surface)', 
@@ -863,7 +961,7 @@ export default function AlbumGallery(){
                   } else {
                     imageUrl = `http://localhost:8000/${imageSource}`
                   }
-         
+                  
                   fetch('http://127.0.0.1:7242/ingest/69418a1c-11a7-4033-a5d0-1680a2112c44',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AlbumGallery.jsx:300',message:'Image URL constructed',data:{photoId:photo.id,imageUrl,imageSource},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
 
                 } else {
@@ -943,9 +1041,9 @@ export default function AlbumGallery(){
                             </button>
                           </div>
                         )}
-                        <img 
-                          src={imageUrl} 
-                          alt={`Photo ${photo.id}`}
+                      <img 
+                        src={imageUrl} 
+                        alt={`Photo ${photo.id}`}
                           onClick={() => {
                             if (!canBatchOperate(user?.role) || selectedPhotos.size === 0) {
                               nav(`/photos/${photo.id}`, { state: { photo } })
@@ -958,12 +1056,12 @@ export default function AlbumGallery(){
                             opacity: isSelected ? 0.7 : 1,
                             transition: 'opacity 0.2s ease'
                           }}
-                          loading="lazy"
-                          onError={(e) => {
-                            console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
-                            e.target.style.display = 'none'
-                          }}
-                        />
+                        loading="lazy"
+                        onError={(e) => {
+                          console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
+                          e.target.style.display = 'none'
+                        }}
+                      />
                         {/* Action Buttons Overlay */}
                         <div style={{
                           position: 'absolute',

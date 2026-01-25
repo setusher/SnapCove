@@ -55,6 +55,13 @@ class PhotoViewSet(viewsets.ModelViewSet):
             else:
                 queryset = queryset.none()
         
+        # Search by semantic tags (ai_tags)
+        semantic_tag_search = self.request.query_params.get('semantic_tag', None)
+        if semantic_tag_search:
+            # For JSONField arrays, search if any tag contains the search term
+            # Using icontains for case-insensitive partial matching
+            queryset = queryset.filter(ai_tags__icontains=semantic_tag_search)
+        
         return queryset
     
     def get_permissions(self):
