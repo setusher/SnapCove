@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import { api } from "../api/api"
 import TopNav from "../components/TopNav"
-import { ChevronLeft, Upload, X, UserPlus, XCircle, Search, Download, Heart, Info, Trash2, Move, Lock, Unlock, CheckSquare, Square } from "lucide-react"
+import { ChevronLeft, Upload, X, UserPlus, XCircle, Search, Download, Heart, Info, Trash2, Move, Lock, Unlock, CheckSquare, Square, Grid3x3, List, LayoutGrid } from "lucide-react"
 import { useAuth } from "../auth/AuthProvider"
 import { canUpload, canBatchOperate } from "../utils/roles"
 
@@ -22,6 +22,7 @@ export default function AlbumGallery(){
   const [semanticTagSearchQuery, setSemanticTagSearchQuery] = useState("")
   const [photoSearchTimeout, setPhotoSearchTimeout] = useState(null)
   const [dateFilter, setDateFilter] = useState("")
+  const [viewMode, setViewMode] = useState("grid") // "grid", "list", "compact"
   const [downloadingPhotos, setDownloadingPhotos] = useState(new Set())
   const [selectedPhotos, setSelectedPhotos] = useState(new Set())
   const [showBatchActions, setShowBatchActions] = useState(false)
@@ -994,6 +995,119 @@ export default function AlbumGallery(){
             </div>
           </div>
 
+          {/* View Mode Toggle */}
+          {photos.length > 0 && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              marginBottom: 'var(--form-field-gap)',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button
+                  onClick={() => setViewMode("grid")}
+                  style={{
+                    padding: '8px 12px',
+                    background: viewMode === "grid" ? 'var(--accent)' : 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: viewMode === "grid" ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (viewMode !== "grid") {
+                      e.currentTarget.style.background = 'var(--elevated)'
+                      e.currentTarget.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (viewMode !== "grid") {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                >
+                  <Grid3x3 size={16} strokeWidth={1.5} />
+                  Grid
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  style={{
+                    padding: '8px 12px',
+                    background: viewMode === "list" ? 'var(--accent)' : 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: viewMode === "list" ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (viewMode !== "list") {
+                      e.currentTarget.style.background = 'var(--elevated)'
+                      e.currentTarget.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (viewMode !== "list") {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                >
+                  <List size={16} strokeWidth={1.5} />
+                  List
+                </button>
+                <button
+                  onClick={() => setViewMode("compact")}
+                  style={{
+                    padding: '8px 12px',
+                    background: viewMode === "compact" ? 'var(--accent)' : 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-button)',
+                    color: viewMode === "compact" ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (viewMode !== "compact") {
+                      e.currentTarget.style.background = 'var(--elevated)'
+                      e.currentTarget.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (viewMode !== "compact") {
+                      e.currentTarget.style.background = 'var(--surface)'
+                      e.currentTarget.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                >
+                  <LayoutGrid size={16} strokeWidth={1.5} />
+                  Compact
+                </button>
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+              </div>
+            </div>
+          )}
+
           {photos.length === 0 ? (
             <div style={{ 
               background: 'var(--surface)', 
@@ -1008,9 +1122,14 @@ export default function AlbumGallery(){
             </div>
           ) : (
             <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '16px'
+              display: viewMode === "list" ? "flex" : "grid",
+              flexDirection: viewMode === "list" ? "column" : "row",
+              gridTemplateColumns: viewMode === "grid" 
+                ? 'repeat(auto-fill, minmax(240px, 1fr))' 
+                : viewMode === "compact"
+                ? 'repeat(auto-fill, minmax(120px, 1fr))'
+                : '1fr',
+              gap: viewMode === "list" ? '12px' : '16px'
             }}>
               {photos.map(photo => {
                 const imageSource = photo.thumbnail || photo.image
@@ -1044,24 +1163,31 @@ export default function AlbumGallery(){
                   <div 
                     key={photo.id}
                     style={{
-                      aspectRatio: '1',
+                      aspectRatio: viewMode === "list" ? "auto" : "1",
                       background: 'var(--bg)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-card)',
                       overflow: 'hidden',
                       cursor: 'pointer',
                       transition: 'all 200ms ease',
-                      position: 'relative'
+                      position: 'relative',
+                      display: viewMode === "list" ? "flex" : "block",
+                      flexDirection: viewMode === "list" ? "row" : "column",
+                      height: viewMode === "list" ? "auto" : "auto"
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = 'var(--accent)'
-                      e.currentTarget.style.transform = 'translateY(-4px)'
-                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)'
+                      if (viewMode !== "list") {
+                        e.currentTarget.style.transform = 'translateY(-4px)'
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)'
+                      }
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
+                      if (viewMode !== "list") {
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }
                     }}
                   >
                     {imageUrl ? (
@@ -1070,8 +1196,8 @@ export default function AlbumGallery(){
                         {canBatchOperate(user?.role) && (
                           <div style={{
                             position: 'absolute',
-                            top: '12px',
-                            left: '12px',
+                            top: viewMode === "list" ? "8px" : "12px",
+                            left: viewMode === "list" ? "8px" : "12px",
                             zIndex: 10
                           }}>
                             <button
@@ -1108,9 +1234,148 @@ export default function AlbumGallery(){
                             </button>
                           </div>
                         )}
-                      <img 
-                        src={imageUrl} 
-                        alt={`Photo ${photo.id}`}
+                      {viewMode === "list" ? (
+                        <>
+                          <div style={{
+                            width: '200px',
+                            height: '150px',
+                            flexShrink: 0,
+                            position: 'relative',
+                            background: 'var(--bg)'
+                          }}>
+                            <img 
+                              src={imageUrl} 
+                              alt={`Photo ${photo.id}`}
+                              onClick={() => {
+                                if (!canBatchOperate(user?.role) || selectedPhotos.size === 0) {
+                                  nav(`/photos/${photo.id}`, { state: { photo } })
+                                }
+                              }}
+                              style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                objectFit: 'cover',
+                                opacity: isSelected ? 0.7 : 1,
+                                transition: 'opacity 0.2s ease'
+                              }}
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
+                                e.target.style.display = 'none'
+                              }}
+                            />
+                          </div>
+                          <div style={{
+                            flex: 1,
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between'
+                          }}>
+                            <div>
+                              <h3 style={{
+                                fontSize: '16px',
+                                fontWeight: 600,
+                                color: 'var(--text-primary)',
+                                marginBottom: '8px'
+                              }}>
+                                {photo.caption || `Photo ${photo.id}`}
+                              </h3>
+                              {photo.uploaded_at && (
+                                <p style={{
+                                  fontSize: '13px',
+                                  color: 'var(--text-secondary)',
+                                  marginBottom: '4px'
+                                }}>
+                                  {new Date(photo.uploaded_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </p>
+                              )}
+                              {photo.uploaded_by && (
+                                <p style={{
+                                  fontSize: '13px',
+                                  color: 'var(--text-secondary)'
+                                }}>
+                                  By {photo.uploaded_by.name || photo.uploaded_by.email}
+                                </p>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                              <button
+                                onClick={(e) => handlePhotoDownload(photo, e)}
+                                disabled={isDownloading}
+                                style={{
+                                  padding: '8px 12px',
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-button)',
+                                  color: 'var(--text-primary)',
+                                  cursor: isDownloading ? 'not-allowed' : 'pointer',
+                                  opacity: isDownloading ? 0.6 : 1,
+                                  fontSize: '13px',
+                                  fontWeight: 500,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isDownloading) {
+                                    e.currentTarget.style.background = 'var(--accent)'
+                                    e.currentTarget.style.borderColor = 'var(--accent)'
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!isDownloading) {
+                                    e.currentTarget.style.background = 'var(--surface)'
+                                    e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                                  }
+                                }}
+                              >
+                                <Download size={14} strokeWidth={1.5} />
+                                Download
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  nav(`/photos/${photo.id}`, { state: { photo } })
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-button)',
+                                  color: 'var(--text-primary)',
+                                  cursor: 'pointer',
+                                  fontSize: '13px',
+                                  fontWeight: 500,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = 'var(--accent)'
+                                  e.currentTarget.style.borderColor = 'var(--accent)'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = 'var(--surface)'
+                                  e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                                }}
+                              >
+                                <Info size={14} strokeWidth={1.5} />
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <img 
+                          src={imageUrl} 
+                          alt={`Photo ${photo.id}`}
                           onClick={() => {
                             if (!canBatchOperate(user?.role) || selectedPhotos.size === 0) {
                               nav(`/photos/${photo.id}`, { state: { photo } })
@@ -1123,34 +1388,36 @@ export default function AlbumGallery(){
                             opacity: isSelected ? 0.7 : 1,
                             transition: 'opacity 0.2s ease'
                           }}
-                        loading="lazy"
-                        onError={(e) => {
-                          console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
-                          e.target.style.display = 'none'
-                        }}
-                      />
-                        {/* Action Buttons Overlay */}
-                        <div style={{
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          background: 'linear-gradient(to top, rgba(10, 17, 40, 0.9), transparent)',
-                          padding: '12px',
-                          display: 'flex',
-                          gap: '8px',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          opacity: 0,
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = '1'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = '0'
-                        }}
-                        >
+                          loading="lazy"
+                          onError={(e) => {
+                            console.error('Image failed to load:', imageUrl, 'Photo data:', photo)
+                            e.target.style.display = 'none'
+                          }}
+                        />
+                      )}
+                        {/* Action Buttons Overlay - Only for grid/compact views */}
+                        {viewMode !== "list" && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: 'linear-gradient(to top, rgba(10, 17, 40, 0.9), transparent)',
+                            padding: '12px',
+                            display: 'flex',
+                            gap: '8px',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            opacity: 0,
+                            transition: 'opacity 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '1'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '0'
+                          }}
+                          >
                           <button
                             onClick={(e) => handlePhotoDownload(photo, e)}
                             disabled={isDownloading}
@@ -1215,6 +1482,7 @@ export default function AlbumGallery(){
                             <Info size={18} strokeWidth={1.5} />
                           </button>
                         </div>
+                        )}
                       </>
                     ) : photo.processing_status === 'processing' || photo.processing_status === 'pending' ? (
                       <div style={{ 
